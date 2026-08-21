@@ -19,7 +19,7 @@ import StarIcon from "../../assets/StarIcon.png";
 import Footer from "../Footer/Footer";
 import MaidaItems from "../Food/MaidaItems.jsx";
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
 
 const getGuestId = () => {
   let guestId = localStorage.getItem("guest_id");

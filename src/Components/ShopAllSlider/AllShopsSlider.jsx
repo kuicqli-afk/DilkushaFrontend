@@ -12,22 +12,22 @@ function AllShopsSlider() {
 
   const trackRef = useRef(null);
   const isTransitioning = useRef(false);
-// const [restaurant, setRestaurant] = useState(null);
+  // const [restaurant, setRestaurant] = useState(null);
 
-useEffect(() => {
-  const fetchRestaurant = async () => {
-    try {
-      // Use location.state first if exists, otherwise fetch first restaurant
-      const res = await axios.get("http://localhost:4000/api/restaurant/get-restaurants");
-      const clickedRestaurant = location.state?.restaurant || res.data.data[0];
-      setRestaurant(clickedRestaurant);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  useEffect(() => {
+    const fetchRestaurant = async () => {
+      try {
+        // Use location.state first if exists, otherwise fetch first restaurant
+        const res = await axios.get("https://shyamfoodbackend.onrender.com/api/restaurant/get-restaurants");
+        const clickedRestaurant = location.state?.restaurant || res.data.data[0];
+        setRestaurant(clickedRestaurant);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  fetchRestaurant();
-}, []);
+    fetchRestaurant();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {

@@ -4,7 +4,7 @@ import axios from "axios";
 import "./Slider.css";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://shyamfoodbackend.onrender.com";
 
 const DynamicSlider = () => {
   const navigate = useNavigate();

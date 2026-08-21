@@ -9,7 +9,7 @@ const OfferDetails = () => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/offers/${slug}`)
+      .get(`https://shyamfoodbackend.onrender.com/api/offers/${slug}`)
       .then((res) => setOffer(res.data.offer))
       .catch((err) => console.log(err));
   }, [slug]);
@@ -18,7 +18,7 @@ const OfferDetails = () => {
 
   return (
     <div className="food-container">
-      <Slider/>
+      <Slider />
       <div className="food-text">
         <h1>{Offers.title}</h1>
       </div>

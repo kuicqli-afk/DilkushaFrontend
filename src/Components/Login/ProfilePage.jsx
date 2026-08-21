@@ -17,7 +17,7 @@ import "./ProfilePage.css";
 const BASE_URL =
     import.meta.env?.VITE_API_URL ||
     (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
-    "http://localhost:5000/api";
+    "https://shyamfoodbackend.onrender.com/api";
 
 const ProfilePage = () => {
     const { user, setUser } = useAuth();

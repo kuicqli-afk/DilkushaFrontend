@@ -16,7 +16,7 @@ import { VscEye } from "react-icons/vsc";
 import { FaRegHeart } from "react-icons/fa";
 import { LiaStopwatchSolid } from "react-icons/lia";
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
 
 function MaidaItemsAll({ categoryCode, subCategoryCode, isAll }) {
     const navigate = useNavigate();
@@ -39,11 +39,11 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll }) {
         let responseKey = "data";
 
         if (!isAll && subCategory) {
-           
+
             url = `${BASE_URL}/products/subcategory-products/${encodeURIComponent(subCategory)}`;
             responseKey = "products";
         } else if (!isAll && category) {
-            
+
             url = `${BASE_URL}/products/category-products/${encodeURIComponent(category)}`;
             responseKey = "products";
         }

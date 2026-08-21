@@ -29,7 +29,7 @@ function CombosAll() {
         const fetchCombos = async () => {
             try {
                 const res = await axios.get(
-                    "http://localhost:5000/api/products?tag=combo"
+                    "https://shyamfoodbackend.onrender.com/api/products?tag=combo"
                 );
 
                 setItems(res.data.products || []);

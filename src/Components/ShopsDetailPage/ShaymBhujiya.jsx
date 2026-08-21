@@ -29,7 +29,7 @@ function ShaymBhujiya() {
         const fetchBhujiya = async () => {
             try {
                 const res = await axios.get(
-                    `http://localhost:5000/api/products/category/${CATEGORY_ID}`
+                    `https://shyamfoodbackend.onrender.com/api/products/category/${CATEGORY_ID}`
                 );
 
                 setItems(res.data.products || []);
@@ -157,7 +157,7 @@ function ShaymBhujiya() {
                                 />
                             ) : (
                                 <img
-                                   src={`http://localhost:5000/uploads/${item.image}`}
+                                    src={`https://shyamfoodbackend.onrender.com/uploads/${item.image}`}
                                     alt={item.title}
                                     className="food-image"
                                 />

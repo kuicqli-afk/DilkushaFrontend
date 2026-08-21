@@ -22,7 +22,7 @@ import { useCart } from "../../Context/CartContext";
 import { VscEye } from "react-icons/vsc";
 import { LiaStopwatchSolid } from "react-icons/lia";
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
 
 const MaidaItems = ({
     selectedCategory,

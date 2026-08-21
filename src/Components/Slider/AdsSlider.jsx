@@ -14,7 +14,7 @@ const Slider1 = ({ category }) => {
     const fetchAds = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/ads?category=${category}`
+          `https://shyamfoodbackend.onrender.com/api/ads?category=${category}`
         );
 
         setSlides(res.data.ads || []);

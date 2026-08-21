@@ -10,7 +10,7 @@ import "swiper/css/pagination";
 
 import "./Category.css";
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
 
 const SubCategorySlider = ({ categoryCode, onSelectSubCategory }) => {
   const [subs, setSubs] = useState([]);

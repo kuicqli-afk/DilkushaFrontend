@@ -25,6 +25,7 @@ import { VscEye } from "react-icons/vsc";
 
 const BASE_URL = "https://shyambackend.onrender.com";
 
+
 const Offers = ({ filter, sortBy, price, cuisine }) => {
   const navigate = useNavigate();
   const swiperRef = useRef(null);

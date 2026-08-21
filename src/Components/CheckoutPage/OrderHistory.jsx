@@ -11,7 +11,7 @@ import {
   AiOutlineReload,
 } from "react-icons/ai";
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
 const POLL_INTERVAL = 15000;
 
 const getGuestId = () => {

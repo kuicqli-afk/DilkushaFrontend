@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./Slider.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://shyamfoodbackend.onrender.com";
 
 const Slider2 = () => {
   const [slides, setSlides] = useState([]);
@@ -212,8 +212,8 @@ const Slider2 = () => {
             <span
               key={i}
               className={`dot ${index % slides.length === i
-                  ? "active"
-                  : ""
+                ? "active"
+                : ""
                 }`}
               onClick={() =>
                 handleDotClick(i)
