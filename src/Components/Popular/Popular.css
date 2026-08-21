@@ -1,0 +1,246 @@
+/* .shop-slider-wrapper {
+    max-width: 1500px;
+    margin: 5% auto;
+    padding: 40px 16px;
+    text-align: center;
+} */
+ .shop-slider-wrapper {
+
+    margin: 5% auto;
+    padding: 40px 16px;
+    text-align: center;
+    padding-inline: clamp(12px, 4vw, 60px);
+}
+
+.title-section {
+    margin-bottom: 30px;
+}
+
+.around-city {
+    color: #e11d48;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.main-heading {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #666;
+    margin-top: 8px;
+}
+
+.slide-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Slide Container */
+.slide-container {
+    position: relative;
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+    transition: all 0.35s ease; /* Smooth transition for position and opacity */
+}
+
+/* Image Hover Effect */
+
+/* Active Caption on Hover */
+.slide-container:hover .caption-top,
+.slide-container.active .caption-top {
+    color: #e11d48; /* Change text color for top caption */
+}
+
+.slide-container:hover .caption-bottom,
+.slide-container.active .caption-bottom {
+    color: black; /* Change text color for bottom caption */
+}
+
+.slide-image {
+    width: 99.4%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+    position: relative;
+}
+
+/* Badge */
+.listing-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background-color: #e11d48;
+    color: white;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    z-index: 2;
+}
+
+/* Caption Base */
+.slide-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 11;
+    text-align: center;
+    transition: all 0.35s ease; /* Smooth transition for position and opacity */
+    margin: 0; /* Remove any extra margin */
+    padding: 0; /* Ensure no padding is causing the gap */
+}
+
+/* Section Top + Bottom Text */
+.caption-top,
+.caption-bottom {
+    position: relative;
+    z-index: 11;
+    overflow: hidden;
+    transition: color 0.5s ease; /* Smooth transition for text color */
+    overflow: visible;
+}
+
+/* Background Slide Animations */
+.caption-top::before,
+.caption-bottom::before {
+    content: '';
+    position: absolute;
+    top: 0%; /* Increase from the top */
+    left: 0;
+    right: 0;
+    bottom: 0%; /* Increase from the bottom */
+    width: 100%;
+    background: #fff;
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition */
+    z-index: -1; 
+}
+
+/* Adjust the height to cover the entire area of the caption */
+.caption-top::before,
+.caption-bottom::before {
+    height: 180%;  /* Cover the full height of the caption */
+}
+
+/* Slide in directions */
+.caption-top::before {
+    transform: translateX(-100%); /* Start from the left */
+}
+
+.caption-bottom::before {
+    transform: translateX(100%); /* Start from the right */
+}
+
+/* On hover or active: animate background in and text color change */
+.slide-container:hover .caption-top::before,
+.slide-container.active .caption-top::before {
+    opacity: 1;
+    transform: translateX(0%); /* Slide to the right, to the end */
+}
+
+.slide-container:hover .caption-bottom::before,
+.slide-container.active .caption-bottom::before {
+    opacity: 1;
+    transform: translateX(0%); /* Slide to the left, to the end */
+}
+
+/* On hover or active: text color changes smoothly */
+.slide-container:hover .caption-top,
+.slide-container.active .caption-top {
+    color: #e11d48; /* Red for top caption */
+    z-index: 1;
+}
+
+.slide-container:hover .caption-bottom,
+.slide-container.active .caption-bottom {
+    color: black; /* Black for bottom caption */
+    z-index: 1;
+}
+
+/* Fonts */
+.caption-top {
+    font-family: "Sacramento", cursive;
+    font-size: 34px;
+    position: relative;
+    color: red;
+    padding-top: 20px;
+}
+
+.caption-bottom {
+    font-size: 42px;
+    font-weight: 700;
+    padding-bottom: 20px;
+    color: white;
+}
+
+.slide-container:hover,
+.slide-container.active {
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.103); 
+}
+
+/* Arrow button */
+.hover-arrow-btn {
+    position: absolute;
+    bottom: 80%;
+    right: 10%;
+    background-color: #e11d48;
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: 200; 
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.5s ease;
+    z-index: 999;
+}
+
+/* Show and scale the arrow on hover or active */
+.slide-container:hover .hover-arrow-btn,
+.slide-container.active .hover-arrow-btn {
+    opacity: 1; /* Make the button visible */
+    transform: scale(1.1) translateY(0); /* Move the button up */
+}
+
+/* Optional: change arrow color on hover */
+.slide-container:hover .hover-arrow-btn svg,
+.slide-container.active .hover-arrow-btn svg {
+    color: black;
+}
+
+/* Swiper Pagination */
+.swiper-pagination {
+    position: relative;
+    bottom: 0;
+    margin-top: 30px;
+    text-align: center;
+}
+
+.swiper-pagination-bullet {
+    background: #ccc;
+    opacity: 1;
+    margin: 0 4px !important;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: background 0.3s;
+}
+
+.swiper-pagination-bullet-active {
+    background: #fc3c3c;
+}
+

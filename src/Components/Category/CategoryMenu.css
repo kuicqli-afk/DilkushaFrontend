@@ -1,0 +1,23 @@
+.category-menu {
+  width: 100%;
+padding-inline: clamp(12px, 4vw, 60px);
+
+  
+}
+
+.category-container {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  white-space: nowrap;
+}
+
+.category-item {
+  color: black;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 3px; 
+}
+

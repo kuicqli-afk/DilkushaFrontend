@@ -1,0 +1,128 @@
+.discount-offer-container {
+    padding: 80px 20px;
+    max-width: 1300px;
+    margin: 0 auto;
+    width: 100%;
+    font-family: "Barlow", sans-serif;
+}
+
+.discount-offer-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.discount-offer-header h4 {
+    font-size: 14px;
+    color: #ff4c4c;
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+.discount-offer-header h2 {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 5px 0;
+}
+
+.discount-offer-header p {
+    font-size: 16px;
+    color: #777;
+}
+
+.discount-offer-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+    justify-content: center;
+}
+
+.discount-offer-card {
+    background: #fff;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease;
+}
+
+.discount-offer-card:hover {
+    transform: translateY(-5px);
+}
+
+.discount-offer-image {
+    position: relative;
+    height: 400px;
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+}
+
+.discount-offer-logo {
+    display: none;
+    /* Hide the logo */
+}
+
+.discount-offer-info {
+    display: none;
+    /* Hide all text and links */
+}
+
+.fullscreen-modal {
+  position: fixed;
+  top: 70px;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.904);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  flex-direction: column;
+}
+
+.fullscreen-modal img {
+  max-width: 90%;
+  max-height: 80%;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.arrow {
+  position: fixed;
+  top: 50%;
+  font-size: 48px;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transform: translateY(-50%);
+  z-index: 1001;
+  padding: 0 15px;
+  user-select: none;
+}
+
+.arrow.left {
+  left: 20px;
+}
+
+.arrow.right {
+  right: 20px;
+}
+
+.close-btn {
+  position: fixed;
+  top: 15%;
+  right: 30%;
+  font-size: 30px;
+  color: rgb(255, 255, 255);
+  background: red;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+
+
+

@@ -1,0 +1,174 @@
+.seller-section {
+  background: white;
+  /* padding: 60px 20px; */
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.seller-heading .blog-badge {
+  color: red;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.seller-heading h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #222;
+  margin: 10px 0;
+}
+
+.seller-heading .subtitle {
+  color: #555;
+  font-size: 16px;
+  margin-bottom: 40px;
+}
+
+.carousel-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* New flex container for 3 cards in a row */
+.carousel-cards-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.story-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  text-align: left;
+  width: 320px;
+}
+
+.story-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.story-info {
+  padding: 20px;
+  position: relative;
+  max-width: 100%;
+  min-height: 220px;
+}
+
+.meta {
+  font-size: 15px;
+  color: #777;
+  margin-top: 10px;
+  padding: 0 22px;
+  margin-bottom: 50px;
+}
+
+.date-badge {
+    width: 70px;
+    height: 40%;
+    background: #fc3c3c;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    line-height: 20px;
+    padding: 20px 20px;
+    border-radius: 0 4px 0 4px;
+}
+
+.story-info h3 {
+  font-size: 1.8rem;
+  margin: 10px 0 20px 20px; /* Thoda bottom margin badha diya line ke liye */
+  color: #222;
+  position: relative;
+}
+
+.story-info h3::before {
+  content: "";
+  position: absolute;
+  top: -25px;  /* heading ke bilkul upar */
+  left: 0px; /* left margin same jitna heading ka */
+  width: 70%; /* line ki length */
+  height: 1px; /* line ki thickness */
+  background: #E9E9EE;
+  border-radius: 2px;
+}
+
+
+.story-info .desc {
+    margin-left: 20px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* ====== CSS ARROWS ====== */
+
+.arrow-btn-seller {
+  width: 45px;
+  height: 45px;
+  background-color: #E9E9EE;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 50%;
+}
+
+.arrow-btn-seller:hover {
+    background-color: #fc3c3c;;
+}
+
+/* Arrow shape (left) */
+.arrow-btn-seller.left::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-top: 3px solid white;
+  border-left: 3px solid white;
+  transform: rotate(-45deg);
+  margin-left: 4px;
+  margin-top: 3px;
+}
+
+/* Arrow shape (right) */
+.arrow-btn-seller.right::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-top: 3px solid white;
+  border-right: 3px solid white;
+  transform: rotate(45deg);
+  margin-right: 4px;
+  margin-top: 3px;
+}
+
+/* Positioning */
+.arrow-btn-seller.left {
+  left: 20%;
+}
+
+.arrow-btn-seller.right {
+  right: 20%;
+}
+
+/* Show arrows on hover */
+.carousel-wrapper:hover .arrow-btn-seller {
+  opacity: 1;
+}

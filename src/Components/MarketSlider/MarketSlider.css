@@ -1,0 +1,120 @@
+.market-category-section {
+  padding: 50px 20px;
+  background-color: #fff;
+  text-align: center;
+  margin-top: -50px;
+}
+
+.market-text-content h5 {
+  color: red;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.market-text-content h2 {
+  font-size: 2rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.market-text-content p {
+  font-size: 0.95rem;
+  color: #555;
+  margin-top: 8px;
+  margin-bottom: 30px;
+}
+
+.market-category-wrapper {
+  position: relative;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.market-category-item {
+  padding: 0 10px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.market-category-item a {
+  text-decoration: none;
+}
+
+.market-category-item img {
+  width: 100%;
+  height: 35vh;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+  display: block;
+}
+
+.market-category-item p {
+  position: relative;
+  background: #f2f2f2;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #161c26;
+  border-radius: 0 0 8px 8px;
+  text-align: center;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.market-category-item p::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: red;
+  transition: all 0.4s ease;
+  transform: translateX(-50%);
+}
+
+.market-category-item:not(.active):hover p::after {
+  width: 100%;
+}
+
+.market-category-item:not(.active):hover p {
+  background-color: white;
+}
+
+.market-category-item.active p {
+  background-color: white;
+}
+
+.market-category-item .active-line {
+  content: "";
+  position: relative;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: red;
+  transition: all 0.7s ease;
+  transform: translateX(-50%);
+}
+
+.market-category-item.active .active-line {
+  width: 100%;
+}
+
+.market-category-item.active:hover p::after {
+  width: 0;
+}
+
+.market-category-item.active:hover p {
+  background-color: #f2f2f2;
+}
+
+@keyframes movingLine {
+  0% { background-position: 0 0; }
+  100% { background-position: 300% 0; }
+}
+

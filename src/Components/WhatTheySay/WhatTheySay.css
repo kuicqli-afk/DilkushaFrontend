@@ -1,0 +1,165 @@
+/* Container and header styling */
+.testimonial-section {
+    background-color: #F0F3F6;
+    padding: 80px 20px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.testimonial-header .subheading {
+    color: #ff4d4f;
+    font-weight: bold;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.testimonial-header h2 {
+    font-size: 36px;
+    margin: 0;
+    font-weight: 700;
+    color: #1c1c1c;
+}
+
+.testimonial-header .desc {
+    color: #666;
+    margin: 10px 0 40px;
+}
+
+/* Slider wrapper */
+.testimonial-slider-wrapper {
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+    overflow: visible; 
+  }
+  
+
+/* Slick Slider Adjustments for Gap between Cards */
+.slick-slide {
+    padding: 0 15px;
+}
+
+/* Individual card */
+.testimonial-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 50px 30px 55px 55px;
+    position: relative;
+    text-align: left;
+    min-height: 280px;
+    transition: all 0.3s ease-in-out;
+    margin: 0 auto;
+    /* Ensure cards are centered */
+}
+
+.testimonial-card::after {
+    content: '';
+    background: url(../../assets/bg-arrow.png) repeat bottom center transparent;
+    width: 166px;
+    height: 110px;
+    position: absolute;
+    top: 100%;
+    left: 30px;
+    z-index: 11;
+}
+
+
+/* Arrow icons - Favicon Style */
+.custom-arrow {
+    font-size: 20px;
+    color: #fff;
+    cursor: pointer;
+    position: absolute;
+    top: 40%;
+    z-index: 2;
+    background: #0a0a0a48;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    transform: scale(0.8);
+}
+
+.custom-arrow svg {
+    position: absolute;
+    bottom: 20px;  /* Adjust this value for height from the bottom */
+    left: 23px;    /* Adjust this value for distance from the left */
+  }
+
+  .left-arrow svg {
+    bottom: 20px;  /* Adjust this value for height from the bottom */
+    left: 20px;  
+  }
+
+.custom-arrow:hover {
+    opacity: 1;
+    background: #0a0a0aa8;
+}
+
+/* Make arrows visible only on hover of slider */
+.testimonial-slider-wrapper:hover .custom-arrow {
+    opacity: 1;
+}
+
+.left-arrow {
+    left: -20px;
+}
+
+.right-arrow {
+    right: -20px;
+}
+
+/* Profile picture */
+.profile-pic {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 6px solid #ff4d4f;
+    overflow: hidden;
+    margin-bottom: 20px;
+    transition: all 0.3s ease-in-out;
+}
+
+.profile-pic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-pic:hover {
+    transform: scale(1.1);
+}
+
+/* Text and name */
+.testimonial-text p {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.7;
+    margin-bottom: 20px;
+}
+
+.testimonial-text h4 {
+    font-weight: bold;
+    font-size: 18px;
+    color: #000;
+}
+
+.testimonial-text span {
+    font-weight: normal;
+    font-size: 15px;
+    color: #888;
+}
+
+/* Quote icon */
+.quote-icon {
+    position: absolute;
+    right: 20px;
+    bottom: 0px;
+    font-size: 5rem;
+    color: #ff4d4f;
+    font-weight: bold;
+}

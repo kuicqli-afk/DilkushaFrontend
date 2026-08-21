@@ -1,0 +1,215 @@
+html, body {
+  overflow-x: hidden;
+}
+
+.hero-slider {
+  width: 94%;
+  height: 317px;
+  margin: 15px auto 0;
+  overflow: hidden;
+  position: relative;
+  border-radius: 14px;
+}
+
+/* ===== TRACK ===== */
+.hero-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.8s ease-in-out;
+}
+
+/* ===== EACH SLIDE ===== */
+.hero-slide {
+  min-width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.hero-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ===== DARK GRADIENT OVERLAY ===== */
+.hero-slide::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.85),
+    rgba(0, 0, 0, 0.6),
+    rgba(0, 0, 0, 0)
+  );
+  z-index: 1;
+}
+
+/* ===== CONTENT ===== */
+.hero-overlay-content {
+  position: absolute;
+  top: 50%;
+  left: 4%;
+  transform: translateY(-50%);
+  z-index: 2;
+  color: white;
+  max-width: 600px;
+}
+
+.hero-overlay-content h2 {
+  font-size: 2.5rem;
+  font-family: "Sacramento", cursive;
+  color: #e63946;
+  font-weight: 400;
+  letter-spacing: 4px;
+}
+
+.hero-overlay-content h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-top: 10px;
+}
+
+.hero-overlay-content p {
+  font-size: 15px;
+  margin-top: 15px;
+  line-height: 1.6;
+}
+
+/* ========================================= */
+/* ========== RESPONSIVE START ============ */
+/* ========================================= */
+
+/* ===== Large Screens (1600px ↓) ===== */
+@media (max-width: 1599px) {
+  .hero-overlay-content {
+    max-width: 550px;
+  }
+}
+
+/* ===== Laptop ===== */
+@media (max-width: 1200px) {
+  .hero-slider {
+    height: 300px;
+  }
+
+  .hero-overlay-content h2 {
+    font-size: 2.2rem;
+  }
+
+  .hero-overlay-content h1 {
+    font-size: 1.8rem;
+  }
+}
+
+/* ===== Tablet ===== */
+@media (max-width: 992px) {
+  .hero-slider {
+    height: 280px;
+  }
+
+  .hero-slide::after {
+    width: 65%;
+  }
+
+  .hero-overlay-content {
+    left: 5%;
+    max-width: 500px;
+  }
+
+  .hero-overlay-content h2 {
+    font-size: 2rem;
+  }
+
+  .hero-overlay-content h1 {
+    font-size: 1.6rem;
+  }
+
+  .hero-overlay-content p {
+    font-size: 14px;
+  }
+}
+
+/* ===== Small Tablet ===== */
+@media (max-width: 768px) {
+  .hero-slider {
+    height: 260px;
+  }
+
+  .hero-slide::after {
+    width: 75%;
+  }
+
+  .hero-overlay-content {
+    max-width: 90%;
+  }
+
+  .hero-overlay-content h2 {
+    font-size: 1.7rem;
+  }
+
+  .hero-overlay-content h1 {
+    font-size: 1.4rem;
+  }
+
+  .hero-overlay-content p {
+    font-size: 13px;
+  }
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 576px) {
+  .hero-slider {
+    height: 240px;
+    width: 95%;
+  }
+
+  .hero-slide::after {
+    width: 100%;
+  }
+
+  .hero-overlay-content {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .hero-overlay-content h2 {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+  }
+
+  .hero-overlay-content h1 {
+    font-size: 1.2rem;
+    line-height: 1.3;
+  }
+
+  .hero-overlay-content p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}
+
+/* ===== Small Mobile ===== */
+@media (max-width: 400px) {
+  .hero-slider {
+    height: 220px;
+  }
+
+  .hero-overlay-content h2 {
+    font-size: 1.3rem;
+  }
+
+  .hero-overlay-content h1 {
+    font-size: 1rem;
+  }
+
+  .hero-overlay-content p {
+    font-size: 11px;
+  }
+}

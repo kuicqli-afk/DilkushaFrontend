@@ -1,0 +1,151 @@
+/* ================= BASE ================= */
+.explore-menu {
+  position: relative;
+  overflow: hidden;
+  padding-left: 55px;
+  padding-right: 40px;
+  background-color: white;
+}
+
+.explore-menu-wrapper {
+  width: 93%;
+  padding-inline: clamp(12px, 4vw, 50px);
+  margin: auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ================= ITEM ================= */
+.explore-menu-list-item {
+  width: 150px;
+  flex-shrink: 0;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-left: -18px;
+}
+
+.explore-menu-list-item img {
+  width: 110px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.explore-menu-list-item img:hover {
+  transform: scale(0.9);
+}
+
+.explore-menu-list-item p {
+  margin-top: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #555;
+}
+
+/* ================= ICON BOX ================= */
+.icon-box {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: #fff0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-box svg {
+  font-size: 65px;
+  color: #ff4d4d;
+}
+
+/* ================= DOTS ================= */
+.category-dots {
+  display: flex;
+  justify-content: center;
+  margin-top: 35px;
+  gap: 8px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  background: #cfcfcf;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dot.active {
+  width: 22px;
+  border-radius: 10px;
+  background: #ff3d00;
+}
+
+/* ================= SLIDER WIDTH CONTROL ================= */
+.swiper {
+  width: 100%;
+}
+
+/* ================= RESPONSIVE (TABLET + MOBILE) ================= */
+@media (max-width: 1279px) {
+
+  .menu-arrow,
+  .category-dots {
+    display: none !important;
+  }
+
+  .explore-menu {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .explore-menu-wrapper {
+    width: 100%;
+  }
+}
+
+@media (min-width: 300px) {
+
+  .menu-arrow,
+  .category-dots {
+    display: none !important;
+  }
+
+  .explore-menu {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .explore-menu-wrapper {
+    width: 100%;
+  }
+}
+
+/* ================= SMALL DEVICES ================= */
+@media (max-width: 768px) {
+  .explore-menu-list-item {
+    width: 120px;
+  }
+
+  .explore-menu-list-item img,
+  .icon-box {
+    width: 85px;
+    height: 85px;
+  }
+
+  .icon-box svg {
+    font-size: 45px;
+  }
+
+  .explore-menu-list-item p {
+    font-size: 14px;
+  }
+}
