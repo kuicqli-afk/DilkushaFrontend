@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import Slider from "../Slider/Slider";
 import SubCategorySlider from "./SubCategroySlider";
 import MaidaItemsAll from "../ViewAll/MaidaItemsAll";
-import Footer from "../Footer/Footer";
+
 
 function CategoryPage() {
   const { categoryCode, subCategoryCode } = useParams();
@@ -24,7 +24,7 @@ function CategoryPage() {
         isAll={isAll}
       />
 
-      <Footer />
+
     </div>
   );
 }

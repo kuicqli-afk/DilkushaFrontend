@@ -56,9 +56,8 @@ export const Categories = () => {
         {categories.map((cat, index) => (
           <SwiperSlide key={index}>
             <div
-              className={`category-item ${
-                index === activeIndex ? "active" : ""
-              }`}
+              className={`category-item ${index === activeIndex ? "active" : ""
+                }`}
             >
               <Link to={cat.link}>
                 <img src={cat.src} alt={cat.text} />

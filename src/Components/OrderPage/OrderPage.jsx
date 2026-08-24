@@ -16,7 +16,7 @@ import SaveIcon from "../../assets/SaveIcon.png";
 import ShareIcon from "../../assets/ShareIcon.png";
 import StarIcon from "../../assets/StarIcon.png";
 
-import Footer from "../Footer/Footer";
+
 import MaidaItems from "../Food/MaidaItems.jsx";
 
 const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
@@ -477,7 +477,6 @@ const OrderPage = () => {
         <MaidaItems key={cat} category={cat} excludeId={item._id} />
       ))}
 
-      <Footer />
     </>
   );
 };
