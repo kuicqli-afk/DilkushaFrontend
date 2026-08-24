@@ -32,7 +32,7 @@ const MaidaItems = ({
     cuisine,
     category,
     subCategory,
-    subCategoryName, // ✅ backward-compat — kuch jagah ye prop naam bhi use ho raha hoga
+    subCategoryName,
     isAll = false,
     excludeId,
 }) => {
@@ -45,9 +45,8 @@ const MaidaItems = ({
     const [selectedSlots, setSelectedSlots] = useState({});
     const [list, setList] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(""); // ✅ FIX: missing state add ki
+    const [error, setError] = useState("");
 
-    // ✅ FIX: dono prop naam accept karo, aur "all" ko string se bhi detect karo
     const effectiveSubCategory = subCategory ?? subCategoryName;
     const treatAsAll = isAll || category === "all";
 

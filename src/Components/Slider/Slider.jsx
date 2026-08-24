@@ -12,47 +12,50 @@ const Slider = () => {
 
   const [slides, setSlides] = useState([]);
   const [index, setIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const trackRef = useRef(null);
   const isTransitioning = useRef(false);
 
   // =====================================================
-  // FETCH SLIDERS
+  // FETCH SLIDERS — ✅ sirf ACTIVE + auto refetch 30s
   // =====================================================
 
+  const fetchSliders = async () => {
+    try {
+      // ✅ ?status=Active → backend se hi sirf Active aate hain
+      const res = await axios.get(`${API_URL}/api/sliders?status=Active`);
+
+      const sliderData = res.data?.data || res.data?.sliders || [];
+
+      // double safety: client side bhi filter
+      const activeSliders = sliderData
+        .filter(
+          (slider) =>
+            slider.status === "Active" ||
+            slider.status === "active"
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt) -
+            new Date(a.createdAt)
+        );
+
+      setSlides(activeSliders);
+    } catch (error) {
+      console.error("Fetch Slider Error:", error);
+      setSlides([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchSliders = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/api/sliders`);
-
-        console.log("Slider API Response:", res.data);
-
-        const sliderData =
-          res.data?.data ||
-          res.data?.sliders ||
-          [];
-
-        const activeSliders = sliderData
-          .filter((slider) => {
-            return (
-              slider.status === "Active" ||
-              slider.status === "active"
-            );
-          })
-          .sort(
-            (a, b) =>
-              new Date(b.createdAt) -
-              new Date(a.createdAt)
-          );
-
-        setSlides(activeSliders);
-      } catch (error) {
-        console.error("Fetch Slider Error:", error);
-        setSlides([]);
-      }
-    };
-
     fetchSliders();
+
+    // ✅ Har 30 second refetch → Activate/Deactivate turant reflect
+    const interval = setInterval(fetchSliders, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   // =====================================================
@@ -62,7 +65,6 @@ const Slider = () => {
   const getImageUrl = (image) => {
     if (!image) return "";
 
-    // Cloudinary / external URL
     if (
       image.startsWith("http://") ||
       image.startsWith("https://")
@@ -70,7 +72,6 @@ const Slider = () => {
       return image;
     }
 
-    // Local backend image
     if (image.startsWith("/")) {
       return `${API_URL}${image}`;
     }
@@ -79,31 +80,32 @@ const Slider = () => {
   };
 
   // =====================================================
-  // HANDLE SLIDER CLICK
+  // ✅ SIRF BUTTON CLICK — image click par kuch nahi hota
   // =====================================================
 
-  const handleClick = (item) => {
-    if (!item) return;
+  const handleButtonClick = (item) => {
+    if (!item || !item.buttonLink) return;
 
-    // If buttonLink exists
-    if (item.buttonLink) {
-      const link = item.buttonLink.trim();
+    const link = item.buttonLink.trim();
+    if (!link) return;
 
-      // Internal React route
-      if (link.startsWith("/")) {
-        navigate(link);
-        return;
-      }
-
-      // External URL
-      if (
-        link.startsWith("http://") ||
-        link.startsWith("https://")
-      ) {
-        window.open(link, "_blank", "noopener,noreferrer");
-        return;
-      }
+    // Internal route → same site, same page (new tab nahi)
+    if (link.startsWith("/")) {
+      navigate(link);
+      return;
     }
+
+    // External URL → same tab mein khule
+    if (
+      link.startsWith("http://") ||
+      link.startsWith("https://")
+    ) {
+      window.open(link, "_self", "noopener,noreferrer");
+      return;
+    }
+
+    // tel: / whatsapp: type links
+    window.open(link, "_self");
   };
 
   // =====================================================
@@ -125,7 +127,6 @@ const Slider = () => {
     const timer = setInterval(() => {
       if (!isTransitioning.current) {
         isTransitioning.current = true;
-
         setIndex((prev) => prev + 1);
       }
     }, 3000);
@@ -152,10 +153,8 @@ const Slider = () => {
       if (index >= slides.length) {
         track.style.transition = "none";
         track.style.transform = "translateX(0)";
-
         setIndex(0);
       }
-
       isTransitioning.current = false;
     };
 
@@ -178,25 +177,28 @@ const Slider = () => {
 
   const handleDotClick = (dotIndex) => {
     const track = trackRef.current;
-
     if (!track) return;
 
     track.style.transition =
       "transform 0.8s ease-in-out";
-
     setIndex(dotIndex);
   };
 
   // =====================================================
-  // LOADING
+  // LOADING / EMPTY
   // =====================================================
 
-  if (slides.length === 0) {
+  if (loading) {
     return (
       <div className="slider-container">
         Loading banners...
       </div>
     );
+  }
+
+  // ✅ Koi Active slider nahi → slider section poora hide
+  if (slides.length === 0) {
+    return null;
   }
 
   // =====================================================
@@ -216,7 +218,7 @@ const Slider = () => {
           <div
             key={`${slide._id || "slide"}-${i}`}
             className="slide"
-            onClick={() => handleClick(slide)}
+            style={{ position: "relative" }}
           >
 
             <img
@@ -228,6 +230,36 @@ const Slider = () => {
               }
             />
 
+            {/* ✅ BUTTON — sirf yeh clickable hai, image nahi */}
+            {slide.buttonText && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleButtonClick(slide);
+                }}
+                style={{
+                  position: "absolute",
+                  bottom: "28px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  padding: "11px 28px",
+                  borderRadius: "30px",
+                  border: "none",
+                  background: "#f97316",
+                  color: "#ffffff",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  letterSpacing: "0.4px",
+                  cursor: "pointer",
+                  boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
+                  whiteSpace: "nowrap",
+                  zIndex: 2,
+                }}
+              >
+                {slide.buttonText}
+              </button>
+            )}
+
           </div>
         ))}
       </div>
@@ -236,7 +268,6 @@ const Slider = () => {
 
       {slides.length > 1 && (
         <div className="slider-dots">
-
           {slides.map((_, i) => (
             <span
               key={i}
@@ -249,7 +280,6 @@ const Slider = () => {
               }
             />
           ))}
-
         </div>
       )}
 
