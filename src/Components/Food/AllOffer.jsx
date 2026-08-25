@@ -1,62 +1,61 @@
+// OfferDetail.jsx
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation } from "swiper/modules";
-import "swiper/css";
-import "./AllOffer.css"
-const AllOffer = () => {
-  const [offers, setOffers] = useState([]);
-  const navigate = useNavigate();
+
+const API_URL = "https://shyambackend.onrender.com"; // match your offers backend
+
+const OfferDetail = () => {
+  const { slug } = useParams();
+  const [offer, setOffer] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get("https://shyambackend.onrender.com/api/offers")
-      .then(res => setOffers(res.data.offers))
-      .catch(err => console.log(err));
-  }, []);
+    const fetchOffer = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(`${API_URL}/api/offers/${slug}`);
+        setOffer(res.data?.offer || null);
+      } catch (err) {
+        console.error("Fetch Offer Error:", err);
+        setOffer(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOffer();
+  }, [slug]);
+
+  if (loading) return <div className="p-6 text-center text-sm">Loading...</div>;
+
+  if (!offer) {
+    return <div className="p-10 text-center text-slate-500 text-sm">Offer not found.</div>;
+  }
 
   return (
-    <section className="offer-section">
-      <Swiper
-        modules={[Navigation, Autoplay]}
-        loop={offers.length > 4}   // ✅ loop fix
-        speed={700}
-        autoplay={{ delay: 3000, disableOnInteraction: false }}
-        navigation={{ nextEl: ".offer-next", prevEl: ".offer-prev" }}
-        breakpoints={{
-          300: { slidesPerView: 1, spaceBetween: 20 },
-          400: { slidesPerView: 1.3, spaceBetween: 20 },
-          500: { slidesPerView: 1.5, spaceBetween: 20 },
-          700: { slidesPerView: 2, spaceBetween: 18 },
-          800: { slidesPerView: 2.5, spaceBetween: 18 },
-          900: { slidesPerView: 2.5, spaceBetween: 23 },
-          1000: { slidesPerView: 3, spaceBetween: 18 },
-          1224: { slidesPerView: 3.8, spaceBetween: 23 },
-          1300: { slidesPerView: 4, spaceBetween: 16 },
-          1500: { slidesPerView: 4, spaceBetween: 20 },
-          1600: { slidesPerView: 5, spaceBetween: 16 },
-        }}
-        className="offer-swiper"
-      >
-        {offers.map((offer) => (
-          <SwiperSlide key={offer._id}>
-            <div
-              className="offer-card"
-              onClick={() => navigate(`/offers/${offer.slug}`)}
-            >
-              <img
-                src={offer.image}
-                alt={offer.title}
-              />
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
+    <div className="p-4">
+      <img src={offer.image} alt={offer.title} className="w-full rounded-lg mb-4" />
+      <h1 className="text-xl font-bold mb-4">{offer.title}</h1>
 
-      <button className="offer-prev">‹</button>
-      <button className="offer-next">›</button>
-    </section>
+      {offer.products?.length ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {offer.products.map((p) => (
+            <div key={p._id} className="border rounded-lg p-2">
+              <img
+                src={p.image}
+                alt={p.title}
+                className="w-full h-32 object-cover rounded"
+              />
+              <p className="text-xs font-semibold mt-2 truncate">{p.title}</p>
+              <p className="text-xs text-orange-600">₹{p.price}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-center text-slate-500 text-sm">No products in this offer yet.</p>
+      )}
+    </div>
   );
 };
 
-export default AllOffer;
+export default OfferDetail;

@@ -17,7 +17,7 @@ const DynamicSlider = () => {
   const trackRef = useRef(null);
   const isTransitioning = useRef(false);
 
-  // ✅ FETCH — Active only + GENERAL + 30s refetch
+  // ✅ FETCH — sirf ACTIVE + GENERAL (bina category ke) + har 30s refetch
   const fetchBanners = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/sliders?status=Active`);
@@ -25,10 +25,15 @@ const DynamicSlider = () => {
       const banners = res.data?.sliders || res.data?.data || [];
 
       const activeBanners = (Array.isArray(banners) ? banners : [])
-        .filter((b) => (b.status === "Active" || b.status === "active") && !b.category)
+        .filter(
+          (b) =>
+            (b.status === "Active" || b.status === "active") &&
+            !b.category
+        )
         .sort(
           (a, b) =>
-            new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+            new Date(b.createdAt || 0) -
+            new Date(a.createdAt || 0)
         );
 
       if (activeBanners.length === 0) {
@@ -73,8 +78,15 @@ const DynamicSlider = () => {
 
   const getImageUrl = (image) => {
     if (!image) return "";
-    if (image.startsWith("http://") || image.startsWith("https://")) return image;
-    if (image.startsWith("/")) return `${API_URL}${image}`;
+    if (
+      image.startsWith("http://") ||
+      image.startsWith("https://")
+    ) {
+      return image;
+    }
+    if (image.startsWith("/")) {
+      return `${API_URL}${image}`;
+    }
     return `${API_URL}/${image}`;
   };
 
@@ -88,16 +100,21 @@ const DynamicSlider = () => {
       navigate(link);
       return;
     }
-    if (link.startsWith("http://") || link.startsWith("https://")) {
+    if (
+      link.startsWith("http://") ||
+      link.startsWith("https://")
+    ) {
       window.open(link, "_self", "noopener,noreferrer");
       return;
     }
     window.open(link, "_self");
   };
 
-  // ✅ AUTOPLAY — har 3 second
+  const loopSlides = [...slides, ...slides];
+
+  // ✅ AUTOPLAY — har 3 second slide
   useEffect(() => {
-    if (slides.length <= 1) return;
+    if (slides.length === 0) return;
     const timer = setInterval(() => {
       if (!isTransitioning.current) {
         isTransitioning.current = true;
@@ -105,12 +122,13 @@ const DynamicSlider = () => {
       }
     }, 3000);
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [slides]);
 
-  // ✅ INFINITE LOOP — end par silently wapas start
+  // ✅ SMOOTH INFINITE LOOP
   useEffect(() => {
+    if (slides.length === 0) return;
     const track = trackRef.current;
-    if (!track || slides.length === 0) return;
+    if (!track) return;
 
     track.style.transition = "transform 0.8s ease-in-out";
     track.style.transform = `translateX(-${index * 100}%)`;
@@ -126,24 +144,22 @@ const DynamicSlider = () => {
 
     track.addEventListener("transitionend", handleTransitionEnd);
     return () => track.removeEventListener("transitionend", handleTransitionEnd);
-  }, [index, slides.length]);
+  }, [index, slides]);
 
   if (loading) {
     return <div className="slider-container">Loading banner...</div>;
   }
 
+  // ✅ Koi banner nahi → section poora hide
   if (!banner || slides.length === 0) return null;
-
-  const loopSlides = slides.length > 1 ? [...slides, ...slides] : slides;
-
 
   return (
     <div className="slider-container">
       <div className="slider-track" ref={trackRef}>
         {loopSlides.map((slide, i) => (
           <div
-            key={`${slide.src}-${i}`}
             className="slide"
+            key={`${slide.src}-${i}`}
             style={{ position: "relative", cursor: "pointer" }}
             onClick={() => handleSlideClick(slide)}
           >
@@ -156,6 +172,19 @@ const DynamicSlider = () => {
           </div>
         ))}
       </div>
+
+      {/* ✅ DOTS */}
+      {slides.length > 1 && (
+        <div className="slider-dots">
+          {slides.map((_, i) => (
+            <span
+              key={i}
+              className={`dot ${index % slides.length === i ? "active" : ""}`}
+              onClick={() => setIndex(i)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
