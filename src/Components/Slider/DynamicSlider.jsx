@@ -17,7 +17,7 @@ const DynamicSlider = () => {
   const trackRef = useRef(null);
   const isTransitioning = useRef(false);
 
-  // ✅ FETCH — Active only + 30s refetch
+  // ✅ FETCH — Active only + GENERAL + 30s refetch
   const fetchBanners = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/sliders?status=Active`);
@@ -78,13 +78,16 @@ const DynamicSlider = () => {
     return `${API_URL}/${image}`;
   };
 
-  // ✅ SIRF BUTTON se navigate
-  const handleButtonClick = (item) => {
+  // ✅ KAHI BHI CLICK → navigate
+  const handleSlideClick = (item) => {
     if (!item?.buttonLink) return;
     const link = item.buttonLink.trim();
-    if (!link) return;
+    if (!link || link === "#") return;
 
-    if (link.startsWith("/")) { navigate(link); return; }
+    if (link.startsWith("/")) {
+      navigate(link);
+      return;
+    }
     if (link.startsWith("http://") || link.startsWith("https://")) {
       window.open(link, "_self", "noopener,noreferrer");
       return;
@@ -92,6 +95,7 @@ const DynamicSlider = () => {
     window.open(link, "_self");
   };
 
+  // ✅ AUTOPLAY — har 3 second
   useEffect(() => {
     if (slides.length <= 1) return;
     const timer = setInterval(() => {
@@ -103,6 +107,7 @@ const DynamicSlider = () => {
     return () => clearInterval(timer);
   }, [slides.length]);
 
+  // ✅ INFINITE LOOP — end par silently wapas start
   useEffect(() => {
     const track = trackRef.current;
     if (!track || slides.length === 0) return;
@@ -123,14 +128,6 @@ const DynamicSlider = () => {
     return () => track.removeEventListener("transitionend", handleTransitionEnd);
   }, [index, slides.length]);
 
-  const handleDotClick = (dotIndex) => {
-    const track = trackRef.current;
-    if (!track || slides.length === 0 || isTransitioning.current) return;
-    isTransitioning.current = true;
-    track.style.transition = "transform 0.8s ease-in-out";
-    setIndex(dotIndex);
-  };
-
   if (loading) {
     return <div className="slider-container">Loading banner...</div>;
   }
@@ -139,6 +136,7 @@ const DynamicSlider = () => {
 
   const loopSlides = slides.length > 1 ? [...slides, ...slides] : slides;
 
+
   return (
     <div className="slider-container">
       <div className="slider-track" ref={trackRef}>
@@ -146,7 +144,8 @@ const DynamicSlider = () => {
           <div
             key={`${slide.src}-${i}`}
             className="slide"
-            style={{ position: "relative" }}
+            style={{ position: "relative", cursor: "pointer" }}
+            onClick={() => handleSlideClick(slide)}
           >
             <img
               src={getImageUrl(slide.src)}
@@ -154,49 +153,9 @@ const DynamicSlider = () => {
               alt={slide.title || "Promotional Banner"}
               loading={i === 0 ? "eager" : "lazy"}
             />
-
-            {slide.buttonLink && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleButtonClick(slide);
-                }}
-                style={{
-                  position: "absolute",
-                  bottom: "28px",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  padding: "11px 28px",
-                  borderRadius: "30px",
-                  border: "none",
-                  background: "#f97316",
-                  color: "#fff",
-                  fontSize: "14px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
-                  whiteSpace: "nowrap",
-                  zIndex: 2,
-                }}
-              >
-                View
-              </button>
-            )}
           </div>
         ))}
       </div>
-
-      {slides.length > 1 && (
-        <div className="slider-dots">
-          {slides.map((_, i) => (
-            <span
-              key={i}
-              className={`dot ${index % slides.length === i ? "active" : ""}`}
-              onClick={() => handleDotClick(i)}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };
