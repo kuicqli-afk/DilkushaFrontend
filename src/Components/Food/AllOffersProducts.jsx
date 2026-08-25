@@ -36,7 +36,12 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
 
     // ✅ FETCH — products tagged with this offer's slug
     useEffect(() => {
+        if (!slug) return;
         setLoading(true);
+
+        // Debug what slug is captured from the URL route
+        console.log("Fetching products for tag/slug:", slug);
+
         axios
             .get(`${API_URL}/api/products?tag=${encodeURIComponent(slug)}`)
             .then((res) => {
@@ -154,48 +159,7 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
 
                         {filteredList.map((item) => (
                             <div key={item._id} className="food-card">
-                                {/* Slot popup */}
-                                {openCardId === item._id && (
-                                    <div className="slot-popup-overlay">
-                                        <div className="slot-popup-content">
-                                            <h4>Select a Slot</h4>
-                                            <ul>
-                                                {Array.isArray(item.slots) &&
-                                                    item.slots.map((slot) => (
-                                                        <li
-                                                            key={slot}
-                                                            className={
-                                                                selectedSlots[item._id] === slot ? "selected" : ""
-                                                            }
-                                                            onClick={() =>
-                                                                setSelectedSlots({
-                                                                    ...selectedSlots,
-                                                                    [item._id]: slot,
-                                                                })
-                                                            }
-                                                        >
-                                                            {slot}
-                                                        </li>
-                                                    ))}
-                                            </ul>
-                                            <button
-                                                disabled={!selectedSlots[item._id]}
-                                                onClick={() => {
-                                                    setOpenCardId(null);
-                                                    navigate("/order#", {
-                                                        state: {
-                                                            item,
-                                                            category: "offers",
-                                                            slot: selectedSlots[item._id],
-                                                        },
-                                                    });
-                                                }}
-                                            >
-                                                Set Time & Place Order
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
+
 
                                 {/* Image */}
                                 <div className="food-image-wrapper">
@@ -332,4 +296,4 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
     )
 }
 
-export default AllOffersProducts
+export default AllOffersProducts;

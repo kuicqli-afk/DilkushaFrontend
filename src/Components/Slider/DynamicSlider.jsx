@@ -16,37 +16,61 @@ const DynamicSlider = () => {
   const trackRef = useRef(null);
   const isTransitioning = useRef(false);
 
-  // ✅ FETCH — SAARE ACTIVE + GENERAL sliders + har 30s refetch
+  // ✅ FETCH — General Sliders + Offers, dono ko merge karke ek array banao
   const fetchBanners = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/sliders?status=Active`);
+      // Dono APIs ek saath call — koi ek fail ho to bhi dusra chal jaye
+      const [sliderRes, offerRes] = await Promise.allSettled([
+        axios.get(`${API_URL}/api/sliders?status=Active`),
+        axios.get(`${API_URL}/api/offers?status=Active`),
+      ]);
 
-      const banners = res.data?.sliders || res.data?.data || [];
+      // ---------- SLIDER DATA ----------
+      let sliderSlides = [];
+      if (sliderRes.status === "fulfilled") {
+        const banners = sliderRes.value.data?.sliders || sliderRes.value.data?.data || [];
 
-      // Sabhi active general sliders — har ek = ek slide
-      const activeBanners = (Array.isArray(banners) ? banners : [])
-        .filter(
-          (b) =>
-            (b.status === "Active" || b.status === "active") &&
-            !b.category
-        )
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt || 0) -
-            new Date(a.createdAt || 0)
-        );
+        const activeBanners = (Array.isArray(banners) ? banners : [])
+          .filter((b) => (b.status === "Active" || b.status === "active") && !b.category)
+          .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
-      const slidesData = activeBanners
-        .map((b) => ({
-          src: b.image,
-          title: b.title || "Promotional Banner",
-          buttonLink: b.buttonLink || "",
-        }))
-        .filter((s) => s.src);
+        sliderSlides = activeBanners
+          .map((b) => ({
+            src: b.image,
+            title: b.title || "Promotional Banner",
+            buttonLink: b.buttonLink || "",
+            source: "slider", // debug ke liye, UI pe koi fark nahi
+          }))
+          .filter((s) => s.src);
+      } else {
+        console.error("Slider fetch failed:", sliderRes.reason);
+      }
 
-      console.log("DynamicSlider → total slides:", slidesData.length);
+      // ---------- OFFER DATA ----------
+      let offerSlides = [];
+      if (offerRes.status === "fulfilled") {
+        const offers = offerRes.value.data?.offers || offerRes.value.data?.data || [];
 
-      setSlides(slidesData);
+        offerSlides = (Array.isArray(offers) ? offers : [])
+          .filter((o) => o.status === "Active" || o.status === "active")
+          .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+          .map((o) => ({
+            src: o.image,
+            title: o.title || "Offer",
+            buttonLink: `/offers/${o.slug}`, // offer pe click → uska products page
+            source: "offer",
+          }))
+          .filter((s) => s.src);
+      } else {
+        console.error("Offer fetch failed:", offerRes.reason);
+      }
+
+      // ---------- MERGE (jaise aaye waise hi rakho, koi extra reorder nahi) ----------
+      const merged = [...sliderSlides, ...offerSlides];
+
+      console.log("DynamicSlider → sliders:", sliderSlides.length, "| offers:", offerSlides.length, "| total:", merged.length);
+
+      setSlides(merged);
       setIndex(0);
     } catch (error) {
       console.error("Error fetching banners:", error);
@@ -64,10 +88,7 @@ const DynamicSlider = () => {
 
   const getImageUrl = (image) => {
     if (!image) return "";
-    if (
-      image.startsWith("http://") ||
-      image.startsWith("https://")
-    ) {
+    if (image.startsWith("http://") || image.startsWith("https://")) {
       return image;
     }
     if (image.startsWith("/")) {
@@ -76,7 +97,7 @@ const DynamicSlider = () => {
     return `${API_URL}/${image}`;
   };
 
-  // ✅ KAHI BHI CLICK → navigate
+  // ✅ KAHI BHI CLICK → navigate (slider ke buttonLink aur offer ke /offers/:slug dono ke liye same logic)
   const handleSlideClick = (item) => {
     if (!item?.buttonLink) return;
     const link = item.buttonLink.trim();
@@ -86,10 +107,7 @@ const DynamicSlider = () => {
       navigate(link);
       return;
     }
-    if (
-      link.startsWith("http://") ||
-      link.startsWith("https://")
-    ) {
+    if (link.startsWith("http://") || link.startsWith("https://")) {
       window.open(link, "_self", "noopener,noreferrer");
       return;
     }
