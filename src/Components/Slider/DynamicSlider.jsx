@@ -9,7 +9,6 @@ const API_URL = "https://shyamfoodbackend.onrender.com";
 const DynamicSlider = () => {
   const navigate = useNavigate();
 
-  const [banner, setBanner] = useState(null);
   const [slides, setSlides] = useState([]);
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -17,13 +16,14 @@ const DynamicSlider = () => {
   const trackRef = useRef(null);
   const isTransitioning = useRef(false);
 
-  // ✅ FETCH — sirf ACTIVE + GENERAL (bina category ke) + har 30s refetch
+  // ✅ FETCH — SAARE ACTIVE + GENERAL sliders + har 30s refetch
   const fetchBanners = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/sliders?status=Active`);
 
       const banners = res.data?.sliders || res.data?.data || [];
 
+      // Sabhi active general sliders — har ek = ek slide
       const activeBanners = (Array.isArray(banners) ? banners : [])
         .filter(
           (b) =>
@@ -36,34 +36,20 @@ const DynamicSlider = () => {
             new Date(a.createdAt || 0)
         );
 
-      if (activeBanners.length === 0) {
-        setBanner(null);
-        setSlides([]);
-        return;
-      }
+      const slidesData = activeBanners
+        .map((b) => ({
+          src: b.image,
+          title: b.title || "Promotional Banner",
+          buttonLink: b.buttonLink || "",
+        }))
+        .filter((s) => s.src);
 
-      const latest = activeBanners[0];
-      setBanner(latest);
-
-      const images = Array.isArray(latest.images)
-        ? latest.images
-        : latest.image
-          ? [latest.image]
-          : [];
-
-      const slidesData = images
-        .filter(Boolean)
-        .map((img) => ({
-          src: img,
-          title: latest.title || "Promotional Banner",
-          buttonLink: latest.buttonLink || "",
-        }));
+      console.log("DynamicSlider → total slides:", slidesData.length);
 
       setSlides(slidesData);
       setIndex(0);
     } catch (error) {
       console.error("Error fetching banners:", error);
-      setBanner(null);
       setSlides([]);
     } finally {
       setLoading(false);
@@ -112,7 +98,7 @@ const DynamicSlider = () => {
 
   const loopSlides = [...slides, ...slides];
 
-  // ✅ AUTOPLAY — har 3 second slide
+  // ✅ AUTOPLAY — har 3 second
   useEffect(() => {
     if (slides.length === 0) return;
     const timer = setInterval(() => {
@@ -150,8 +136,7 @@ const DynamicSlider = () => {
     return <div className="slider-container">Loading banner...</div>;
   }
 
-  // ✅ Koi banner nahi → section poora hide
-  if (!banner || slides.length === 0) return null;
+  if (slides.length === 0) return null;
 
   return (
     <div className="slider-container">
@@ -173,7 +158,7 @@ const DynamicSlider = () => {
         ))}
       </div>
 
-      {/* ✅ DOTS */}
+      {/* ✅ DOTS — 2+ slides par dikhenge */}
       {slides.length > 1 && (
         <div className="slider-dots">
           {slides.map((_, i) => (
