@@ -3,6 +3,7 @@ import axios from "axios";
 
 import { useNavigate, useParams } from "react-router-dom";
 import { useCart } from "../../Context/CartContext";
+import AdsSlider from "../Slider/AdsSlider"; // ✅ FIX: category-wise banner ke liye AdsSlider chahiye (Slider1.jsx exist nahi karta, AdsSlider.jsx hi wahi kaam karta hai)
 
 import Open from "../../assets/Open.png";
 import Close from "../../assets/CLOSE.png";
@@ -18,7 +19,7 @@ import { LiaStopwatchSolid } from "react-icons/lia";
 
 const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
 
-function MaidaItemsAll({ categoryCode, subCategoryCode, isAll }) {
+function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true }) {
     const navigate = useNavigate();
     const { cartItems, addToCart, updateQty, getCartKey } = useCart();
     const [openCardId, setOpenCardId] = useState(null);
@@ -74,165 +75,182 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll }) {
     const placeOrder = (item) =>
         navigate("/order", { state: { item, category: category || "all" } });
 
+    // Banner sirf tab dikhao jab specific category/subcategory ho, aur parent (jaise CategoryPage) khud banner nahi dikha raha
+    const bannerCategory = !isAll && showBanner ? (category || subCategory) : null;
+
     if (loading) {
         return (
-            <div className="food-container">
-                <p>Loading products...</p>
-            </div>
+            <>
+                {bannerCategory && <AdsSlider category={bannerCategory} />}
+                <div className="food-container">
+                    <p>Loading products...</p>
+                </div>
+            </>
         );
     }
 
     if (error) {
         return (
-            <div className="food-container">
-                <p>{error}</p>
-            </div>
+            <>
+                {bannerCategory && <AdsSlider category={bannerCategory} />}
+                <div className="food-container">
+                    <p>{error}</p>
+                </div>
+            </>
         );
     }
 
     if (!items.length) {
         return (
-            <div className="food-container">
-                <p>No products found.</p>
-            </div>
+            <>
+                {bannerCategory && <AdsSlider category={bannerCategory} />}
+                <div className="food-container">
+                    <p>No products found.</p>
+                </div>
+            </>
         );
     }
 
     return (
-        <div className="food-container">
-            <div id="mixnamkeen" className="food-text">
-                <h1>{isAll ? "All Products" : category || subCategory}</h1>
-            </div>
+        <>
+            {/* Sirf isi category ka banner — admin ne "Add Slider" mein jo category select ki thi wahi */}
+            {bannerCategory && <AdsSlider category={bannerCategory} />}
 
-            <div className="food-card-grid">
-                {items.map((item) => (
-                    <div key={item._id} className="food-card">
+            <div className="food-container">
+                <div id="mixnamkeen" className="food-text">
+                    <h1>{isAll ? "All Products" : category || subCategory}</h1>
+                </div>
 
-                        <div className="food-image-wrapper">
+                <div className="food-card-grid">
+                    {items.map((item) => (
+                        <div key={item._id} className="food-card">
 
-                            {(item.video || item.video2) && (
-                                <div className="add-badge">Ads</div>
-                            )}
+                            <div className="food-image-wrapper">
 
-                            {item.video && item.video.endsWith(".mp4") ? (
-                                <video
-                                    className="food-image"
-                                    src={item.video}
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                    preload="metadata"
-                                />
-                            ) : item.video2 && item.video2.endsWith(".mp4") ? (
-                                <video
-                                    className="food-image"
-                                    src={item.video2}
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                    preload="metadata"
-                                />
-                            ) : item.video2 && item.video2.includes("youtube.com") ? (
-                                <iframe
-                                    className="food-image"
-                                    src={`${item.video2}?autoplay=1&mute=1&loop=1&controls=0&playsinline=1`}
-                                    frameBorder="0"
-                                    allow="autoplay; encrypted-media"
-                                    allowFullScreen
-                                    title={item.title}
-                                />
-                            ) : (
-                                <img
-                                    src={item.image}
-                                    alt={item.title}
-                                    className="food-image"
-                                />
-                            )}
+                                {(item.video || item.video2) && (
+                                    <div className="add-badge">Ads</div>
+                                )}
 
-                            <div className="view-eye">
-                                <VscEye
-                                    style={{
-                                        fontSize: "22px",
-                                        color: "white",
-                                        marginBottom: "-2px",
-                                        cursor: "pointer",
-                                    }}
-                                />
-                                {item.view || 0}
-                            </div>
-
-                            <img
-                                className="top-icon"
-                                src={item.type === "veg" ? GreenArrow : RedArrow}
-                                alt=""
-                            />
-                        </div>
-
-                        <div className="food-info">
-                            <div className="food-status-left">
-                                <img src={item.isOpen === false || (item.status && item.status.toLowerCase() === 'offline') ? Close : Open} alt="" />
-                                <p>{item.status}</p>
-                                <div className="food-status-right-icon">
-                                    <LiaStopwatchSolid
-                                        size={24}
-                                        color="#ff5722"
-                                        title="Select Slot"
-                                        onClick={() =>
-                                            setOpenCardId(openCardId === item._id ? null : item._id)
-                                        }
-                                        style={{ cursor: "pointer" }}
+                                {item.video && item.video.endsWith(".mp4") ? (
+                                    <video
+                                        className="food-image"
+                                        src={item.video}
+                                        autoPlay
+                                        loop
+                                        muted
+                                        playsInline
+                                        preload="metadata"
                                     />
-                                    <FaRegHeart size={20} title="Like" style={{ cursor: "pointer" }} />
-                                    <img src={SaveIcon} alt="Save" title="Book Mark" />
-                                    <img src={ShareIcon} alt="Share" title="Share" />
+                                ) : item.video2 && item.video2.endsWith(".mp4") ? (
+                                    <video
+                                        className="food-image"
+                                        src={item.video2}
+                                        autoPlay
+                                        loop
+                                        muted
+                                        playsInline
+                                        preload="metadata"
+                                    />
+                                ) : item.video2 && item.video2.includes("youtube.com") ? (
+                                    <iframe
+                                        className="food-image"
+                                        src={`${item.video2}?autoplay=1&mute=1&loop=1&controls=0&playsinline=1`}
+                                        frameBorder="0"
+                                        allow="autoplay; encrypted-media"
+                                        allowFullScreen
+                                        title={item.title}
+                                    />
+                                ) : (
+                                    <img
+                                        src={item.image}
+                                        alt={item.title}
+                                        className="food-image"
+                                    />
+                                )}
+
+                                <div className="view-eye">
+                                    <VscEye
+                                        style={{
+                                            fontSize: "22px",
+                                            color: "white",
+                                            marginBottom: "-2px",
+                                            cursor: "pointer",
+                                        }}
+                                    />
+                                    {item.view || 0}
                                 </div>
+
+                                <img
+                                    className="top-icon"
+                                    src={item.type === "veg" ? GreenArrow : RedArrow}
+                                    alt=""
+                                />
                             </div>
 
-                            <h2>
-                                {item.title} <span>({item.portion})</span>
-                            </h2>
-                            <p className="food-desc">{(item.desc || "").slice(0, 60)}...</p>
+                            <div className="food-info">
+                                <div className="food-status-left">
+                                    <img src={item.isOpen === false || (item.status && item.status.toLowerCase() === 'offline') ? Close : Open} alt="" />
+                                    <p>{item.status}</p>
+                                    <div className="food-status-right-icon">
+                                        <LiaStopwatchSolid
+                                            size={24}
+                                            color="#ff5722"
+                                            title="Select Slot"
+                                            onClick={() =>
+                                                setOpenCardId(openCardId === item._id ? null : item._id)
+                                            }
+                                            style={{ cursor: "pointer" }}
+                                        />
+                                        <FaRegHeart size={20} title="Like" style={{ cursor: "pointer" }} />
+                                        <img src={SaveIcon} alt="Save" title="Book Mark" />
+                                        <img src={ShareIcon} alt="Share" title="Share" />
+                                    </div>
+                                </div>
 
-                            <div className="food-rating">
-                                <img src={StarIcon} alt="" />
-                                <h3>
-                                    {item.rating || 0} <span>({item.reviews || 0})</span>
-                                </h3>
-                                <p>{item.orders || 0} orders last week</p>
-                            </div>
+                                <h2>
+                                    {item.title} <span>({item.portion})</span>
+                                </h2>
+                                <p className="food-desc">{(item.desc || "").slice(0, 60)}...</p>
 
-                            <div className="food-price-row">
-                                <span className="food-price">
-                                    <small className="Rs">₹</small> {item.price}
-                                </span>
-                                {item.offer > 0 && (
-                                    <span className="offer">
-                                        <small className="offer">₹</small>
-                                        {item.offer}
+                                <div className="food-rating">
+                                    <img src={StarIcon} alt="" />
+                                    <h3>
+                                        {item.rating || 0} <span>({item.reviews || 0})</span>
+                                    </h3>
+                                    <p>{item.orders || 0} orders last week</p>
+                                </div>
+
+                                <div className="food-price-row">
+                                    <span className="food-price">
+                                        <small className="Rs">₹</small> {item.price}
                                     </span>
-                                )}
-                                {item.off > 0 && (
-                                    <span className="food-off">{item.off}% OFF</span>
-                                )}
-                            </div>
+                                    {item.offer > 0 && (
+                                        <span className="offer">
+                                            <small className="offer">₹</small>
+                                            {item.offer}
+                                        </span>
+                                    )}
+                                    {item.off > 0 && (
+                                        <span className="food-off">{item.off}% OFF</span>
+                                    )}
+                                </div>
 
-                            <div className="food-actions">
-                                <button className="order-btn" onClick={() => placeOrder(item)}>
-                                    Place order
-                                </button>
-                                <div className="add-btn">
-                                    <button onClick={() => decrease(item)}>-</button>
-                                    <span>{getQty(item)}</span>
-                                    <button onClick={() => increase(item)}>+</button>
+                                <div className="food-actions">
+                                    <button className="order-btn" onClick={() => placeOrder(item)}>
+                                        Place order
+                                    </button>
+                                    <div className="add-btn">
+                                        <button onClick={() => decrease(item)}>-</button>
+                                        <span>{getQty(item)}</span>
+                                        <button onClick={() => increase(item)}>+</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
-        </div>
+        </>
     );
 }
 

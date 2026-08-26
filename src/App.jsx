@@ -168,7 +168,7 @@ function AppContent() {
                 cuisine={cuisine}
                 setCuisine={setCuisine}
               />
-              <AllOffer />
+              {/* <AllOffer /> */}
 
               {categories.map((item) => (
                 <div key={item}>

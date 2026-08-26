@@ -17,9 +17,9 @@ import { LiaStopwatchSolid } from "react-icons/lia";
 import { VscEye } from "react-icons/vsc";
 
 import "swiper/css";
+import "../Slider/Slider.css"; // 🆕 same CSS jo main homepage slider use karta hai
 
 import { useCart } from "../../Context/CartContext";
-import Slider from "../Slider/Slider";
 
 const API_URL = "https://shyamfoodbackend.onrender.com";
 
@@ -33,6 +33,27 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
     const { slug } = useParams();
     const [list, setList] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // 🆕 Sirf isi offer ka banner data (title + image) — poora general slider nahi
+    const [offerBanner, setOfferBanner] = useState(null);
+    const [bannerLoading, setBannerLoading] = useState(true);
+
+    // 🆕 FETCH — is offer ka apna single banner
+    useEffect(() => {
+        if (!slug) return;
+        setBannerLoading(true);
+
+        axios
+            .get(`${API_URL}/api/offers/slug/${encodeURIComponent(slug)}`)
+            .then((res) => {
+                setOfferBanner(res.data?.data || null);
+            })
+            .catch((err) => {
+                console.error("Fetch Offer Banner Error:", err);
+                setOfferBanner(null);
+            })
+            .finally(() => setBannerLoading(false));
+    }, [slug]);
 
     // ✅ FETCH — products tagged with this offer's slug
     useEffect(() => {
@@ -129,12 +150,36 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
         text.replace(/-/g, " ")
             .replace(/\b\w/g, c => c.toUpperCase());
 
+    // 🆕 Offer banner image ka full URL banane ke liye
+    const getImageUrl = (image) => {
+        if (!image) return "";
+        if (image.startsWith("http://") || image.startsWith("https://")) return image;
+        if (image.startsWith("/")) return `${API_URL}${image}`;
+        return `${API_URL}/${image}`;
+    };
+
+    // 🆕 Same markup/classes jo DynamicSlider/Slider.jsx use karte hain — size bilkul match karega
+    const OfferBanner = () =>
+        !bannerLoading && offerBanner ? (
+            <div className="slider-container">
+                <div className="slider-track">
+                    <div className="slide">
+                        <img
+                            src={getImageUrl(offerBanner.image)}
+                            className="bg-img"
+                            alt={offerBanner.title || "Offer Banner"}
+                        />
+                    </div>
+                </div>
+            </div>
+        ) : null;
+
     if (loading) {
         return (
             <>
-                <Slider type={slug} />
+                <OfferBanner />
                 <div className="food-container">
-                    <div className="food-text"><h1>{formatTitle(slug)}</h1></div>
+                    <div className="food-text"><h1>{offerBanner?.title || formatTitle(slug)}</h1></div>
                     <p className="p-6 text-center text-sm">Loading products...</p>
                 </div>
             </>
@@ -143,11 +188,11 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
 
     return (
         <>
-            <Slider type={slug} />
+            <OfferBanner />
 
             <div className="food-container">
                 <div className="food-text">
-                    <h1>{formatTitle(slug)}</h1>
+                    <h1>{offerBanner?.title || formatTitle(slug)}</h1>
                 </div>
 
                 {filteredList.length === 0 ? (
@@ -233,15 +278,7 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
                                         <img src={item.isOpen ? Open : Close} alt="" />
                                         <p>{item.status}</p>
                                         <div className="food-status-right-icon">
-                                            <LiaStopwatchSolid
-                                                size={24}
-                                                color="#ff5722"
-                                                title="Select Slot"
-                                                onClick={() =>
-                                                    setOpenCardId(openCardId === item._id ? null : item._id)
-                                                }
-                                                style={{ cursor: "pointer" }}
-                                            />
+
                                             <FaRegHeart size={20} title="Like" style={{ cursor: "pointer" }} />
                                             <img src={SaveIcon} alt="Save" title="Book Mark" />
                                             <img src={ShareIcon} alt="Share" title="Share" />

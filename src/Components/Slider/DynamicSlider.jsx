@@ -39,7 +39,7 @@ const DynamicSlider = () => {
             src: b.image,
             title: b.title || "Promotional Banner",
             buttonLink: b.buttonLink || "",
-            source: "slider", // debug ke liye, UI pe koi fark nahi
+            source: "slider",
           }))
           .filter((s) => s.src);
       } else {

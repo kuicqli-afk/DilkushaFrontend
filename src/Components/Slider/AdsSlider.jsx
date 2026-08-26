@@ -1,4 +1,3 @@
-// Slider1.jsx — category wise slider (admin se selected category ka)
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./Slider.css";
@@ -6,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const API_URL = "https://shyamfoodbackend.onrender.com";
 
-const Slider1 = ({ category }) => {
+const AdsSlider = ({ category }) => {
   const navigate = useNavigate();
 
   const [slides, setSlides] = useState([]);
@@ -165,4 +164,4 @@ const Slider1 = ({ category }) => {
   );
 };
 
-export default Slider1;
+export default AdsSlider;
