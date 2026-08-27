@@ -1,14 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { useCart } from "../../Context/CartContext";
 import { useAuth } from "../../Context/AuthContext";
 import "./Navbar.css";
 
-import { FaSearch, FaUser, FaBox, FaSignOutAlt, FaChevronDown, FaUserEdit } from "react-icons/fa";
+import { FaSearch, FaUser, FaBox, FaSignOutAlt, FaChevronDown, FaUserEdit, FaCheck, FaPlus } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import shyam from "../../assets/syam.png";
 import profile from "../../assets/profile.gif";
 import cart from "../../assets/cart.gif";
+
+const API_URL = "https://shyamfoodbackend.onrender.com/api";
 
 const PLACEHOLDERS = [
   "Search for Shyam Bakers & Namkeen, a cuisine, or a dish…",
@@ -20,6 +23,18 @@ const PLACEHOLDERS = [
   "Search for sev",
 ];
 
+// ✅ Bina login ke unique device pehchan ke liye — ek baar generate hoke localStorage mein save rahega
+const getDeviceId = () => {
+  let id = localStorage.getItem("deviceId");
+  if (!id) {
+    id =
+      (crypto?.randomUUID && crypto.randomUUID()) ||
+      `dev-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem("deviceId", id);
+  }
+  return id;
+};
+
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { cartItems } = useCart();
@@ -29,6 +44,12 @@ const Navbar = () => {
   const [displayText, setDisplayText] = useState("");
   const [isInputActive, setIsInputActive] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // ✅ Follow + Total Products state
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [followLoading, setFollowLoading] = useState(false);
 
   const dropdownRef = useRef(null);
 
@@ -83,6 +104,57 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ✅ Follow status + Total Products fetch (page load par)
+  useEffect(() => {
+    const deviceId = getDeviceId();
+
+    axios
+      .get(`${API_URL}/follow/status/${deviceId}`)
+      .then((res) => {
+        if (res.data.success) {
+          setIsFollowing(res.data.following);
+          setFollowersCount(res.data.followersCount);
+        }
+      })
+      .catch((err) => console.error("Follow Status Error:", err));
+
+    axios
+      .get(`${API_URL}/products/count`)
+      .then((res) => {
+        if (res.data.success) {
+          setTotalProducts(res.data.count);
+        }
+      })
+      .catch((err) => console.error("Product Count Error:", err));
+  }, []);
+
+  // ✅ Follow / Unfollow toggle
+  const handleFollowToggle = async () => {
+    if (followLoading) return;
+    setFollowLoading(true);
+    const deviceId = getDeviceId();
+
+    try {
+      if (isFollowing) {
+        const res = await axios.delete(`${API_URL}/follow/${deviceId}`);
+        if (res.data.success) {
+          setIsFollowing(false);
+          setFollowersCount(res.data.followersCount);
+        }
+      } else {
+        const res = await axios.post(`${API_URL}/follow`, { deviceId });
+        if (res.data.success) {
+          setIsFollowing(true);
+          setFollowersCount(res.data.followersCount);
+        }
+      }
+    } catch (err) {
+      console.error("Follow Toggle Error:", err);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearchValue(value);
@@ -98,6 +170,7 @@ const Navbar = () => {
 
   return (
     <div className="nav-container">
+      {/* ================= LEFT : Logo + Location + Search ================= */}
       <div className="nav-left">
         <Link to="/" style={{ textDecoration: "none" }}>
           <img className="logo-text" src={shyam} alt="Logo" />
@@ -131,7 +204,35 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* ================= RIGHT : Products + Follow | Account | Cart ================= */}
       <div className="nav-right">
+        {/* ✅ TOTAL PRODUCTS + FOLLOW — right side */}
+        <div className="store-stats">
+          <span className="total-products-badge">
+            <strong>{totalProducts}</strong> Products
+          </span>
+
+          <span className="stats-divider" />
+
+          <button
+            className={`follow-btn ${isFollowing ? "following" : ""}`}
+            onClick={handleFollowToggle}
+            disabled={followLoading}
+          >
+            {isFollowing ? (
+              <>
+                <FaCheck size={11} /> Following
+              </>
+            ) : (
+              <>
+                <FaPlus size={11} /> Follow
+              </>
+            )}
+          </button>
+
+          <span className="followers-count">{followersCount} followers</span>
+        </div>
+
         <ul className="nav-list">
           {isAuthenticated ? (
             <li

@@ -30,9 +30,19 @@ const DynamicSlider = () => {
       if (sliderRes.status === "fulfilled") {
         const banners = sliderRes.value.data?.sliders || sliderRes.value.data?.data || [];
 
+        // const activeBanners = (Array.isArray(banners) ? banners : [])
+        //   .filter((b) => (b.status === "Active" || b.status === "active") && !b.category)
+        //   .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
         const activeBanners = (Array.isArray(banners) ? banners : [])
           .filter((b) => (b.status === "Active" || b.status === "active") && !b.category)
-          .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+          // ✅ sortOrder se arrange hoga (drag-drop wala order),
+          //    same sortOrder par naya slider pehle
+          .sort(
+            (a, b) =>
+              (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
+              new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+          );
 
         sliderSlides = activeBanners
           .map((b) => ({
