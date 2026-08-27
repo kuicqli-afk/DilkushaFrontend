@@ -352,6 +352,57 @@
   background-color: #fff5f5;
 }
 
+
+.store-stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 12px;
+}
+
+.total-products-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #444;
+  white-space: nowrap;
+}
+
+.follow-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #ff6b6b;
+  background: #ff6b6b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.follow-btn:hover {
+  opacity: 0.9;
+}
+
+.follow-btn.following {
+  background: #fff;
+  color: #ff6b6b;
+}
+
+.follow-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.followers-count {
+  font-size: 11px;
+  color: #888;
+  white-space: nowrap;
+}
+
 /* ================= RESPONSIVE ================= */
 
 @media (max-width: 768px) {
