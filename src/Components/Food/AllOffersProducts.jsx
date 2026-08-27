@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Food.css";
-
+import Category from "../Category/Category";
 import Open from "../../assets/Open.png";
 import Close from "../../assets/CLOSE.png";
 import RedArrow from "../../assets/NON VEG.png";
@@ -20,6 +20,7 @@ import "swiper/css";
 import "../Slider/Slider.css"; // 🆕 same CSS jo main homepage slider use karta hai
 
 import { useCart } from "../../Context/CartContext";
+
 
 const API_URL = "https://shyamfoodbackend.onrender.com";
 
@@ -189,7 +190,7 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
     return (
         <>
             <OfferBanner />
-
+            <Category />
             <div className="food-container">
                 <div className="food-text">
                     {/* <h1>{offerBanner?.title || formatTitle(slug)}</h1> */}

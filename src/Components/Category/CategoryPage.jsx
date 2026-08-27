@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 
 import Slider from "../Slider/Slider";
+import ViewAllSlider from "../Slider/ViewAllSlider"; // ✅ NEW — category-specific banner
 import SubCategorySlider from "./SubCategroySlider";
 import MaidaItemsAll from "../ViewAll/MaidaItemsAll";
 import Category from "./Category";
@@ -14,18 +15,25 @@ function CategoryPage() {
 
   return (
     <div>
-      {isAll && <Slider />}
 
-      {/* ✅ NEW — Category list ab har View All / Category page pe dikhega */}
+      {isAll ? (
+        <Slider />
+      ) : (
+        <ViewAllSlider category={categoryCode} />
+      )}
+
+
       <Category onSelectCategory={setSelectedCategory} />
 
-      {/* Subcategory only when NOT all */}
+
       {!isAll && <SubCategorySlider categoryCode={categoryCode} />}
+
 
       <MaidaItemsAll
         categoryCode={categoryCode}
         subCategoryCode={subCategoryCode}
         isAll={isAll}
+        showBanner={false}
       />
     </div>
   );

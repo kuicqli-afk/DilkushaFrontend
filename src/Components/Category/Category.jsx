@@ -58,14 +58,7 @@ const Category = ({ onSelectCategory }) => {
     }
 
     const slug = getSlug(item.name);
-
-    if (location.pathname === "/") {
-      // ✅ already homepage pe hai — direct scroll
-      scrollToSection(slug);
-    } else {
-      // ✅ kahi aur page pe hai — pehle home bhejo, phir scroll
-      navigate("/", { state: { scrollTo: slug } });
-    }
+    navigate(`/category/${encodeURIComponent(item.name)}`);
   };
 
   if (loading) {

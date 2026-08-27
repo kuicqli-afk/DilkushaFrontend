@@ -22,11 +22,12 @@
 .food-card-grid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
-  gap: 30px; 
+  gap: 30px;
   row-gap: 60px;
   margin-bottom: 25px;
   /* overflow: hidden; */
 }
+
 .delivery-badge {
   display: inline-block;
   font-size: 13px;
@@ -101,7 +102,7 @@
 
 
 .swiper-wrapper {
-  padding-top: 25px;
+  padding-top: 70px;
   padding-bottom: 35px;
   margin: 0;
 }
@@ -129,10 +130,10 @@
 
 .food-image {
   width: 100%;
-  height: 340px; 
+  height: 340px;
   object-fit: cover;
   /* border-radius: 18px 18px 0 0; */
-    border-radius: 18px;
+  border-radius: 18px;
 }
 
 .top-icon {
@@ -240,14 +241,14 @@
 .food-rating {
   display: flex;
   align-items: center;
-  gap: 8px;                 
+  gap: 8px;
   margin-top: 8px;
   flex-wrap: nowrap;
 }
 
 /* STAR ICON */
 .food-rating img {
-  width: 23px;             
+  width: 23px;
   height: 23px;
 }
 
@@ -256,7 +257,7 @@
   display: flex;
   align-items: center;
   gap: 2px;
-  font-size: 23px;          
+  font-size: 23px;
   font-weight: 600;
   margin: 0;
 }
@@ -272,7 +273,7 @@
   margin-left: 10px;
   font-size: 13px;
   color: #777;
-  white-space: nowrap;      
+  white-space: nowrap;
 }
 
 
@@ -281,8 +282,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-left: -10px;   
-  margin-right: -10px;  
+  margin-left: -10px;
+  margin-right: -10px;
 
 }
 
@@ -297,7 +298,7 @@
 }
 
 .add-btn {
- 
+
   display: flex;
   align-items: center;
   background: #e11c1c;
@@ -306,9 +307,11 @@
   padding: 10px 18px;
 
 }
-.add{
+
+.add {
   margin-right: -50px;
 }
+
 .add-btn button {
   background: transparent;
   border: none;
@@ -316,8 +319,9 @@
   font-size: 16px;
   cursor: pointer;
 }
+
 .add-btn span {
-  width: 42px;         
+  width: 42px;
   text-align: center;
   display: inline-block;
   font-size: 14px;
@@ -431,7 +435,7 @@
 /* ================================
    VEG → GREEN
 ================================ */
-.toggle span:nth-child(1).active ~ .slider {
+.toggle span:nth-child(1).active~.slider {
   transform: translateX(0%);
   background: linear-gradient(135deg, #2ecc71, #27ae60);
   box-shadow: 0 6px 14px rgba(46, 204, 113, 0.35);
@@ -440,7 +444,7 @@
 /* ================================
    NON-VEG → RED
 ================================ */
-.toggle span:nth-child(2).active ~ .slider {
+.toggle span:nth-child(2).active~.slider {
   transform: translateX(100%);
   background: linear-gradient(135deg, #e74c3c, #c0392b);
   box-shadow: 0 6px 14px rgba(231, 76, 60, 0.35);
@@ -449,11 +453,12 @@
 /* ================================
    ALL → ORANGE / BRAND
 ================================ */
-.toggle span:nth-child(3).active ~ .slider {
+.toggle span:nth-child(3).active~.slider {
   transform: translateX(200%);
   background: linear-gradient(135deg, #ff7a18, #ff3d00);
   box-shadow: 0 6px 14px rgba(255, 122, 24, 0.35);
 }
+
 .filters-header {
   display: flex;
   align-items: center;
@@ -499,6 +504,7 @@
     padding: 5px 10px;
   }
 }
+
 /* ==========================
    Dropdown Styles
 ========================== */
@@ -510,7 +516,7 @@
 }
 
 select {
-  padding: 0.5rem 1rem; 
+  padding: 0.5rem 1rem;
   padding-right: 2.5rem;
   border-radius: 8px;
   border: 1px solid #ccc;
@@ -518,7 +524,8 @@ select {
   font-size: 0.95rem;
   cursor: pointer;
   min-width: 140px;
-  appearance: none; /* hide default arrow */
+  appearance: none;
+  /* hide default arrow */
   -webkit-appearance: none;
   -moz-appearance: none;
   background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='12' viewBox='0 0 24 24' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
@@ -539,36 +546,42 @@ select:focus {
 }
 
 /* Optional: add spacing between selects */
-.select + .select2,
-.select2 + .cuising {
+.select+.select2,
+.select2+.cuising {
   margin-left: 1rem;
 }
 
 /* --- Slot popup overlay --- */
 .slot-popup-overlay {
-  position: absolute;        /* position above the image */
+  position: absolute;
+  /* position above the image */
   top: 0;
   left: 0;
-  
+
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* semi-transparent dark background */
+  background: rgba(0, 0, 0, 0.5);
+  /* semi-transparent dark background */
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 20;              /* above all other card elements */
-  border-radius: 10px;       /* match card corners */
+  z-index: 20;
+  /* above all other card elements */
+  border-radius: 10px;
+  /* match card corners */
 }
 
 /* --- Slot popup box --- */
 .slot-popup-content {
-  background: #fff;          /* white popup */
+  background: #fff;
+  /* white popup */
   padding: 20px;
   border-radius: 12px;
   width: 80%;
   max-width: 250px;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); /* soft shadow */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  /* soft shadow */
 }
 
 /* --- Slot list --- */
@@ -588,7 +601,8 @@ select:focus {
 /* --- Hover / Selected slot --- */
 .slot-popup-content ul li:hover,
 .slot-popup-content ul li.selected {
-  background-color: #ff5722; /* highlight color */
+  background-color: #ff5722;
+  /* highlight color */
   color: #fff;
 }
 
@@ -597,7 +611,8 @@ select:focus {
   margin-top: 10px;
   padding: 8px 12px;
   border: none;
-  background-color: #ff5722; /* matching brand color */
+  background-color: #ff5722;
+  /* matching brand color */
   color: #fff;
   border-radius: 6px;
   cursor: pointer;
@@ -613,6 +628,7 @@ select:focus {
   background-color: #ccc;
   cursor: not-allowed;
 }
+
 .no-offers {
   grid-column: 1 / -1;
   display: flex;
@@ -632,10 +648,12 @@ select:focus {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .toggle {
     width: 100px;
     height: 50px;
   }
+
   select {
     min-width: 100%;
   }
@@ -644,12 +662,14 @@ select:focus {
 
 /* Optional: responsive */
 @media (max-width: 768px) {
+
   .select select,
   .select2 select,
   .cuising select {
     width: 100%;
   }
 }
+
 @media (max-width: 480px) {
   .food-rating h3 {
     font-size: 13px;
