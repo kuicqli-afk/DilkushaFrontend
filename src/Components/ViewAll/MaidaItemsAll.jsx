@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
 import { useNavigate, useParams } from "react-router-dom";
 import { useCart } from "../../Context/CartContext";
-import AdsSlider from "../Slider/AdsSlider"; // ✅ FIX: category-wise banner ke liye AdsSlider chahiye (Slider1.jsx exist nahi karta, AdsSlider.jsx hi wahi kaam karta hai)
+import ViewAllSlider from "../Slider/ViewAllSlider";
 
 import Open from "../../assets/Open.png";
 import Close from "../../assets/CLOSE.png";
@@ -17,20 +16,22 @@ import { VscEye } from "react-icons/vsc";
 import { FaRegHeart } from "react-icons/fa";
 import { LiaStopwatchSolid } from "react-icons/lia";
 
+
 const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
 
 function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true }) {
     const navigate = useNavigate();
     const { cartItems, addToCart, updateQty, getCartKey } = useCart();
     const [openCardId, setOpenCardId] = useState(null);
-    const [selectedSlots, setSelectedSlots] = useState({});
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     const params = useParams();
-    const category = categoryCode ?? params.categoryCode ?? params.categoryName;
-    const subCategory = subCategoryCode ?? params.subCategoryCode ?? params.subCategoryName;
+
+    // Safely fallback across all potential route parameter names
+    const category = categoryCode ?? params.categoryCode ?? params.categoryName ?? params.category;
+    const subCategory = subCategoryCode ?? params.subCategoryCode ?? params.subCategoryName ?? params.subCategory;
 
     useEffect(() => {
         setLoading(true);
@@ -40,11 +41,9 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
         let responseKey = "data";
 
         if (!isAll && subCategory) {
-
             url = `${BASE_URL}/products/subcategory-products/${encodeURIComponent(subCategory)}`;
             responseKey = "products";
         } else if (!isAll && category) {
-
             url = `${BASE_URL}/products/category-products/${encodeURIComponent(category)}`;
             responseKey = "products";
         }
@@ -75,13 +74,12 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
     const placeOrder = (item) =>
         navigate("/order", { state: { item, category: category || "all" } });
 
-    // Banner sirf tab dikhao jab specific category/subcategory ho, aur parent (jaise CategoryPage) khud banner nahi dikha raha
     const bannerCategory = !isAll && showBanner ? (category || subCategory) : null;
 
     if (loading) {
         return (
             <>
-                {bannerCategory && <AdsSlider category={bannerCategory} />}
+                {bannerCategory && <ViewAllSlider category={bannerCategory} />}
                 <div className="food-container">
                     <p>Loading products...</p>
                 </div>
@@ -92,7 +90,7 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
     if (error) {
         return (
             <>
-                {bannerCategory && <AdsSlider category={bannerCategory} />}
+                {bannerCategory && <ViewAllSlider category={bannerCategory} />}
                 <div className="food-container">
                     <p>{error}</p>
                 </div>
@@ -103,7 +101,7 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
     if (!items.length) {
         return (
             <>
-                {bannerCategory && <AdsSlider category={bannerCategory} />}
+                {bannerCategory && <ViewAllSlider category={bannerCategory} />}
                 <div className="food-container">
                     <p>No products found.</p>
                 </div>
@@ -113,20 +111,16 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
 
     return (
         <>
-            {/* Sirf isi category ka banner — admin ne "Add Slider" mein jo category select ki thi wahi */}
-            {bannerCategory && <AdsSlider category={bannerCategory} />}
-
+            {bannerCategory && <ViewAllSlider category={bannerCategory} />}
             <div className="food-container">
                 <div id="mixnamkeen" className="food-text">
-                    <h1>{isAll ? "All Products" : category || subCategory}</h1>
+                    {/* <h1>{isAll ? "All Products" : category || subCategory}</h1> */}
                 </div>
 
                 <div className="food-card-grid">
                     {items.map((item) => (
                         <div key={item._id} className="food-card">
-
                             <div className="food-image-wrapper">
-
                                 {(item.video || item.video2) && (
                                     <div className="add-badge">Ads</div>
                                 )}

@@ -179,7 +179,7 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
             <>
                 <OfferBanner />
                 <div className="food-container">
-                    <div className="food-text"><h1>{offerBanner?.title || formatTitle(slug)}</h1></div>
+                    {/* <div className="food-text"><h1>{offerBanner?.title || formatTitle(slug)}</h1></div> */}
                     <p className="p-6 text-center text-sm">Loading products...</p>
                 </div>
             </>
@@ -192,7 +192,7 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
 
             <div className="food-container">
                 <div className="food-text">
-                    <h1>{offerBanner?.title || formatTitle(slug)}</h1>
+                    {/* <h1>{offerBanner?.title || formatTitle(slug)}</h1> */}
                 </div>
 
                 {filteredList.length === 0 ? (

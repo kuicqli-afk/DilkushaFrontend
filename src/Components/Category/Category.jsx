@@ -90,14 +90,7 @@ const Category = ({ onSelectCategory }) => {
     );
   }
 
-  const allCategoryItem = {
-    _id: "fixed-all-item",
-    name: "All",
-    code: "all",
-    isAll: true,
-  };
-
-  const displayList = [allCategoryItem, ...categories];
+  const displayList = categories;
 
   return (
     <section className="explore-menu" aria-label="Product Categories">

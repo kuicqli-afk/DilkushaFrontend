@@ -14,11 +14,11 @@ const AdsSlider = ({ category }) => {
   const trackRef = useRef(null);
   const isTransitioning = useRef(false);
 
-  // ✅ USI CATEGORY KE SLIDERS — admin wahi naam select karega
+  // ✅ USI CATEGORY KE SLIDERS — lekin sirf wahi jo admin ne "Show on Home" tick kiye hain
   const fetchSliders = async () => {
     try {
       const res = await axios.get(
-        `${API_URL}/api/sliders?category=${encodeURIComponent(category)}&status=Active`
+        `${API_URL}/api/sliders?category=${encodeURIComponent(category)}&status=Active&showOnHome=true`
       );
 
       const list = res.data?.data || res.data?.sliders || [];
