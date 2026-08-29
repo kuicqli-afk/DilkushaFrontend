@@ -50,9 +50,8 @@
 /* ================= MEDIA ================= */
 .food-images {
   width: 100%;
-  height: 340px;
+  height: 420px;
   object-fit: cover;
-  border-radius: 18px;
 }
 
 .food-video {
