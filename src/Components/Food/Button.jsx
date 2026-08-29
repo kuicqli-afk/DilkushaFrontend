@@ -14,7 +14,7 @@ function Button({
   return (
     <div className="filter-wrapper">
       {/* Veg / Non-Veg / All */}
-      <div className={`toggle ${filter}`}>
+      {/* <div className={`toggle ${filter}`}>
         <span
           className={filter === "veg" ? "active" : ""}
           onClick={() => setFilter("veg")}
@@ -34,7 +34,7 @@ function Button({
           All
         </span>
         <div className="slider"></div>
-      </div>
+      </div> */}
 
       {/* Sort By */}
       <div className="select">

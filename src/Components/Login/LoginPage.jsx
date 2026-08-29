@@ -197,6 +197,7 @@ const LoginPage = () => {
                   id="otp"
                   type="text"
                   placeholder="Enter OTP"
+                  maxLength={4}
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   required

@@ -396,7 +396,7 @@ export default function OrderHistory() {
 
   if (orders.length === 0) {
     return (
-      <div style={{ padding: "60px", textAlign: "center" }}>
+      <div style={{ padding: "119px", textAlign: "center" }}>
         <h2 style={{ fontSize: "18px", color: "#333" }}>No Orders Found</h2>
         <p style={{ fontSize: "13px", color: "#999", marginTop: "6px" }}>
           Looks like you haven't placed an order yet.
