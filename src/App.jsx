@@ -26,15 +26,14 @@ import Daliganj from "./Components/Pages/Daliganj.jsx";
 import Kalyanpur from "./Components/Pages/Kalyanpur.jsx";
 import CartPage from "./Components/Cart/Cart.jsx";
 import CheckoutPage from "./Components/CheckoutPage/CheckoutPage.jsx";
-import FeaturedListings from "./Components/FeaturedListings/FeaturedListings.jsx";
+
 import Button from "./Components/Food/Button.jsx";
 import Offers from "./Components/Food/Offers.jsx";
-import Combo from "./Components/Food/Combo.jsx";
-import Weekend from "./Components/Food/Weekend.jsx";
+
 import { ScrollToTopButton } from "./Components/ScrollToTopButton/ScrollToTopButton.jsx";
 import ScrollToTop from "./Components/ScrollToTopButton/ScrollToTop";
 
-import AllOffer from "./Components/Food/AllOffer.jsx";
+
 import AdsSlider from "./Components/Slider/AdsSlider.jsx";
 import OfferDetails from "./Components/Pages/OfferDetails.jsx";
 
@@ -59,7 +58,7 @@ import CakeAll from "./Components/ViewAll/CakeAll.jsx";
 import CookiesAll from "./Components/ViewAll/CookiesAll.jsx";
 import ItemsAll from "./Components/ViewAll/Items.jsx";
 import OffersAll from "./Components/ViewAll/OffersAll.jsx";
-import CombosAll from "./Components/ViewAll/CombosAll.jsx";
+
 import WeekendSpecial from "./Components/ViewAll/WeekendSpecial.jsx";
 import DiscountOffer from "./Components/DiscountOffer/DiscountOffer.jsx";
 import DynamicSlider from "./Components/Slider/DynamicSlider.jsx";
@@ -68,6 +67,7 @@ import CategoryPage from "./Components/Category/CategoryPage.jsx";
 import AllOffersProducts from "./Components/Food/AllOffersProducts.jsx";
 import OrderHistory from "./Components/CheckoutPage/OrderHistory.jsx";
 import ProfilePage from "./Components/Login/ProfilePage.jsx";
+import ItemsSectionProducts from "./Components/Food/ItemsSectionProducts.jsx";
 
 const BASE_URL = import.meta.env?.VITE_API_URL || "https://shyamfoodbackend.onrender.com/api";
 
@@ -93,7 +93,6 @@ function App() {
   );
 }
 
-// Layout Wrapper to render Navbar and Footer cleanly around child routes
 const MainLayout = () => (
   <>
     <ScrollToTop />
@@ -186,12 +185,12 @@ function AppContent() {
 
               <Items filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
               <Offers filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
-              <Combo filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
-              <Weekend filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
               <AppBanner />
             </>
           }
         />
+
+        <Route path="/section/:tag" element={<ItemsSectionProducts />} />
 
         {/* E-Commerce Operations */}
         <Route path="/order" element={<OrderPage />} />
@@ -273,7 +272,6 @@ function AppContent() {
         <Route path="/all-cookies" element={<><Slider /><CookiesAll /></>} />
         <Route path="/all-items" element={<><Slider /><ItemsAll /></>} />
         <Route path="/all-offers" element={<><Slider /><OffersAll /></>} />
-        <Route path="/all-combos" element={<><Slider /><CombosAll /></>} />
         <Route path="/weekend-specials" element={<><Slider /><WeekendSpecial /></>} />
       </Route>
     </Routes>

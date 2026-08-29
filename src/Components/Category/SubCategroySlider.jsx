@@ -25,26 +25,60 @@ const SubCategorySlider = ({ categoryCode, onSelectSubCategory }) => {
 
     setLoading(true);
 
-    axios
-      .get(`${BASE_URL}/category/categories`)
-      .then((res) => {
-        const categoryData = res.data.categories || res.data.data || res.data || [];
+    Promise.allSettled([
+      axios.get(`${BASE_URL}/category/categories`),
+      axios.get(`${BASE_URL}/subcategory/subcategories`),
+    ])
+      .then(([catRes, subRes]) => {
+        const categoryData =
+          catRes.status === "fulfilled"
+            ? catRes.value.data.categories || catRes.value.data.data || catRes.value.data || []
+            : [];
+        const subcategoryData =
+          subRes.status === "fulfilled"
+            ? subRes.value.data.subcategories || subRes.value.data.data || subRes.value.data || []
+            : [];
 
-        // ✅ FIX: categoryCode actually category ka NAME hai, ID nahi.
-        // Us naam se poora category object dhundo, phir uske andar embedded
-        // subcategories array nikalo (jaisa Product.jsx ke dropdown mein assume kiya tha)
+        // Find the matching category object
         const matchedCategory = categoryData.find(
-          (c) => (c.name || c.title) === categoryCode
+          (c) =>
+            (c.name && c.name.toLowerCase() === categoryCode.toLowerCase()) ||
+            (c.code && c.code.toLowerCase() === categoryCode.toLowerCase()) ||
+            c._id === categoryCode
         );
 
-        const rawSubs =
+        const matchedCatId = matchedCategory?._id || categoryCode;
+        const matchedCatName = matchedCategory?.name || categoryCode;
+
+        // Filter subcategories by parentCategoryId
+        const matchingSubs = subcategoryData.filter((sub) => {
+          if (sub.hidden) return false;
+          const parentId =
+            sub.parentCategoryId?._id || sub.parentCategoryId?.id || sub.parentCategoryId;
+          const parentName = sub.parentCategoryId?.name || sub.parentCategory;
+          return (
+            parentId === matchedCatId ||
+            (parentName && parentName.toLowerCase() === matchedCatName.toLowerCase())
+          );
+        });
+
+        // Also check any embedded subcategories if present
+        const embeddedSubs =
           matchedCategory?.subcategories ||
           matchedCategory?.subCategories ||
           matchedCategory?.subcategoryList ||
           [];
 
-        // Normalize: string array ho sakta hai, ya object array {name, image} bhi ho sakta hai
-        const normalized = rawSubs.map((s) =>
+        const combined = [...matchingSubs];
+        embeddedSubs.forEach((es) => {
+          const id = typeof es === "string" ? es : es._id || es.id || es.name;
+          if (!combined.some((s) => (s._id || s.id) === id)) {
+            combined.push(typeof es === "string" ? { _id: es, name: es, image: null } : es);
+          }
+        });
+
+        // Normalize
+        const normalized = combined.map((s) =>
           typeof s === "string"
             ? { _id: s, name: s, image: null }
             : { _id: s._id || s.name, name: s.name || s.title, image: s.image || null }

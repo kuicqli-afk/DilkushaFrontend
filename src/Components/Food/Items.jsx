@@ -1,5 +1,6 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { FaEye, FaRegHeart } from "react-icons/fa";
 import "./Food.css";
 
@@ -10,8 +11,6 @@ import GreenArrow from "../../assets/VEG.png";
 import SaveIcon from "../../assets/SaveIcon.png";
 import ShareIcon from "../../assets/ShareIcon.png";
 import StarIcon from "../../assets/StarIcon.png";
-
-import itemsData from "../../data/ItemsData";
 
 // ✅ Swiper
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -25,8 +24,15 @@ import { useCart } from "../../Context/CartContext";
 import { VscEye } from "react-icons/vsc";
 import { LiaStopwatchSolid } from "react-icons/lia";
 
+const API_URL = "https://shyamfoodbackend.onrender.com";
+
+// ✅ Is section ko dikhne wale products isi tag se pehchane jaate hain.
+// Admin "Add Product" form ke "Offer Tags" field mein "trending" likhega
+// to wo product yahan automatically dikh jayega — koi naya form/file nahi chahiye.
+const SECTION_TAG = "trending";
+
 /* ✅ helper: decide source (local mp4 OR online url) */
-const getVideoSource = (item) => item.videoUrl || item.video || "";
+const getVideoSource = (item) => item.video2 || item.video || "";
 
 const isMp4 = (src) => {
   if (!src) return false;
@@ -40,9 +46,26 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
 
   const { cartItems, addToCart, updateQty, getCartKey } = useCart();
 
-  const list = useMemo(() => itemsData, []);
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [openCardId, setOpenCardId] = useState(null);
   const [selectedSlots, setSelectedSlots] = useState({});
+
+  // ✅ FETCH — backend se "trending" tag wale products
+  useEffect(() => {
+    setLoading(true);
+    axios
+      .get(`${API_URL}/api/products?tag=${encodeURIComponent(SECTION_TAG)}`)
+      .then((res) => {
+        const products = res.data?.products || res.data?.data || [];
+        setList(Array.isArray(products) ? products : []);
+      })
+      .catch((err) => {
+        console.error("Fetch Trending Items Error:", err);
+        setList([]);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const filteredList = useMemo(() => {
     let result = [...list];
@@ -53,7 +76,7 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
     }
 
     if (filter === "nonveg") {
-      result = result.filter(item => item.type === "nonveg");
+      result = result.filter(item => item.type === "non-veg" || item.type === "nonveg");
     }
 
     // Price filter
@@ -73,11 +96,11 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
 
     // Sorting
     if (sortBy === "name") {
-      result.sort((a, b) => a.title.localeCompare(b.title));
+      result.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
     }
 
     if (sortBy === "rating") {
-      result.sort((a, b) => b.rating - a.rating);
+      result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     }
 
     if (sortBy === "priceLow") {
@@ -95,18 +118,18 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
   const getQty = (item) => {
     const key = getCartKey(item);
     const found = cartItems.find((x) => x.key === key);
-    return found ? found.quantity : ("ADD"); 
+    return found ? found.quantity : ("ADD");
   };
 
   const increase = (item) => {
-    addToCart(item, 1); // Always add 1 when increasing
+    addToCart(item, 1);
   };
 
   const decrease = (item) => {
     const key = getCartKey(item);
     const found = cartItems.find((x) => x.key === key);
-    if (!found) return; // Prevent going below 1 if item is not in the cart
-    updateQty(key, found.quantity - 1); // Decrease quantity, remove if 0
+    if (!found) return;
+    updateQty(key, found.quantity - 1);
   };
 
   const placeOrder = (item) =>
@@ -118,34 +141,21 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
       },
     });
 
-
+  // ✅ Backend se data load hone ya khaali hone par section silently hide (jaise MaidaItems mein hota hai)
+  if (loading) return null;
+  if (!filteredList.length) return null;
 
   return (
     <div id="hot-offers" className="food-container">
       <div className="food-text">
         <h1>Hot & Trending Food Offers</h1>
-      <p className="view-all" onClick={() => navigate("/all-items")}>View all</p>
+        <p className="view-all" onClick={() => navigate(`/section/${SECTION_TAG}`)}>View all</p>
       </div>
-      {/* <div>
-        {filteredList.length === 0 && (
-          <p style={{
-            color: "#ff4d4f",
-            fontSize: "22px",
-            fontWeight: "600",
-            paddingTop: "50px",
-            textAlign: "center",
-            fontFamily: "'Comic Sans MS', cursive, sans-serif"
-          }}>
-            {filter
-              ? `${filter === "veg" ? "Veg" : "Non-Veg"} Sweets Not Found`
-              : "No Sweets Found"}
-          </p>
-        )}
-      </div> */}
+
       <Swiper
         modules={[Autoplay]}
         onSwiper={(swiper) => (swiperRef.current = swiper)}
-        loop={true}
+        loop={filteredList.length > 5}
         speed={700}
         autoplay={{
           delay: 3000,
@@ -154,7 +164,6 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
         }}
 
         breakpoints={{
-
           300: {
             slidesPerView: 1,
             spaceBetween: 20,
@@ -175,15 +184,10 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
             slidesPerView: 2.5,
             spaceBetween: 18,
           },
-          //    900: {
-          //   slidesPerView: 3,
-          //   spaceBetween: 20,
-          // },
           1000: {
             slidesPerView: 3,
             spaceBetween: 18,
           },
-
           900: {
             slidesPerView: 2.5,
             spaceBetween: 23,
@@ -200,7 +204,6 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
             slidesPerView: 4,
             spaceBetween: 20,
           },
-
           1600: {
             slidesPerView: 5,
             spaceBetween: 16,
@@ -210,51 +213,17 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
         className="food-card-row"
       >
 
-
-        {filteredList.map((item, index) => {
+        {filteredList.map((item) => {
           const videoSrc = getVideoSource(item);
           const hasVideo = Boolean(videoSrc);
 
           return (
-            <SwiperSlide key={`${item.id}-${index}`}>
+            <SwiperSlide key={item._id}>
               <div className="food-card">
                 {/* ✅ ADD badge – only for video cards */}
                 {hasVideo && <div className="add-badge">Ads</div>}
 
                 <div className="food-image-wrapper">
-                  {openCardId === item.id && (
-                    <div className="slot-popup-overlay">
-                      <div className="slot-popup-content">
-                        <h4>Select a Slot</h4>
-                        <ul>
-                          {Array.isArray(item.slots) && item.slots.map((slot) => (
-                            <li
-                              key={slot}
-                              className={selectedSlots[item.id] === slot ? "selected" : ""}
-                              onClick={() =>
-                                setSelectedSlots({ ...selectedSlots, [item.id]: slot })
-                              }
-                            >
-                              {slot}
-                            </li>
-                          ))}
-
-                        </ul>
-                        <button
-                          onClick={() => {
-                            alert(
-                              `Order: ${item.title}\nSlot: ${selectedSlots[item.id]}\nPrice: ₹${item.price}`
-                            );
-                            setOpenCardId(null); // 👈 popup close
-                          }}
-                        // disabled={!selectedSlots[item.id]}
-                        >
-                          Set Time & Place Order
-                        </button>
-
-                      </div>
-                    </div>
-                  )}
                   {/* ✅ VIDEO/IMAGE SAME PLACE */}
                   {hasVideo ? (
                     isMp4(videoSrc) ? (
@@ -289,7 +258,7 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
                     />
                   )}
 
-                  <div className="view-eye"><VscEye style={{ fontSize: "22px", color: "white", marginBottom: "-2px", cursor: "pointer" }} />{item.view}</div>
+                  <div className="view-eye"><VscEye style={{ fontSize: "22px", color: "white", marginBottom: "-2px", cursor: "pointer" }} />{item.view || 0}</div>
                   <img
                     className="top-icon"
                     src={item.type === "veg" ? GreenArrow : RedArrow}
@@ -299,7 +268,7 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
 
                 <div className="food-info">
                   <div className="food-status-left">
-                    <img src={item.isOpen ? Open : Close} alt="" />
+                    <img src={item.isOpen === false ? Close : Open} alt="" />
                     <p>{item.status}</p>
 
                     <div className="food-status-right-icon">
@@ -307,7 +276,7 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
                         size={24}
                         color="#ff5722"
                         title="Select Slot"
-                        onClick={() => setOpenCardId(openCardId === item.id ? null : item.id)}
+                        onClick={() => setOpenCardId(openCardId === item._id ? null : item._id)}
                         style={{ marginTop: "-1px", cursor: "pointer" }}
                       />
 
@@ -326,25 +295,29 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
                     {item.title} <span>({item.portion})</span>
                   </h2>
 
-                  <p className="food-desc">{item.desc.slice(0, 70)}...</p>
+                  <p className="food-desc">{(item.desc || "").slice(0, 70)}...</p>
 
                   <div className="food-rating">
                     <img src={StarIcon} alt="" />
                     <h3>
-                      {item.rating} <span>({item.reviews})</span>
+                      {item.rating || 0} <span>({item.reviews || 0})</span>
                     </h3>
-                    <p>{item.orders} orders last week</p>
+                    <p>{item.orders || 0} orders last week</p>
                   </div>
 
                   <div className="food-price-row">
                     <span className="food-price">
                       <small className="Rs">₹</small> {item.price}
                     </span>
-                    <span className="offer">
-                      <small className="offer">₹</small>
-                      {item.offer}
-                    </span>
-                    <span className="food-off">{item.off}% OFF</span>
+                    {item.offer > 0 && (
+                      <span className="offer">
+                        <small className="offer">₹</small>
+                        {item.offer}
+                      </span>
+                    )}
+                    {item.off > 0 && (
+                      <span className="food-off">{item.off}% OFF</span>
+                    )}
                   </div>
 
                   <div className="food-actions">
@@ -354,10 +327,6 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
                     >
                       Place order
                     </button>
-
-                    {/* <div className="add" onClick={() => increase(item)}>
-                      <span>ADD</span>
-                    </div> */}
 
                     <div className="add-btn">
                       <button onClick={() => decrease(item)}>-</button>
@@ -371,7 +340,6 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
           );
         })}
       </Swiper>
-
       <div className="food-dots"></div>
     </div>
   );

@@ -16,19 +16,29 @@ const ViewAllSlider = ({ category }) => {
 
     const fetchSliders = async () => {
         try {
+            if (!category || category === "all") {
+                setSlides([]);
+                return;
+            }
+
             const res = await axios.get(
                 `${API_URL}/api/sliders?category=${encodeURIComponent(category)}&status=Active`
             );
-
             const list = res.data?.data || res.data?.sliders || [];
+            
+            // ✅ Only show active sliders specifically assigned to this category
             const active = list.filter(
-                (s) => s.status === "Active" || s.status === "active"
+                (s) =>
+                    (s.status === "Active" || s.status === "active") &&
+                    s.category &&
+                    s.category.toLowerCase().trim() === category.toLowerCase().trim()
             );
 
             setSlides(active);
             setIndex(0);
         } catch (err) {
             console.log("Fetch Category Slider Error:", err);
+            setSlides([]);
         }
     };
 

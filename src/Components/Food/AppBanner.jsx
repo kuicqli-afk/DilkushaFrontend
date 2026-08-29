@@ -8,7 +8,7 @@ function AppBanner() {
 
 
   return (
-    <div style={{height: "71vh", marginBottom: "-51px"}} className="container">
+    <div style={{ height: "53vh", marginBottom: "-51px" }} className="container">
       {/* Mobile App Images */}
       <div className="mobile-app">
         <img className="mo-aap" src={mobile} alt="Mobile App" />
