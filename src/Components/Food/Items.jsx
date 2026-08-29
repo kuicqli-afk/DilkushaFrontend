@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaEye, FaRegHeart } from "react-icons/fa";
+import { FaRegHeart } from "react-icons/fa";
 import "./Food.css";
 
 import Open from "../../assets/Open.png";
@@ -14,7 +14,7 @@ import StarIcon from "../../assets/StarIcon.png";
 
 // ✅ Swiper
 import { Swiper, SwiperSlide } from "swiper/react";
-import { FreeMode, Autoplay, Pagination } from "swiper/modules";
+import { Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/pagination";
@@ -26,11 +26,6 @@ import { LiaStopwatchSolid } from "react-icons/lia";
 
 const API_URL = "https://shyamfoodbackend.onrender.com";
 
-// ✅ Is section ko dikhne wale products isi tag se pehchane jaate hain.
-// Admin "Add Product" form ke "Offer Tags" field mein "trending" likhega
-// to wo product yahan automatically dikh jayega — koi naya form/file nahi chahiye.
-const SECTION_TAG = "trending";
-
 /* ✅ helper: decide source (local mp4 OR online url) */
 const getVideoSource = (item) => item.video2 || item.video || "";
 
@@ -39,8 +34,20 @@ const isMp4 = (src) => {
   return String(src).toLowerCase().includes(".mp4");
 };
 
-const Items = ({ filter, sortBy, price, cuisine }) => {
-
+// ✅ AB GENERIC HAI — MaidaItems.jsx jaisa pattern.
+// "tag" batata hai konsa product-tag fetch karna hai (jo admin "Add Product" form
+// ke checkbox se save hota hai: trending / combo / weekend-special / koi bhi naya tag).
+// "title" section ka heading text hai — jo dikhana hai wahi pass karo.
+// Isi ek component se saare homepage sections chalte hain, alag file nahi banani padti.
+const Items = ({
+  tag = "trending",
+  title = "Hot & Trending Food Offers",
+  sectionId,
+  filter,
+  sortBy,
+  price,
+  cuisine,
+}) => {
   const navigate = useNavigate();
   const swiperRef = useRef(null);
 
@@ -51,47 +58,44 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
   const [openCardId, setOpenCardId] = useState(null);
   const [selectedSlots, setSelectedSlots] = useState({});
 
-  // ✅ FETCH — backend se "trending" tag wale products
+  // ✅ FETCH — backend se isi "tag" wale products
   useEffect(() => {
+    if (!tag) return;
     setLoading(true);
     axios
-      .get(`${API_URL}/api/products?tag=${encodeURIComponent(SECTION_TAG)}`)
+      .get(`${API_URL}/api/products?tag=${encodeURIComponent(tag)}`)
       .then((res) => {
         const products = res.data?.products || res.data?.data || [];
         setList(Array.isArray(products) ? products : []);
       })
       .catch((err) => {
-        console.error("Fetch Trending Items Error:", err);
+        console.error(`Fetch "${tag}" Items Error:`, err);
         setList([]);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [tag]);
 
   const filteredList = useMemo(() => {
     let result = [...list];
 
     // Veg / Non-Veg filter
     if (filter === "veg") {
-      result = result.filter(item => item.type === "veg");
+      result = result.filter((item) => item.type === "veg");
     }
 
     if (filter === "nonveg") {
-      result = result.filter(item => item.type === "non-veg" || item.type === "nonveg");
+      result = result.filter((item) => item.type === "non-veg" || item.type === "nonveg");
     }
 
     // Price filter
     if (price) {
       const [min, max] = price.split("-").map(Number);
-      result = result.filter(item =>
-        max
-          ? item.price >= min && item.price <= max
-          : item.price >= min
-      );
+      result = result.filter((item) => (max ? item.price >= min && item.price <= max : item.price >= min));
     }
 
     // Cuisine filter
     if (cuisine) {
-      result = result.filter(item => item.cuisine === cuisine);
+      result = result.filter((item) => item.cuisine === cuisine);
     }
 
     // Sorting
@@ -118,7 +122,7 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
   const getQty = (item) => {
     const key = getCartKey(item);
     const found = cartItems.find((x) => x.key === key);
-    return found ? found.quantity : ("ADD");
+    return found ? found.quantity : "ADD";
   };
 
   const increase = (item) => {
@@ -137,19 +141,21 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
       state: {
         item,
         quantity: getQty(item),
-        category: "hot",
+        category: tag,
       },
     });
 
-  // ✅ Backend se data load hone ya khaali hone par section silently hide (jaise MaidaItems mein hota hai)
+  // ✅ Backend se data load hone ya khaali hone par section silently hide
   if (loading) return null;
   if (!filteredList.length) return null;
 
   return (
-    <div id="hot-offers" className="food-container">
+    <div id={sectionId || tag} className="food-container">
       <div className="food-text">
-        <h1>Hot & Trending Food Offers</h1>
-        <p className="view-all" onClick={() => navigate(`/section/${SECTION_TAG}`)}>View all</p>
+        <h1>{title}</h1>
+        <p className="view-all" onClick={() => navigate(`/section/${tag}`)}>
+          View all
+        </p>
       </div>
 
       <Swiper
@@ -162,57 +168,21 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
           disableOnInteraction: false,
           pauseOnMouseEnter: true,
         }}
-
         breakpoints={{
-          300: {
-            slidesPerView: 1,
-            spaceBetween: 20,
-          },
-          400: {
-            slidesPerView: 1.3,
-            spaceBetween: 20,
-          },
-          500: {
-            slidesPerView: 1.5,
-            spaceBetween: 20,
-          },
-          700: {
-            slidesPerView: 2,
-            spaceBetween: 18,
-          },
-          800: {
-            slidesPerView: 2.5,
-            spaceBetween: 18,
-          },
-          1000: {
-            slidesPerView: 3,
-            spaceBetween: 18,
-          },
-          900: {
-            slidesPerView: 2.5,
-            spaceBetween: 23,
-          },
-          1224: {
-            slidesPerView: 3.8,
-            spaceBetween: 23,
-          },
-          1300: {
-            slidesPerView: 4,
-            spaceBetween: 16,
-          },
-          1500: {
-            slidesPerView: 4,
-            spaceBetween: 20,
-          },
-          1600: {
-            slidesPerView: 5,
-            spaceBetween: 16,
-          }
+          300: { slidesPerView: 1, spaceBetween: 20 },
+          400: { slidesPerView: 1.3, spaceBetween: 20 },
+          500: { slidesPerView: 1.5, spaceBetween: 20 },
+          700: { slidesPerView: 2, spaceBetween: 18 },
+          800: { slidesPerView: 2.5, spaceBetween: 18 },
+          1000: { slidesPerView: 3, spaceBetween: 18 },
+          900: { slidesPerView: 2.5, spaceBetween: 23 },
+          1224: { slidesPerView: 3.8, spaceBetween: 23 },
+          1300: { slidesPerView: 4, spaceBetween: 16 },
+          1500: { slidesPerView: 4, spaceBetween: 20 },
+          1600: { slidesPerView: 5, spaceBetween: 16 },
         }}
-
         className="food-card-row"
       >
-
         {filteredList.map((item) => {
           const videoSrc = getVideoSource(item);
           const hasVideo = Boolean(videoSrc);
@@ -251,19 +221,14 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
                     )
                   ) : (
                     // 🖼 Image fallback
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="food-images"
-                    />
+                    <img src={item.image} alt={item.title} className="food-images" />
                   )}
 
-                  <div className="view-eye"><VscEye style={{ fontSize: "22px", color: "white", marginBottom: "-2px", cursor: "pointer" }} />{item.view || 0}</div>
-                  <img
-                    className="top-icon"
-                    src={item.type === "veg" ? GreenArrow : RedArrow}
-                    alt="food-type"
-                  />
+                  <div className="view-eye">
+                    <VscEye style={{ fontSize: "22px", color: "white", marginBottom: "-2px", cursor: "pointer" }} />
+                    {item.view || 0}
+                  </div>
+                  <img className="top-icon" src={item.type === "veg" ? GreenArrow : RedArrow} alt="food-type" />
                 </div>
 
                 <div className="food-info">
@@ -280,12 +245,7 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
                         style={{ marginTop: "-1px", cursor: "pointer" }}
                       />
 
-                      <FaRegHeart
-                        size={20}
-                        color=""
-                        title="Like"
-                        style={{ cursor: "pointer" }}
-                      />
+                      <FaRegHeart size={20} color="" title="Like" style={{ cursor: "pointer" }} />
                       <img src={SaveIcon} alt="Save" title="Book Mark" />
                       <img src={ShareIcon} alt="Share" title="Share" />
                     </div>
@@ -315,16 +275,11 @@ const Items = ({ filter, sortBy, price, cuisine }) => {
                         {item.offer}
                       </span>
                     )}
-                    {item.off > 0 && (
-                      <span className="food-off">{item.off}% OFF</span>
-                    )}
+                    {item.off > 0 && <span className="food-off">{item.off}% OFF</span>}
                   </div>
 
                   <div className="food-actions">
-                    <button
-                      className="order-btn"
-                      onClick={() => placeOrder(item)}
-                    >
+                    <button className="order-btn" onClick={() => placeOrder(item)}>
                       Place order
                     </button>
 

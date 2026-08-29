@@ -14,7 +14,7 @@ import SaveIcon from "../../assets/SaveIcon.png";
 import ShareIcon from "../../assets/ShareIcon.png";
 import StarIcon from "../../assets/StarIcon.png";
 
-import ViewAllSlider from "../Slider/ViewAllSlider";
+import Slider from "../Slider/Slider";
 import Category from "../Category/Category";
 import Button from "./Button";
 import { useCart } from "../../Context/CartContext";
@@ -146,7 +146,8 @@ function ItemsSectionProducts({ tag: propTag }) {
     return (
         <div>
             {/* 1. Category / Section Top Promotional Banner */}
-            <ViewAllSlider category={tag} />
+            {/* 1. Generic Home Page Slider */}
+            <Slider />
 
             {/* 2. Category Navigation Bar */}
             <Category />
@@ -184,43 +185,6 @@ function ItemsSectionProducts({ tag: propTag }) {
 
                             return (
                                 <div key={item._id} className="food-card">
-                                    {/* Slot Popup Modal */}
-                                    {openCardId === item._id && (
-                                        <div className="slot-popup-overlay">
-                                            <div className="slot-popup-content">
-                                                <h4>Select a Slot</h4>
-                                                <ul>
-                                                    {Array.isArray(item.slots) &&
-                                                        item.slots.map((slot) => (
-                                                            <li
-                                                                key={slot}
-                                                                className={
-                                                                    selectedSlots[item._id] === slot
-                                                                        ? "selected"
-                                                                        : ""
-                                                                }
-                                                                onClick={() =>
-                                                                    setSelectedSlots({
-                                                                        ...selectedSlots,
-                                                                        [item._id]: slot,
-                                                                    })
-                                                                }
-                                                            >
-                                                                {slot}
-                                                            </li>
-                                                        ))}
-                                                </ul>
-                                                <button
-                                                    onClick={() => {
-                                                        setOpenCardId(null);
-                                                        placeOrder(item);
-                                                    }}
-                                                >
-                                                    Set Time & Place Order
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
 
                                     {/* Image / Video Media Wrapper */}
                                     <div className="food-image-wrapper">
@@ -255,7 +219,6 @@ function ItemsSectionProducts({ tag: propTag }) {
                                                 className="food-images"
                                             />
                                         )}
-
                                         <div className="view-eye">
                                             <VscEye
                                                 style={{
@@ -267,7 +230,6 @@ function ItemsSectionProducts({ tag: propTag }) {
                                             />
                                             {item.view || 0}
                                         </div>
-
                                         <img
                                             className="top-icon"
                                             src={item.type === "veg" ? GreenArrow : RedArrow}
@@ -367,4 +329,5 @@ function ItemsSectionProducts({ tag: propTag }) {
         </div>
     );
 }
+
 export default ItemsSectionProducts;

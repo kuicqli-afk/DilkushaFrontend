@@ -183,7 +183,9 @@ function AppContent() {
                 </div>
               ))}
 
-              <Items filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
+              <Items tag="trending" title="Hot & Trending Food Offers" filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
+              <Items tag="combo" title="Combo Deals" filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
+              <Items tag="weekend-special" title="Weekend Special" filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
               <Offers filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
               <AppBanner />
             </>
