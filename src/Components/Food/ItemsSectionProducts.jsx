@@ -312,7 +312,6 @@ function ItemsSectionProducts({ tag: propTag }) {
                                             >
                                                 Place order
                                             </button>
-
                                             <div className="add-btn">
                                                 <button onClick={() => decrease(item)}>-</button>
                                                 <span>{getQty(item)}</span>

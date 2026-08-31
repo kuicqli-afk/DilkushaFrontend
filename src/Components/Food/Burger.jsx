@@ -104,22 +104,6 @@ const Burger = ({ filter, sortBy, price, cuisine }) => {
         <h1>Burgers</h1>
         <p className="view-all">View all</p>
       </div>
-      {/* <div>
-        {filteredList.length === 0 && (
-          <p style={{
-            color: "#ff4d4f",
-            fontSize: "22px",
-            fontWeight: "600",
-            paddingTop: "50px",
-            textAlign: "center",
-            fontFamily: "'Comic Sans MS', cursive, sans-serif"
-          }}>
-            {filter
-              ? `${filter === "veg" ? "Veg" : "Non-Veg"} Sweets Not Found`
-              : "No Sweets Found"}
-          </p>
-        )}
-      </div> */}
       <Swiper
         modules={[Autoplay]}
         onSwiper={(swiper) => (swiperRef.current = swiper)}
@@ -148,10 +132,7 @@ const Burger = ({ filter, sortBy, price, cuisine }) => {
             slidesPerView: 2.5,
             spaceBetween: 18,
           },
-          //    900: {
-          //   slidesPerView: 3,
-          //   spaceBetween: 20,
-          // },
+          
           1000: {
             slidesPerView: 3,
             spaceBetween: 18,
