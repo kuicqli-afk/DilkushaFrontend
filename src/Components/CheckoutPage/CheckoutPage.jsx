@@ -70,9 +70,120 @@ export default function CheckoutPage() {
   const [showCouponList, setShowCouponList] = useState(false);
   const [, setFetchingCoupons] = useState(false);
 
-  const DELIVERY = 49;
-  const SERVICE = 19;
+  // Delivery Fee States
+  const [deliveryFee, setDeliveryFee] = useState(49);
+  const [distanceInfo, setDistanceInfo] = useState(null);
+  const [deliveryLoading, setDeliveryLoading] = useState(false);
+  const [detectingLocation, setDetectingLocation] = useState(false);
+  const [userCoords, setUserCoords] = useState(null);
+  const [detectedAreaName, setDetectedAreaName] = useState("");
+
   const subtotal = totals?.subtotal || 0;
+
+  // Fetch Delivery Fee from backend
+  const fetchDeliveryFee = async (targetAddress, coords = null) => {
+    const addr = targetAddress || address;
+    const currentCoords = coords || userCoords;
+
+    const fullAddr = [addr.street, addr.apartment, addr.city, addr.state, addr.pincode]
+      .filter(Boolean)
+      .join(", ");
+
+    if (!fullAddr && !currentCoords) return;
+
+    setDeliveryLoading(true);
+    try {
+      const res = await axios.post(`${BASE_URL}/orders/calculate-delivery-fee`, {
+        address: fullAddr,
+        lat: currentCoords?.lat || null,
+        lng: currentCoords?.lng || null,
+      });
+
+      if (res.data?.success) {
+        setDeliveryFee(Number(res.data.deliveryFee) || 49);
+        setDistanceInfo({
+          distanceKm: res.data.distanceKm,
+          duration: res.data.durationText || "25 mins",
+        });
+      }
+    } catch (err) {
+      console.warn("Delivery fee calculation fallback:", err.message);
+    } finally {
+      setDeliveryLoading(false);
+    }
+  };
+
+  // Auto calculate when step is 2/3 or address / coordinates change
+  useEffect(() => {
+    const hasAddress =
+      (address.street && address.street.trim().length >= 3) ||
+      (address.city && address.city.trim().length >= 3) ||
+      (address.pincode && address.pincode.trim().length >= 4) ||
+      userCoords;
+
+    if (hasAddress) {
+      const debounceTimer = setTimeout(() => {
+        fetchDeliveryFee(address, userCoords);
+      }, 500);
+      return () => clearTimeout(debounceTimer);
+    }
+  }, [address.street, address.city, address.pincode, userCoords]);
+
+  // Request user current GPS location, reverse-geocode and auto-fill address form
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    setDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const coords = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        };
+        setUserCoords(coords);
+
+        // Reverse-geocode to auto-populate form fields
+        try {
+          const revRes = await axios.get(
+            `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json`,
+            { timeout: 4000 }
+          );
+          if (revRes.data && revRes.data.address) {
+            const rawAddr = revRes.data.address;
+            const area = rawAddr.suburb || rawAddr.neighbourhood || rawAddr.road || rawAddr.residential || "";
+            const city = rawAddr.city || rawAddr.town || rawAddr.county || "Lucknow";
+            const state = rawAddr.state || "Uttar Pradesh";
+            const pincode = rawAddr.postcode || "";
+
+            setAddress((prev) => ({
+              ...prev,
+              street: area || prev.street,
+              city: city || prev.city,
+              state: state || prev.state,
+              pincode: pincode || prev.pincode,
+            }));
+
+            if (area) {
+              setDetectedAreaName(`${area}, ${city}`);
+            }
+          }
+        } catch (revErr) {
+          console.warn("Reverse geocode fallback:", revErr.message);
+        } finally {
+          setDetectingLocation(false);
+        }
+
+        fetchDeliveryFee(address, coords);
+      },
+      (err) => {
+        console.warn("Geolocation permission denied or error:", err.message);
+        setDetectingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   // 1. Fetch available active coupons on mount
   useEffect(() => {
@@ -141,7 +252,8 @@ export default function CheckoutPage() {
   };
 
   const discount = calculateDiscount();
-  const total = Math.max(0, subtotal + DELIVERY + SERVICE - discount);
+  const foodTotal = Math.max(0, subtotal - discount);
+  const total = foodTotal; // Online Razorpay charges Food Total only
 
   // Apply Coupon (by Code string or Coupon Object)
   const applyCouponHandler = async (codeToApply) => {
@@ -219,10 +331,17 @@ export default function CheckoutPage() {
       };
     }),
     address,
+    dropLocation: {
+      address: [address.street, address.apartment, address.city, address.pincode].filter(Boolean).join(", "),
+      lat: userCoords?.lat || null,
+      lng: userCoords?.lng || null,
+    },
     paymentMethod,
-    delivery: DELIVERY,
-    service: SERVICE,
+    subtotal: subtotal,
+    delivery: deliveryFee,
     discount: discount,
+    total: foodTotal,
+    deliveryPayToDriver: true,
     couponCode: appliedCoupon?.code || null,
   });
 
@@ -376,7 +495,37 @@ export default function CheckoutPage() {
 
       {step === 2 && (
         <div className="checkout-left">
-          <h2>Shipping Address</h2>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
+            <div>
+              <h2 style={{ margin: 0 }}>Shipping Address</h2>
+              {detectedAreaName && (
+                <span style={{ fontSize: "12px", color: "#15803d", fontWeight: "600", display: "inline-flex", alignItems: "center", gap: "4px", marginTop: "4px" }}>
+                  📍 Auto-filled: {detectedAreaName} ✓
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={detectLocation}
+              disabled={detectingLocation}
+              style={{
+                background: detectingLocation ? "#f3f4f6" : "#fdf2f8",
+                border: "1px solid #f472b6",
+                color: "#880559",
+                padding: "8px 14px",
+                borderRadius: "8px",
+                fontSize: "12px",
+                fontWeight: "700",
+                cursor: detectingLocation ? "wait" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+              }}
+            >
+              {detectingLocation ? "⏳ Detecting GPS..." : (userCoords ? "📍 Location Auto-Filled ✓" : "📍 Auto-Detect Location (GPS)")}
+            </button>
+          </div>
 
           {user?.addresses && user.addresses.length > 1 && (
             <div className="form-group" style={{ marginBottom: "16px" }}>
@@ -486,14 +635,24 @@ export default function CheckoutPage() {
             </div>
 
             {paymentMethod === "cod" && (
-              <div className="cod-info">
-                <p>Pay in cash when your order is delivered. Additional ₹20 handling charges may apply.</p>
+              <div className="cod-info" style={{ background: "#fffbeb", border: "1px solid #fef3c7", padding: "12px 14px", borderRadius: "8px", marginTop: "12px" }}>
+                <p style={{ margin: 0, fontSize: "13px", color: "#92400e", fontWeight: "600" }}>
+                  💵 Cash on Delivery (Pay on Arrival)
+                </p>
+                <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#78350f" }}>
+                  Pay Food Total (₹{foodTotal.toFixed(2)}) + Delivery Charge (₹{deliveryFee}) directly to the delivery partner when your order arrives.
+                </p>
               </div>
             )}
 
             {(paymentMethod === "card" || paymentMethod === "upi") && (
-              <div className="cod-info">
-                <p>Continue to Payment "Pay ₹{total}" button , then Razorpay secure payment window will open.</p>
+              <div className="cod-info" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "12px 14px", borderRadius: "8px", marginTop: "12px" }}>
+                <p style={{ margin: 0, fontSize: "13px", color: "#166534", fontWeight: "700" }}>
+                  💳 Pay Food Order Online: ₹{foodTotal.toFixed(2)}
+                </p>
+                <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#15803d" }}>
+                  🛵 Delivery fee (₹{deliveryFee}) will be paid directly to the delivery partner in cash/UPI upon delivery.
+                </p>
               </div>
             )}
           </div>
@@ -524,6 +683,11 @@ export default function CheckoutPage() {
                 {orderDetails?.paymentMethod || paymentMethod}
               </strong>
             </div>
+            {/* 🆕 Delivery Fee row — Confirmation screen (end) tak dikhega */}
+            <div className="order-detail-row">
+              <span>🛵 Delivery Fee</span>
+              <strong>₹{Number(orderDetails?.delivery ?? deliveryFee).toFixed(2)}</strong>
+            </div>
             <div className="order-detail-row">
               <span>Amount Paid</span>
               <strong className="amount-highlight">
@@ -547,9 +711,37 @@ export default function CheckoutPage() {
         <div className="checkout-right">
           <h3>Your Order</h3>
 
-          <div className="price-row"><span>Subtotal</span><span>₹ {subtotal}</span></div>
-          <div className="price-row"><span>Delivery</span><span>₹ {DELIVERY}</span></div>
-          <div className="price-row"><span>Service</span><span>₹ {SERVICE}</span></div>
+          <div className="price-row"><span>Food Items Subtotal</span><span>₹ {subtotal.toFixed(2)}</span></div>
+
+          {discount > 0 && (
+            <div className="price-row discount-row" style={{ color: "#16a34a", fontWeight: "600" }}>
+              <span>Coupon Discount</span>
+              <span>- ₹ {discount.toFixed(2)}</span>
+            </div>
+          )}
+
+          {/* 🆕 DYNAMIC DELIVERY FEE CARD — sirf Address step (2) se aage dikhega, Cart (1) pe nahi */}
+          {step >= 2 && (
+            <div style={{
+              background: "#f0fdf4",
+              border: "1.5px dashed #86efac",
+              borderRadius: "8px",
+              padding: "10px 12px",
+              margin: "12px 0 8px 0",
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                <span style={{ fontSize: "12px", fontWeight: "700", color: "#166534" }}>
+                  🛵 Delivery Fee {distanceInfo ? `(${distanceInfo.distanceKm} km)` : ""}
+                </span>
+                <span style={{ fontSize: "14px", fontWeight: "800", color: "#166534" }}>
+                  {deliveryLoading ? "..." : `₹ ${deliveryFee}`}
+                </span>
+              </div>
+              <p style={{ margin: 0, fontSize: "11px", color: "#15803d" }}>
+                ⏱️ Est. {distanceInfo?.duration || "25 mins"} · <strong>Pay to Driver on Delivery</strong>
+              </p>
+            </div>
+          )}
 
           {/* DYNAMIC COUPON SECTION */}
           <div className="coupon-section" style={{ margin: "14px 0" }}>
@@ -601,7 +793,7 @@ export default function CheckoutPage() {
                         width: "100%",
                         display: "flex",
                         alignItems: "center",
-                        justify: "space-between",
+                        justifyContent: "space-between",
                         background: "#fff7ed",
                         border: "1px border #ffedd5",
                         color: "#c2410c",
@@ -641,7 +833,7 @@ export default function CheckoutPage() {
                               borderRadius: "6px",
                               display: "flex",
                               alignItems: "center",
-                              justify: "space-between",
+                              justifyContent: "space-between",
                             }}
                           >
                             <div>
@@ -688,16 +880,30 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          {discount > 0 && (
-            <div className="price-row discount-row" style={{ color: "#16a34a", fontWeight: "600" }}>
-              <span>Discount</span>
-              <span>- ₹ {discount.toFixed(2)}</span>
-            </div>
-          )}
-
           <hr />
 
-          <div className="price-total"><span>TO PAY</span><span>₹ {total.toFixed(2)}</span></div>
+          <div
+            className="price-total"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <div>
+              <span style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#1a1a1a" }}>
+                {paymentMethod === "cod" ? "TOTAL ORDER VALUE" : "PAY NOW (FOOD TOTAL)"}
+              </span>
+              <p style={{ margin: "3px 0 0 0", fontSize: "11px", color: "#64748b", fontWeight: 400 }}>
+                {paymentMethod === "cod"
+                  ? `Food ₹${foodTotal.toFixed(2)} + Delivery ₹${deliveryFee}`
+                  : `Delivery ₹${deliveryFee} to be paid to driver on arrival`}
+              </p>
+            </div>
+            <span style={{ fontSize: "20px", fontWeight: 800, color: "#880559", whiteSpace: "nowrap" }}>
+              ₹{paymentMethod === "cod" ? (foodTotal + deliveryFee).toFixed(2) : foodTotal.toFixed(2)}
+            </span>
+          </div>
 
           <div className="summary-action">
             {step === 1 && (
@@ -714,7 +920,11 @@ export default function CheckoutPage() {
 
             {step === 3 && (
               <button className="confirm-order-btn" onClick={handlePlaceOrder} disabled={placing}>
-                {placing ? "Processing..." : `Pay ₹ ${total.toFixed(2)}`}
+                {placing
+                  ? "Processing..."
+                  : paymentMethod === "cod"
+                    ? `Place Order (COD ₹${(foodTotal + deliveryFee).toFixed(2)})`
+                    : `Pay ₹ ${foodTotal.toFixed(2)} Online`}
               </button>
             )}
           </div>
@@ -723,6 +933,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-
-

@@ -12,7 +12,7 @@ import {
 } from "react-icons/ai";
 
 const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
-const POLL_INTERVAL = 15000;
+const POLL_INTERVAL = 10000;
 
 const getGuestId = () => {
   let guestId = localStorage.getItem("guest_id");
