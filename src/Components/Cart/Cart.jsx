@@ -1,12 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiArrowRight } from "react-icons/fi";
 import { useCart } from "../../Context/CartContext";
 import "./Cart.css";
 
+// Product images can arrive under different keys depending on where the item
+// was added from (images[], image, img, or nested inside `product`). Check
+// them all instead of assuming one shape.
+const getItemImage = (item) =>
+  item.images?.[0] ||
+  item.image ||
+  item.img ||
+  item.product?.images?.[0] ||
+  item.product?.image ||
+  "";
+
 const Cart = () => {
   const navigate = useNavigate();
   const { cartItems, updateQty, removeFromCart, totals, clearCart } = useCart();
+  const [brokenImages, setBrokenImages] = useState({});
+
+  const markImageBroken = (key) =>
+    setBrokenImages((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
 
   const handleCheckout = () => {
     const token = localStorage.getItem("token");
@@ -38,7 +53,9 @@ const Cart = () => {
     <div className="cart-wrapper">
       <div className="cart-header">
         <h2>Shopping Cart</h2>
-        <span className="item-count">{cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}</span>
+        <span className="item-count">
+          {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
+        </span>
       </div>
 
       <div className="cart-grid">
@@ -47,14 +64,22 @@ const Cart = () => {
           <div className="cart-list">
             {cartItems.map((item) => {
               const itemTotal = Number(item.price * item.quantity).toFixed(2);
+              const imgSrc = getItemImage(item);
+              const showImage = imgSrc && !brokenImages[item.key];
               return (
                 <div key={item.key} className="cart-item-card">
                   <div className="cart-product-info">
                     <div className="cart-image-wrapper">
-                      {item.images?.[0] ? (
-                        <img src={item.images[0]} alt={item.title} />
+                      {showImage ? (
+                        <img
+                          src={imgSrc}
+                          alt={item.title}
+                          onError={() => markImageBroken(item.key)}
+                        />
                       ) : (
-                        <div className="cart-image-placeholder" />
+                        <div className="cart-image-placeholder">
+                          <FiShoppingBag />
+                        </div>
                       )}
                     </div>
                     <div className="cart-details">

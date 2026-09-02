@@ -3,13 +3,31 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useCart } from "../../Context/CartContext";
 import { useAuth } from "../../Context/AuthContext";
-import { AiOutlineTag, AiOutlineCheck, AiOutlineDown, AiOutlineUp } from "react-icons/ai";
+import {
+  AiOutlineTag,
+  AiOutlineCheck,
+  AiOutlineDown,
+  AiOutlineUp,
+  AiOutlineShoppingCart,
+  AiOutlineEnvironment,
+  AiOutlineCreditCard,
+  AiOutlineCheckCircle,
+  AiOutlineMobile,
+  AiOutlineWallet,
+} from "react-icons/ai";
 import "./CheckoutPage.css";
 
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
   (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
   "https://shyamfoodbackend.onrender.com/api";
+
+const STEP_DEFINITIONS = [
+  { id: 1, label: "Cart", icon: AiOutlineShoppingCart },
+  { id: 2, label: "Address", icon: AiOutlineEnvironment },
+  { id: 3, label: "Payment", icon: AiOutlineCreditCard },
+  { id: 4, label: "Confirm", icon: AiOutlineCheckCircle },
+];
 
 const getGuestId = () => {
   let guestId = localStorage.getItem("guest_id");
@@ -463,10 +481,28 @@ export default function CheckoutPage() {
 
   const ProgressBar = () => (
     <div className="progress-bar">
-      <div className={step >= 1 ? "active" : ""} onClick={() => handleStepClick(1)}>Cart</div>
-      <div className={step >= 2 ? "active" : ""} onClick={() => handleStepClick(2)}>Address</div>
-      <div className={step >= 3 ? "active" : ""} onClick={() => handleStepClick(3)}>Payment</div>
-      <div className={step >= 4 ? "active" : ""} onClick={() => handleStepClick(4)}>Confirm</div>
+      {STEP_DEFINITIONS.map((s, idx) => {
+        const isComplete = step > s.id;
+        const isActive = step === s.id;
+        const Icon = s.icon;
+        return (
+          <React.Fragment key={s.id}>
+            <button
+              type="button"
+              className={`progress-bar__step ${isActive ? "is-active" : ""} ${isComplete ? "is-complete" : ""}`}
+              onClick={() => handleStepClick(s.id)}
+            >
+              <span className="progress-bar__icon">
+                {isComplete ? <AiOutlineCheck /> : <Icon />}
+              </span>
+              <span className="progress-bar__label">{s.label}</span>
+            </button>
+            {idx < STEP_DEFINITIONS.length - 1 && (
+              <span className={`progress-bar__connector ${step > s.id ? "is-complete" : ""}`} />
+            )}
+          </React.Fragment>
+        );
+      })}
     </div>
   );
 
@@ -476,18 +512,30 @@ export default function CheckoutPage() {
 
       {step === 1 && (
         <div className="checkout-left">
-          <h3>Your Cart</h3>
-          {cartItems.map((item) => (
-            <div key={item.key || item._id} className="checkout-item">
-              <div className="item-left">
-                <p className="item-title">{item.title}</p>
-                <p className="item-qty">Quantity: (x{item.quantity})</p>
+          <div className="panel-header">
+            <h2 className="panel-title">Your cart</h2>
+            <span className="panel-count">
+              {cartItems.length} item{cartItems.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+
+          <div className="cart-list">
+            {cartItems.map((item) => (
+              <div key={item.key || item._id} className="cart-item">
+                {item.image && (
+                  <img src={item.image} alt={item.title} className="cart-item__thumb" />
+                )}
+                <div className="cart-item__info">
+                  <p className="cart-item__title">{item.title}</p>
+                  <p className="cart-item__qty">Quantity: (x{item.quantity})</p>
+                </div>
+                <div className="cart-item__price">₹ {item.price * item.quantity}</div>
               </div>
-              <div className="item-right">₹ {item.price * item.quantity}</div>
-            </div>
-          ))}
-          <div className="cart-total">
-            <span>Total - </span>
+            ))}
+          </div>
+
+          <div className="cart-subtotal">
+            <span>Total</span>
             <span>₹ {subtotal}</span>
           </div>
         </div>
@@ -495,44 +543,35 @@ export default function CheckoutPage() {
 
       {step === 2 && (
         <div className="checkout-left">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
+          <div className="panel-header">
             <div>
-              <h2 style={{ margin: 0 }}>Shipping Address</h2>
+              <h2 className="panel-title">Shipping address</h2>
               {detectedAreaName && (
-                <span style={{ fontSize: "12px", color: "#15803d", fontWeight: "600", display: "inline-flex", alignItems: "center", gap: "4px", marginTop: "4px" }}>
-                  📍 Auto-filled: {detectedAreaName} ✓
-                </span>
+                <p className="panel-subtitle panel-subtitle--success">
+                  <AiOutlineCheck /> Auto-filled: {detectedAreaName}
+                </p>
               )}
             </div>
             <button
               type="button"
               onClick={detectLocation}
               disabled={detectingLocation}
-              style={{
-                background: detectingLocation ? "#f3f4f6" : "#fdf2f8",
-                border: "1px solid #f472b6",
-                color: "#880559",
-                padding: "8px 14px",
-                borderRadius: "8px",
-                fontSize: "12px",
-                fontWeight: "700",
-                cursor: detectingLocation ? "wait" : "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-              }}
+              className={`gps-button ${detectingLocation ? "is-loading" : ""}`}
             >
-              {detectingLocation ? "⏳ Detecting GPS..." : (userCoords ? "📍 Location Auto-Filled ✓" : "📍 Auto-Detect Location (GPS)")}
+              <AiOutlineEnvironment />
+              {detectingLocation
+                ? "Detecting GPS…"
+                : userCoords
+                  ? "Location auto-filled"
+                  : "Auto-detect location"}
             </button>
           </div>
 
           {user?.addresses && user.addresses.length > 1 && (
-            <div className="form-group" style={{ marginBottom: "16px" }}>
-              <label>Select Saved Address</label>
+            <div className="form-group">
+              <label>Select saved address</label>
               <select
-                className="address-select-dropdown"
-                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ccc" }}
+                className="saved-address-select"
                 onChange={(e) => {
                   const selected = user.addresses[e.target.value];
                   if (selected) {
@@ -558,51 +597,84 @@ export default function CheckoutPage() {
 
           <div className="form-group">
             <label>Full Name</label>
-            <input type="text" placeholder="Recipient's Full Name" value={address.name}
-              onChange={(e) => setAddress({ ...address, name: e.target.value })} />
+            <input
+              type="text"
+              placeholder="Recipient's Full Name"
+              value={address.name}
+              onChange={(e) => setAddress({ ...address, name: e.target.value })}
+            />
           </div>
 
           <div className="form-group">
             <label>Phone Number</label>
-            <input type="tel" placeholder="10-digit mobile number" maxLength={10} value={address.phone}
-              onChange={(e) => setAddress({ ...address, phone: e.target.value })} />
+            <input
+              type="tel"
+              placeholder="10-digit mobile number"
+              maxLength={10}
+              value={address.phone}
+              onChange={(e) => setAddress({ ...address, phone: e.target.value })}
+            />
           </div>
 
           <div className="form-group">
             <label>Street Address</label>
-            <input type="text" placeholder="House number and street name" value={address.street}
-              onChange={(e) => setAddress({ ...address, street: e.target.value })} />
+            <input
+              type="text"
+              placeholder="House number and street name"
+              value={address.street}
+              onChange={(e) => setAddress({ ...address, street: e.target.value })}
+            />
           </div>
 
           <div className="form-group">
             <label>Apartment, Suite, Unit (Optional)</label>
-            <input type="text" placeholder="Apartment, suite, unit, building, floor, etc." value={address.apartment || ""}
-              onChange={(e) => setAddress({ ...address, apartment: e.target.value })} />
+            <input
+              type="text"
+              placeholder="Apartment, suite, unit, building, floor, etc."
+              value={address.apartment || ""}
+              onChange={(e) => setAddress({ ...address, apartment: e.target.value })}
+            />
           </div>
 
           <div className="form-row">
             <div className="form-group">
               <label>City</label>
-              <input type="text" placeholder="City" value={address.city}
-                onChange={(e) => setAddress({ ...address, city: e.target.value })} />
+              <input
+                type="text"
+                placeholder="City"
+                value={address.city}
+                onChange={(e) => setAddress({ ...address, city: e.target.value })}
+              />
             </div>
             <div className="form-group">
               <label>State</label>
-              <input type="text" placeholder="State" value={address.state || ""}
-                onChange={(e) => setAddress({ ...address, state: e.target.value })} />
+              <input
+                type="text"
+                placeholder="State"
+                value={address.state || ""}
+                onChange={(e) => setAddress({ ...address, state: e.target.value })}
+              />
             </div>
           </div>
 
           <div className="form-row">
             <div className="form-group">
               <label>Postal Code</label>
-              <input type="text" placeholder="Postal Code" value={address.pincode}
-                onChange={(e) => setAddress({ ...address, pincode: e.target.value })} />
+              <input
+                type="text"
+                placeholder="Postal Code"
+                value={address.pincode}
+                onChange={(e) => setAddress({ ...address, pincode: e.target.value })}
+              />
             </div>
             <div className="form-group">
               <label>Country</label>
-              <input type="text" placeholder="Country" value={address.country || ""}
-                onChange={(e) => setAddress({ ...address, country: e.target.value })} />
+              <input
+                type="text"
+                placeholder="Country"
+                value={address.country || ""}
+                onChange={(e) => setAddress({ ...address, country: e.target.value })}
+              />
             </div>
           </div>
         </div>
@@ -610,48 +682,74 @@ export default function CheckoutPage() {
 
       {step === 3 && (
         <div className="checkout-left">
-          <h2>Select Payment Method</h2>
+          <h2 className="panel-title" style={{ paddingBottom: "22px" }}>
+            Select payment method
+          </h2>
 
-          {orderError && (
-            <div style={{ background: "#fee", border: "1px solid #f99", color: "#c00", padding: "10px 14px", borderRadius: "8px", fontSize: "13px", marginBottom: "14px" }}>
-              {orderError}
-            </div>
-          )}
+          {orderError && <div className="alert alert--error">{orderError}</div>}
 
           <div className="payment-methods">
-            <div className={`payment-option ${paymentMethod === "card" ? "active" : ""}`} onClick={() => setPaymentMethod("card")}>
+            <div
+              className={`payment-option ${paymentMethod === "card" ? "active" : ""}`}
+              onClick={() => setPaymentMethod("card")}
+            >
               <input type="radio" checked={paymentMethod === "card"} readOnly />
-              <span>Credit / Debit Card (via Razorpay)</span>
+              <span className="payment-option__icon">
+                <AiOutlineCreditCard />
+              </span>
+              <div className="payment-option__body">
+                <span className="payment-option__title">Credit / Debit Card</span>
+                <span className="payment-option__meta">via Razorpay</span>
+              </div>
+              <span className="payment-option__radio" />
             </div>
 
-            <div className={`payment-option ${paymentMethod === "upi" ? "active" : ""}`} onClick={() => setPaymentMethod("upi")}>
+            <div
+              className={`payment-option ${paymentMethod === "upi" ? "active" : ""}`}
+              onClick={() => setPaymentMethod("upi")}
+            >
               <input type="radio" checked={paymentMethod === "upi"} readOnly />
-              <span>UPI (via Razorpay)</span>
+              <span className="payment-option__icon">
+                <AiOutlineMobile />
+              </span>
+              <div className="payment-option__body">
+                <span className="payment-option__title">UPI</span>
+                <span className="payment-option__meta">via Razorpay</span>
+              </div>
+              <span className="payment-option__radio" />
             </div>
 
-            <div className={`payment-option ${paymentMethod === "cod" ? "active" : ""}`} onClick={() => setPaymentMethod("cod")}>
+            {/* <div
+              className={`payment-option ${paymentMethod === "cod" ? "active" : ""}`}
+              onClick={() => setPaymentMethod("cod")}
+            >
               <input type="radio" checked={paymentMethod === "cod"} readOnly />
-              <span>Cash on Delivery</span>
-            </div>
+              <span className="payment-option__icon">
+                <AiOutlineWallet />
+              </span>
+              <div className="payment-option__body">
+                <span className="payment-option__title">Cash on Delivery</span>
+                <span className="payment-option__meta">Pay when it arrives</span>
+              </div>
+              <span className="payment-option__radio" />
+            </div> */}
 
             {paymentMethod === "cod" && (
-              <div className="cod-info" style={{ background: "#fffbeb", border: "1px solid #fef3c7", padding: "12px 14px", borderRadius: "8px", marginTop: "12px" }}>
-                <p style={{ margin: 0, fontSize: "13px", color: "#92400e", fontWeight: "600" }}>
-                  💵 Cash on Delivery (Pay on Arrival)
-                </p>
-                <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#78350f" }}>
-                  Pay Food Total (₹{foodTotal.toFixed(2)}) + Delivery Charge (₹{deliveryFee}) directly to the delivery partner when your order arrives.
+              <div className="payment-note payment-note--warning">
+                <p>💵 Cash on Delivery (Pay on Arrival)</p>
+                <p>
+                  Pay Food Total (₹{foodTotal.toFixed(2)}) + Delivery Charge (₹{deliveryFee})
+                  directly to the delivery partner when your order arrives.
                 </p>
               </div>
             )}
 
             {(paymentMethod === "card" || paymentMethod === "upi") && (
-              <div className="cod-info" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "12px 14px", borderRadius: "8px", marginTop: "12px" }}>
-                <p style={{ margin: 0, fontSize: "13px", color: "#166534", fontWeight: "700" }}>
-                  💳 Pay Food Order Online: ₹{foodTotal.toFixed(2)}
-                </p>
-                <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#15803d" }}>
-                  🛵 Delivery fee (₹{deliveryFee}) will be paid directly to the delivery partner in cash/UPI upon delivery.
+              <div className="payment-note payment-note--success">
+                <p>💳 Pay Food Order Online: ₹{foodTotal.toFixed(2)}</p>
+                <p>
+                  🛵 Delivery fee (₹{deliveryFee}) will be paid directly to the delivery partner
+                  in cash/UPI upon delivery.
                 </p>
               </div>
             )}
@@ -683,7 +781,6 @@ export default function CheckoutPage() {
                 {orderDetails?.paymentMethod || paymentMethod}
               </strong>
             </div>
-            {/* 🆕 Delivery Fee row — Confirmation screen (end) tak dikhega */}
             <div className="order-detail-row">
               <span>🛵 Delivery Fee</span>
               <strong>₹{Number(orderDetails?.delivery ?? deliveryFee).toFixed(2)}</strong>
@@ -711,61 +808,50 @@ export default function CheckoutPage() {
         <div className="checkout-right">
           <h3>Your Order</h3>
 
-          <div className="price-row"><span>Food Items Subtotal</span><span>₹ {subtotal.toFixed(2)}</span></div>
+          <div className="price-row">
+            <span>Food Items Subtotal</span>
+            <span>₹ {subtotal.toFixed(2)}</span>
+          </div>
 
           {discount > 0 && (
-            <div className="price-row discount-row" style={{ color: "#16a34a", fontWeight: "600" }}>
+            <div className="price-row discount-row">
               <span>Coupon Discount</span>
               <span>- ₹ {discount.toFixed(2)}</span>
             </div>
           )}
 
-          {/* 🆕 DYNAMIC DELIVERY FEE CARD — sirf Address step (2) se aage dikhega, Cart (1) pe nahi */}
           {step >= 2 && (
-            <div style={{
-              background: "#f0fdf4",
-              border: "1.5px dashed #86efac",
-              borderRadius: "8px",
-              padding: "10px 12px",
-              margin: "12px 0 8px 0",
-            }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                <span style={{ fontSize: "12px", fontWeight: "700", color: "#166534" }}>
+            <div className="delivery-card">
+              <div className="delivery-card__row">
+                <span className="delivery-card__label">
                   🛵 Delivery Fee {distanceInfo ? `(${distanceInfo.distanceKm} km)` : ""}
                 </span>
-                <span style={{ fontSize: "14px", fontWeight: "800", color: "#166534" }}>
+                <span className="delivery-card__amount">
                   {deliveryLoading ? "..." : `₹ ${deliveryFee}`}
                 </span>
               </div>
-              <p style={{ margin: 0, fontSize: "11px", color: "#15803d" }}>
+              <p className="delivery-card__eta">
                 ⏱️ Est. {distanceInfo?.duration || "25 mins"} · <strong>Pay to Driver on Delivery</strong>
               </p>
             </div>
           )}
 
-          {/* DYNAMIC COUPON SECTION */}
-          <div className="coupon-section" style={{ margin: "14px 0" }}>
+          <div className="coupon-section">
             {appliedCoupon ? (
-              <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "10px 12px", borderRadius: "8px", display: "flex", items: "center", justifyContent: "space-between" }}>
+              <div className="coupon-applied">
                 <div>
-                  <span style={{ fontWeight: "bold", color: "#15803d", fontSize: "13px" }}>
-                    🏷️ {appliedCoupon.code}
+                  <span className="coupon-applied__code">
+                    <AiOutlineTag /> {appliedCoupon.code}
                   </span>
-                  <p style={{ fontSize: "11px", color: "#166534", margin: 0 }}>
-                    Coupon applied successfully!
-                  </p>
+                  <p className="coupon-applied__note">Coupon applied successfully!</p>
                 </div>
-                <button
-                  onClick={handleRemoveCoupon}
-                  style={{ background: "none", border: "none", color: "#dc2626", fontSize: "12px", cursor: "pointer", fontWeight: "bold" }}
-                >
+                <button onClick={handleRemoveCoupon} className="coupon-remove">
                   Remove
                 </button>
               </div>
             ) : (
               <>
-                {/* Coupon Input Row */}
-                <div className="price-row coupon-row">
+                <div className="coupon-row">
                   <input
                     type="text"
                     placeholder="Enter Coupon Code"
@@ -783,66 +869,29 @@ export default function CheckoutPage() {
                   </button>
                 </div>
 
-                {/* Available Coupons Dropdown / Accordion */}
                 {availableCoupons.length > 0 && (
-                  <div style={{ marginTop: "10px" }}>
+                  <div className="coupon-toggle-wrapper">
                     <button
                       type="button"
                       onClick={() => setShowCouponList((prev) => !prev)}
-                      style={{
-                        width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        background: "#fff7ed",
-                        border: "1px border #ffedd5",
-                        color: "#c2410c",
-                        padding: "8px 10px",
-                        borderRadius: "6px",
-                        fontSize: "12px",
-                        fontWeight: "600",
-                        cursor: "pointer",
-                      }}
+                      className="coupon-toggle"
                     >
-                      <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span>
                         <AiOutlineTag /> View Available Coupons ({availableCoupons.length})
                       </span>
                       {showCouponList ? <AiOutlineUp /> : <AiOutlineDown />}
                     </button>
 
-                    {/* Coupons Dropdown List */}
                     {showCouponList && (
-                      <div
-                        style={{
-                          marginTop: "8px",
-                          maxHeight: "180px",
-                          overflowY: "auto",
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "8px",
-                          paddingRight: "4px",
-                        }}
-                      >
+                      <div className="coupon-list">
                         {availableCoupons.map((c) => (
-                          <div
-                            key={c._id || c.code}
-                            style={{
-                              border: "1px dashed #fdba74",
-                              background: "#fff",
-                              padding: "8px 10px",
-                              borderRadius: "6px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                            }}
-                          >
+                          <div key={c._id || c.code} className="coupon-item">
                             <div>
-                              <span style={{ fontWeight: "700", color: "#9a3412", fontSize: "12px", fontFamily: "monospace" }}>
-                                {c.code}
-                              </span>
-                              <p style={{ margin: 0, fontSize: "10px", color: "#666" }}>
+                              <span className="coupon-item__code">{c.code}</span>
+                              <p className="coupon-item__desc">
                                 {c.discountType === "percentage"
-                                  ? `${c.discountValue}% OFF ${c.maxDiscountAmount ? `(Up to ₹${c.maxDiscountAmount})` : ""}`
+                                  ? `${c.discountValue}% OFF ${c.maxDiscountAmount ? `(Up to ₹${c.maxDiscountAmount})` : ""
+                                  }`
                                   : `₹${c.discountValue} OFF`}
                                 {c.minOrderAmount ? ` on orders above ₹${c.minOrderAmount}` : ""}
                               </p>
@@ -851,16 +900,7 @@ export default function CheckoutPage() {
                               type="button"
                               onClick={() => applyCouponHandler(c.code)}
                               disabled={couponLoading}
-                              style={{
-                                background: "#f97316",
-                                color: "#fff",
-                                border: "none",
-                                padding: "4px 8px",
-                                borderRadius: "4px",
-                                fontSize: "11px",
-                                fontWeight: "600",
-                                cursor: "pointer",
-                              }}
+                              className="coupon-item__apply"
                             >
                               Apply
                             </button>
@@ -873,47 +913,44 @@ export default function CheckoutPage() {
               </>
             )}
 
-            {couponError && (
-              <p style={{ color: "#dc2626", fontSize: "12px", marginTop: "6px", marginBottom: 0 }}>
-                {couponError}
-              </p>
-            )}
+            {couponError && <p className="coupon-error">{couponError}</p>}
           </div>
 
           <hr />
 
-          <div
-            className="price-total"
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
+          <div className="price-total">
             <div>
-              <span style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#1a1a1a" }}>
+              <span className="price-total__label">
                 {paymentMethod === "cod" ? "TOTAL ORDER VALUE" : "PAY NOW (FOOD TOTAL)"}
               </span>
-              <p style={{ margin: "3px 0 0 0", fontSize: "11px", color: "#64748b", fontWeight: 400 }}>
+              <p className="price-total__sub">
                 {paymentMethod === "cod"
                   ? `Food ₹${foodTotal.toFixed(2)} + Delivery ₹${deliveryFee}`
                   : `Delivery ₹${deliveryFee} to be paid to driver on arrival`}
               </p>
             </div>
-            <span style={{ fontSize: "20px", fontWeight: 800, color: "#880559", whiteSpace: "nowrap" }}>
+            <span className="price-total__amount">
               ₹{paymentMethod === "cod" ? (foodTotal + deliveryFee).toFixed(2) : foodTotal.toFixed(2)}
             </span>
           </div>
 
           <div className="summary-action">
             {step === 1 && (
-              <button className="confirm-order-btn" disabled={cartItems.length === 0} onClick={() => setStep(2)}>
+              <button
+                className="confirm-order-btn"
+                disabled={cartItems.length === 0}
+                onClick={() => setStep(2)}
+              >
                 Continue to Address
               </button>
             )}
 
             {step === 2 && (
-              <button className="confirm-order-btn" disabled={!isAddressValid()} onClick={() => setStep(3)}>
+              <button
+                className="confirm-order-btn"
+                disabled={!isAddressValid()}
+                onClick={() => setStep(3)}
+              >
                 Continue to Payment
               </button>
             )}
