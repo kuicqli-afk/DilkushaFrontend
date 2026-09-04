@@ -23,17 +23,7 @@ const PLACEHOLDERS = [
   "Search for sev",
 ];
 
-// ✅ Bina login ke unique device pehchan ke liye — ek baar generate hoke localStorage mein save rahega
-const getDeviceId = () => {
-  let id = localStorage.getItem("deviceId");
-  if (!id) {
-    id =
-      (crypto?.randomUUID && crypto.randomUUID()) ||
-      `dev-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    localStorage.setItem("deviceId", id);
-  }
-  return id;
-};
+
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -104,19 +94,30 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Follow status + Total Products fetch (page load par)
   useEffect(() => {
-    const deviceId = getDeviceId();
-
-    axios
-      .get(`${API_URL}/follow/status/${deviceId}`)
-      .then((res) => {
-        if (res.data.success) {
-          setIsFollowing(res.data.following);
-          setFollowersCount(res.data.followersCount);
-        }
-      })
-      .catch((err) => console.error("Follow Status Error:", err));
+    // sirf logged-in user ke liye follow status check karo
+    if (isAuthenticated && user?._id) {
+      axios
+        .get(`${API_URL}/follow/status/${user._id}`)
+        .then((res) => {
+          if (res.data.success) {
+            setIsFollowing(res.data.following);
+            setFollowersCount(res.data.followersCount);
+          }
+        })
+        .catch((err) => console.error("Follow Status Error:", err));
+    } else {
+      // guest ho to sirf total followers count dikhao, following state false rahegi
+      axios
+        .get(`${API_URL}/follow/count`)
+        .then((res) => {
+          if (res.data.success) {
+            setFollowersCount(res.data.followersCount);
+          }
+        })
+        .catch((err) => console.error("Follow Count Error:", err));
+      setIsFollowing(false);
+    }
 
     axios
       .get(`${API_URL}/products/count`)
@@ -126,23 +127,27 @@ const Navbar = () => {
         }
       })
       .catch((err) => console.error("Product Count Error:", err));
-  }, []);
+  }, [isAuthenticated, user]);
 
-  // ✅ Follow / Unfollow toggle
   const handleFollowToggle = async () => {
+    // 🆕 Agar login nahi hai, seedha login page pe bhej do
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
     if (followLoading) return;
     setFollowLoading(true);
-    const deviceId = getDeviceId();
 
     try {
       if (isFollowing) {
-        const res = await axios.delete(`${API_URL}/follow/${deviceId}`);
+        const res = await axios.delete(`${API_URL}/follow/${user._id}`);
         if (res.data.success) {
           setIsFollowing(false);
           setFollowersCount(res.data.followersCount);
         }
       } else {
-        const res = await axios.post(`${API_URL}/follow`, { deviceId });
+        const res = await axios.post(`${API_URL}/follow`, { userId: user._id });
         if (res.data.success) {
           setIsFollowing(true);
           setFollowersCount(res.data.followersCount);
