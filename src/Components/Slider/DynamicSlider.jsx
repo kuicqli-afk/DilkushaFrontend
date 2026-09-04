@@ -169,7 +169,6 @@ const DynamicSlider = () => {
     <div className="slider-container"
       onMouseEnter={() => (isHovered.current = true)}
       onMouseLeave={() => (isHovered.current = false)}
-
     >
       <div className="slider-track" ref={trackRef}>
         {loopSlides.map((slide, i) => (

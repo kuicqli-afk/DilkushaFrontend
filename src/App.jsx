@@ -159,7 +159,7 @@ function AppContent() {
             <>
               <DynamicSlider />
               <Category onSelectCategory={setSelectedCategory} />
-              <Button
+              {/* <Button
                 filter={filter}
                 setFilter={setFilter}
                 sortBy={sortBy}
@@ -168,7 +168,7 @@ function AppContent() {
                 setPrice={setPrice}
                 cuisine={cuisine}
                 setCuisine={setCuisine}
-              />
+              /> */}
               {/* <AllOffer /> */}
 
               {categories.map((item) => (
