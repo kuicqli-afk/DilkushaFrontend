@@ -8,7 +8,6 @@
 }
 
 .explore-menu-wrapper {
-
   padding-inline: clamp(12px, 4vw, 50px);
   margin: auto;
   overflow: hidden;
@@ -120,9 +119,6 @@
     padding-right: 0;
   }
 
-  /* .explore-menu-wrapper {
-    width: 100%;
-  } */
 }
 
 /* ================= SMALL DEVICES ================= */

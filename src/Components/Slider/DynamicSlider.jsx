@@ -15,7 +15,7 @@ const DynamicSlider = () => {
 
   const trackRef = useRef(null);
   const isTransitioning = useRef(false);
-
+  const isHovered = useRef(false);
   // ✅ FETCH — General Sliders + Offers, dono ko merge karke ek array banao
   const fetchBanners = async () => {
     try {
@@ -126,11 +126,10 @@ const DynamicSlider = () => {
 
   const loopSlides = [...slides, ...slides];
 
-  // ✅ AUTOPLAY — har 3 second
   useEffect(() => {
     if (slides.length === 0) return;
     const timer = setInterval(() => {
-      if (!isTransitioning.current) {
+      if (!isTransitioning.current && !isHovered.current) {
         isTransitioning.current = true;
         setIndex((prev) => prev + 1);
       }
@@ -167,7 +166,11 @@ const DynamicSlider = () => {
   if (slides.length === 0) return null;
 
   return (
-    <div className="slider-container">
+    <div className="slider-container"
+      onMouseEnter={() => (isHovered.current = true)}
+      onMouseLeave={() => (isHovered.current = false)}
+
+    >
       <div className="slider-track" ref={trackRef}>
         {loopSlides.map((slide, i) => (
           <div
