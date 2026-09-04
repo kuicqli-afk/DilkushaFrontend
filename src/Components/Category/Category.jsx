@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Autoplay, Pagination } from "swiper/modules";
 import { BiCategory } from "react-icons/bi";
@@ -14,7 +14,6 @@ const Category = ({ onSelectCategory }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -27,8 +26,6 @@ const Category = ({ onSelectCategory }) => {
         );
 
         const categoryData = res.data.categories || res.data.data || res.data || [];
-
-        // 🆕 sirf visible (non-hidden) categories hi customer ko dikhao
         const visibleCategories = categoryData.filter((cat) => !cat.hidden);
 
         setCategories(visibleCategories);
@@ -43,23 +40,10 @@ const Category = ({ onSelectCategory }) => {
     fetchCategories();
   }, []);
 
-  const getSlug = (name) => name.toLowerCase().replace(/\s+/g, "-");
-
-  const scrollToSection = (slug) => {
-    setTimeout(() => {
-      const el = document.getElementById(slug);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, 150);
-  };
-
   const handleCategoryClick = (item) => {
     if (onSelectCategory) {
       onSelectCategory(item);
     }
-
-    const slug = getSlug(item.name);
     navigate(`/category/${encodeURIComponent(item.name)}`);
   };
 
@@ -88,14 +72,21 @@ const Category = ({ onSelectCategory }) => {
   const displayList = categories;
 
   return (
-    <section className="explore-menu" aria-label="Product Categories">
+    <section style={{ marginTop: "45px" }} className="explore-menu" aria-label="Product Categories">
       <div className="explore-menu-wrapper">
         <Swiper
           modules={[FreeMode, Autoplay, Pagination]}
-          loop={displayList.length > 5}
-          speed={1000}
-          freeMode={{ enabled: true }}
-          autoplay={{ delay: 2500, disableOnInteraction: false }}
+          loop={displayList.length >= 8}
+          speed={800}
+          freeMode={{
+            enabled: true,
+            sticky: false,
+          }}
+          autoplay={{
+            delay: 3000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true
+          }}
           pagination={{
             el: ".category-dots",
             clickable: true,
@@ -103,14 +94,13 @@ const Category = ({ onSelectCategory }) => {
             bulletActiveClass: "active",
           }}
           breakpoints={{
-            0: { slidesPerView: 2.2, spaceBetween: 10 },
-            480: { slidesPerView: 3.2, spaceBetween: 12 },
-            768: { slidesPerView: 4.2, spaceBetween: 15 },
-            912: { slidesPerView: 5, spaceBetween: 15 },
-            1024: { slidesPerView: 6, spaceBetween: 18 },
-            1100: { slidesPerView: 7, spaceBetween: 18 },
-            1280: { slidesPerView: 9, spaceBetween: 18 },
-            1800: { slidesPerView: 9, spaceBetween: 18 },
+            320: { slidesPerView: 3.5, spaceBetween: 6 },
+            480: { slidesPerView: 4.5, spaceBetween: 8 },
+            640: { slidesPerView: 4.5, spaceBetween: 12 },
+            768: { slidesPerView: 6, spaceBetween: 16 },
+            1024: { slidesPerView: 7, spaceBetween: 18 },
+            1280: { slidesPerView: 8.5, spaceBetween: 20 },
+            1536: { slidesPerView: 10, spaceBetween: 22 },
           }}
         >
           {displayList.map((item) => (

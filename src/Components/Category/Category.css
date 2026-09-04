@@ -3,24 +3,23 @@
   position: relative;
   overflow: hidden;
   padding-left: 55px;
-  padding-right: 40px;
+  padding-right: 55px;
   background-color: white;
 }
 
 .explore-menu-wrapper {
-  width: 93%;
+
   padding-inline: clamp(12px, 4vw, 50px);
   margin: auto;
   overflow: hidden;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 /* ================= ITEM ================= */
 .explore-menu-list-item {
-  width: 150px;
-  flex-shrink: 0;
+
   text-align: center;
   cursor: pointer;
   display: flex;
@@ -107,9 +106,6 @@
     padding-right: 0;
   }
 
-  .explore-menu-wrapper {
-    width: 100%;
-  }
 }
 
 @media (min-width: 300px) {
@@ -124,16 +120,14 @@
     padding-right: 0;
   }
 
-  .explore-menu-wrapper {
+  /* .explore-menu-wrapper {
     width: 100%;
-  }
+  } */
 }
 
 /* ================= SMALL DEVICES ================= */
 @media (max-width: 768px) {
-  .explore-menu-list-item {
-    width: 120px;
-  }
+
 
   .explore-menu-list-item img,
   .icon-box {
