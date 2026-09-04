@@ -27,7 +27,11 @@ const Category = ({ onSelectCategory }) => {
         );
 
         const categoryData = res.data.categories || res.data.data || res.data || [];
-        setCategories(categoryData);
+
+        // 🆕 sirf visible (non-hidden) categories hi customer ko dikhao
+        const visibleCategories = categoryData.filter((cat) => !cat.hidden);
+
+        setCategories(visibleCategories);
       } catch (err) {
         console.error("API Error Details:", err.response || err.message || err);
         setError("Failed to load categories. Please try again later.");
@@ -39,11 +43,9 @@ const Category = ({ onSelectCategory }) => {
     fetchCategories();
   }, []);
 
-  // ✅ slug MaidaItems.jsx ke id={category.toLowerCase().replace(/\s+/g,"-")} se exactly match karega
   const getSlug = (name) => name.toLowerCase().replace(/\s+/g, "-");
 
   const scrollToSection = (slug) => {
-    // thoda delay taaki DOM render ho chuka ho (especially navigate ke baad)
     setTimeout(() => {
       const el = document.getElementById(slug);
       if (el) {
