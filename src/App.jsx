@@ -68,7 +68,7 @@ import AllOffersProducts from "./Components/Food/AllOffersProducts.jsx";
 import OrderHistory from "./Components/CheckoutPage/OrderHistory.jsx";
 import ProfilePage from "./Components/Login/ProfilePage.jsx";
 import ItemsSectionProducts from "./Components/Food/ItemsSectionProducts.jsx";
-import FeedbackWatcher from "./Components/FeedBack/FeedbackWatcher.jsx";
+import FeedbackWatcher from "./Components/Feedback/FeedbackWatcher.jsx";
 
 const BASE_URL = import.meta.env?.VITE_API_URL || "https://shyamfoodbackend.onrender.com/api";
 
