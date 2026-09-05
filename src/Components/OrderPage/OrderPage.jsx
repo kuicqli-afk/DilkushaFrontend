@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaRegHeart, FaStar } from "react-icons/fa";
@@ -16,7 +16,6 @@ import SaveIcon from "../../assets/SaveIcon.png";
 import ShareIcon from "../../assets/ShareIcon.png";
 import StarIcon from "../../assets/StarIcon.png";
 
-
 import MaidaItems from "../Food/MaidaItems.jsx";
 
 const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
@@ -30,13 +29,25 @@ const getGuestId = () => {
   return guestId;
 };
 
+// Helper function to scale portion/weight strings based on current quantity
+const parseAndScalePortion = (portionStr, quantity) => {
+  if (!portionStr) return "";
+  return portionStr.replace(/(\d+(?:\.\d+)?)\s*([a-zA-Z]+)/g, (match, num, unit) => {
+    const val = parseFloat(num);
+    if (isNaN(val)) return match;
+    const scaledVal = val * quantity;
+    const formatted = Number.isInteger(scaledVal) ? scaledVal : parseFloat(scaledVal.toFixed(2));
+    return `${formatted} ${unit}`;
+  });
+};
+
 const REVIEWS_PAGE_SIZE = 2;
 
 const OrderPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  const { cartItems, setItemQty, addToCart, getCartKey } = useCart();
+  const { cartItems, setItemQty, getCartKey } = useCart();
 
   const [restaurant, setRestaurant] = useState(null);
   const [restaurantLoading, setRestaurantLoading] = useState(true);
@@ -54,7 +65,6 @@ const OrderPage = () => {
 
   const [posting, setPosting] = useState(false);
 
-  // ✅ naye states — categories ka poora data (ID→name lookup ke liye) + sirf naam list
   const [categoriesData, setCategoriesData] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
 
@@ -71,26 +81,37 @@ const OrderPage = () => {
 
   const { item } = state;
 
-  // ✅ FIX: category ID ya object dono ko naam mein resolve karo, categoriesData lookup use karke
+  // Determine availability status (Matching MaidaItems pattern)
+  const isAvailable =
+    item.isAvailable !== undefined
+      ? item.isAvailable
+      : item.stock !== undefined
+        ? item.stock > 0
+        : item.status?.toLowerCase() !== "out of stock";
+
   const resolveCategoryName = (catValue) => {
     if (!catValue) return "";
-
     if (typeof catValue === "object") {
       return catValue.name || catValue.title || "";
     }
-
     const looksLikeObjectId = /^[a-f\d]{24}$/i.test(catValue);
-
     if (looksLikeObjectId) {
       const found = categoriesData.find((c) => c._id === catValue);
-      return found ? (found.name || found.title) : "";
+      return found ? found.name || found.title : "";
     }
-
     return catValue;
   };
 
   const categoryName = resolveCategoryName(item.category);
   const subcategoryName = resolveCategoryName(item.subcategory);
+
+  // Scaled price and portion calculations
+  const basePrice = item.price || 0;
+  const baseOffer = item.offer || 0;
+
+  const scaledPrice = basePrice * qty;
+  const scaledOffer = baseOffer * qty;
+  const scaledPortion = parseAndScalePortion(item.portion || "", qty);
 
   useEffect(() => {
     const key = getCartKey(item);
@@ -123,7 +144,6 @@ const OrderPage = () => {
       .finally(() => setRestaurantLoading(false));
   }, [item]);
 
-  // ✅ Categories fetch — ab poora object store karte hain, naam list bhi
   useEffect(() => {
     axios
       .get(`${BASE_URL}/category/categories`)
@@ -136,7 +156,7 @@ const OrderPage = () => {
       .catch((err) => console.error("Categories fetch error:", err));
   }, []);
 
-  const fetchReviews = () => {
+  const fetchReviews = useCallback(() => {
     if (!item._id) {
       setReviewsLoading(false);
       return;
@@ -155,21 +175,33 @@ const OrderPage = () => {
         setReviews([]);
       })
       .finally(() => setReviewsLoading(false));
-  };
+  }, [item._id]);
 
   useEffect(() => {
     fetchReviews();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item._id]);
+  }, [fetchReviews]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
 
-  const increase = () => setQty((p) => p + 1);
-  const decrease = () => setQty((p) => (p > 1 ? p - 1 : 1));
+  const handleQuantityChange = (newQty) => {
+    if (!isAvailable) return;
+    const targetQty = Math.max(1, newQty);
+    setQty(targetQty);
+    setItemQty(item, targetQty);
+  };
+
+  const increase = () => handleQuantityChange(qty + 1);
+  const decrease = () => handleQuantityChange(qty - 1);
+
+  const handleAddToCart = () => {
+    if (!isAvailable) return;
+    setItemQty(item, qty);
+  };
 
   const handlePlaceOrder = () => {
+    if (!isAvailable) return;
     setItemQty(item, qty);
     navigate("/cart");
   };
@@ -189,7 +221,7 @@ const OrderPage = () => {
         productId: item._id,
         name: newName.trim(),
         comment: newComment.trim(),
-        rating: newRating
+        rating: newRating,
       });
 
       setNewName("");
@@ -207,7 +239,7 @@ const OrderPage = () => {
   const handleLike = async (reviewId) => {
     try {
       const res = await axios.put(`${BASE_URL}/reviews/like/${reviewId}`, {
-        guestId: getGuestId()
+        guestId: getGuestId(),
       });
 
       setReviews((prev) =>
@@ -221,7 +253,7 @@ const OrderPage = () => {
   const handleDislike = async (reviewId) => {
     try {
       const res = await axios.put(`${BASE_URL}/reviews/dislike/${reviewId}`, {
-        guestId: getGuestId()
+        guestId: getGuestId(),
       });
 
       setReviews((prev) =>
@@ -269,7 +301,9 @@ const OrderPage = () => {
             <div className="order-details">
               <div className="order-status">
                 <img src={item.isOpen ? OpenIcon : CloseIcon} alt="" />
-                <p>{item.status}</p>
+                <p className={`stock-status ${isAvailable ? "text-green-600" : "text-red-600"}`}>
+                  {isAvailable ? "In Stock" : "Out of Stock"}
+                </p>
 
                 <div className="order-status-icons">
                   <FaRegHeart style={{ fontSize: "25px", marginTop: "2px", cursor: "pointer" }} />
@@ -279,7 +313,7 @@ const OrderPage = () => {
               </div>
 
               <h2 className="order-food-title">
-                {item.title} <span>({item.portion})</span>
+                {item.title} {scaledPortion && <span>({scaledPortion})</span>}
               </h2>
 
               <p className="food-desc1">{(item.desc || "").slice(0, 300)}</p>
@@ -294,30 +328,49 @@ const OrderPage = () => {
 
               <div className="order-price-row">
                 <small className="order-price">
-                  <span className="rs">₹</span> {item.price}
+                  <span className="rs">₹</span> {scaledPrice}
                 </small>
-                {item.offer > 0 && (
+                {baseOffer > 0 && (
                   <span className="offer1">
                     <small className="offer1">₹</small>
-                    {item.offer}
+                    {scaledOffer}
                   </span>
                 )}
                 {item.off > 0 && <span className="food-off">{item.off}% OFF</span>}
               </div>
 
               <div className="food-action">
-                <button className="order-btnn" onClick={handlePlaceOrder}>
-                  Place order
+                <button
+                  className="order-btnn"
+                  onClick={handlePlaceOrder}
+                  disabled={!isAvailable}
+                  style={{
+                    opacity: isAvailable ? 1 : 0.5,
+                    cursor: isAvailable ? "pointer" : "not-allowed",
+                  }}
+                >
+                  {isAvailable ? "Place order" : "Out of Stock"}
                 </button>
 
-                <div className="adds">
+                <div
+                  className="adds"
+                  onClick={handleAddToCart}
+                  style={{
+                    cursor: isAvailable ? "pointer" : "not-allowed",
+                    opacity: isAvailable ? 1 : 0.5,
+                  }}
+                >
                   <span>ADD</span>
                 </div>
 
-                <div className="add-btnn">
-                  <button onClick={decrease}>-</button>
+                <div className="add-btnn" style={{ opacity: isAvailable ? 1 : 0.5 }}>
+                  <button onClick={decrease} disabled={!isAvailable}>
+                    -
+                  </button>
                   <span>{qty}</span>
-                  <button onClick={increase}>+</button>
+                  <button onClick={increase} disabled={!isAvailable}>
+                    +
+                  </button>
                 </div>
               </div>
             </div>
@@ -476,7 +529,6 @@ const OrderPage = () => {
       {allCategories.map((cat) => (
         <MaidaItems key={cat} category={cat} excludeId={item._id} />
       ))}
-
     </>
   );
 };

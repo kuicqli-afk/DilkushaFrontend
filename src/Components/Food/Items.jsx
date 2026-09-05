@@ -1,11 +1,9 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaRegHeart } from "react-icons/fa";
+import { FaRegHeart, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import "./Food.css";
 
-import Open from "../../assets/Open.png";
-import Close from "../../assets/CLOSE.png";
 import RedArrow from "../../assets/NON VEG.png";
 import GreenArrow from "../../assets/VEG.png";
 import SaveIcon from "../../assets/SaveIcon.png";
@@ -34,11 +32,16 @@ const isMp4 = (src) => {
   return String(src).toLowerCase().includes(".mp4");
 };
 
-// ✅ AB GENERIC HAI — MaidaItems.jsx jaisa pattern.
-// "tag" batata hai konsa product-tag fetch karna hai (jo admin "Add Product" form
-// ke checkbox se save hota hai: trending / combo / weekend-special / koi bhi naya tag).
-// "title" section ka heading text hai — jo dikhana hai wahi pass karo.
-// Isi ek component se saare homepage sections chalte hain, alag file nahi banani padti.
+// Fisher-Yates shuffle — randomizes product order on page load/refresh
+const shuffleArray = (arr) => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
 const Items = ({
   tag = "trending",
   title = "Hot & Trending Food Offers",
@@ -66,7 +69,8 @@ const Items = ({
       .get(`${API_URL}/api/products?tag=${encodeURIComponent(tag)}`)
       .then((res) => {
         const products = res.data?.products || res.data?.data || [];
-        setList(Array.isArray(products) ? products : []);
+        const fetched = Array.isArray(products) ? products : [];
+        setList(shuffleArray(fetched));
       })
       .catch((err) => {
         console.error(`Fetch "${tag}" Items Error:`, err);
@@ -75,8 +79,21 @@ const Items = ({
       .finally(() => setLoading(false));
   }, [tag]);
 
+  // Stock helpers — item.quantity is the source of truth
+  const getStock = (item) => {
+    if (item.quantity === undefined || item.quantity === null || item.quantity === "") {
+      return Infinity;
+    }
+    return Number(item.quantity) || 0;
+  };
+
+  const isInStock = (item) => getStock(item) > 0;
+
   const filteredList = useMemo(() => {
     let result = [...list];
+
+    // Filter out draft items
+    result = result.filter((item) => !item.isDraft && item.status !== "Draft");
 
     // Veg / Non-Veg filter
     if (filter === "veg") {
@@ -90,7 +107,9 @@ const Items = ({
     // Price filter
     if (price) {
       const [min, max] = price.split("-").map(Number);
-      result = result.filter((item) => (max ? item.price >= min && item.price <= max : item.price >= min));
+      result = result.filter((item) =>
+        max ? item.price >= min && item.price <= max : item.price >= min
+      );
     }
 
     // Cuisine filter
@@ -126,6 +145,13 @@ const Items = ({
   };
 
   const increase = (item) => {
+    if (!isInStock(item)) return;
+
+    const stock = getStock(item);
+    const currentQty = getQty(item);
+    const currentNum = currentQty === "ADD" ? 0 : Number(currentQty);
+    if (currentNum >= stock) return;
+
     addToCart(item, 1);
   };
 
@@ -136,7 +162,9 @@ const Items = ({
     updateQty(key, found.quantity - 1);
   };
 
-  const placeOrder = (item) =>
+  const placeOrder = (item) => {
+    if (!isInStock(item)) return;
+
     navigate("/order", {
       state: {
         item,
@@ -144,8 +172,9 @@ const Items = ({
         category: tag,
       },
     });
+  };
 
-  // ✅ Backend se data load hone ya khaali hone par section silently hide
+  // Silently hide section if loading or empty
   if (loading) return null;
   if (!filteredList.length) return null;
 
@@ -187,19 +216,24 @@ const Items = ({
           const videoSrc = getVideoSource(item);
           const hasVideo = Boolean(videoSrc);
 
+          const stock = getStock(item);
+          const inStock = isInStock(item);
+          const cartQty = getQty(item);
+          const cartQtyNum = cartQty === "ADD" ? 0 : Number(cartQty);
+          const atMaxStock = stock !== Infinity && cartQtyNum >= stock;
+
           return (
             <SwiperSlide key={item._id}>
-              <div className="food-card">
+              <div className={`food-card${!inStock ? " out-of-stock-card" : ""}`}>
                 {/* ✅ ADD badge – only for video cards */}
                 {hasVideo && <div className="add-badge">Ads</div>}
 
                 <div className="food-image-wrapper">
-                  {/* ✅ VIDEO/IMAGE SAME PLACE */}
+                  {/* ✅ VIDEO/IMAGE SAME PLACE WITH BLUR ON OUT OF STOCK */}
                   {hasVideo ? (
                     isMp4(videoSrc) ? (
-                      // ▶️ MP4 (local or online mp4)
                       <video
-                        className="food-images"
+                        className={`food-images${!inStock ? " blurred" : ""}`}
                         src={videoSrc}
                         autoPlay
                         loop
@@ -209,9 +243,8 @@ const Items = ({
                         poster={item.image}
                       />
                     ) : (
-                      // 🌐 YouTube / Instagram embed
                       <iframe
-                        className="food-images"
+                        className={`food-images${!inStock ? " blurred" : ""}`}
                         src={videoSrc}
                         title={item.title}
                         frameBorder="0"
@@ -220,8 +253,11 @@ const Items = ({
                       />
                     )
                   ) : (
-                    // 🖼 Image fallback
-                    <img src={item.image} alt={item.title} className="food-images" />
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className={`food-images${!inStock ? " blurred" : ""}`}
+                    />
                   )}
 
                   <div className="view-eye">
@@ -232,9 +268,16 @@ const Items = ({
                 </div>
 
                 <div className="food-info">
+                  {/* Dynamic In Stock / Out of Stock Status */}
                   <div className="food-status-left">
-                    <img src={item.isOpen === false ? Close : Open} alt="" />
-                    <p>{item.status}</p>
+                    {inStock ? (
+                      <FaCheckCircle className="stock-icon in-stock-icon" title="In Stock" />
+                    ) : (
+                      <FaTimesCircle className="stock-icon out-stock-icon" title="Out of Stock" />
+                    )}
+                    <p className={inStock ? "stock-text-in" : "stock-text-out"}>
+                      {inStock ? "In Stock" : "Out of Stock"}
+                    </p>
 
                     <div className="food-status-right-icon">
                       <LiaStopwatchSolid
@@ -245,14 +288,20 @@ const Items = ({
                         style={{ marginTop: "-1px", cursor: "pointer" }}
                       />
 
-                      <FaRegHeart size={20} color="" title="Like" style={{ cursor: "pointer" }} />
+                      <FaRegHeart size={20} title="Like" style={{ cursor: "pointer" }} />
                       <img src={SaveIcon} alt="Save" title="Book Mark" />
                       <img src={ShareIcon} alt="Share" title="Share" />
                     </div>
                   </div>
 
                   <h2>
-                    {item.title} <span>({item.portion})</span>
+                    {item.title} {item.portion && <span>({item.portion})</span>}
+                    {item.weight && (
+                      <span className="food-weight-inline">
+                        {" "}
+                        {item.weight} {item.unit || "Gram"}
+                      </span>
+                    )}
                   </h2>
 
                   <p className="food-desc">{(item.desc || "").slice(0, 70)}...</p>
@@ -278,17 +327,25 @@ const Items = ({
                     {item.off > 0 && <span className="food-off">{item.off}% OFF</span>}
                   </div>
 
-                  <div className="food-actions">
-                    <button className="order-btn" onClick={() => placeOrder(item)}>
-                      Place order
-                    </button>
+                  {/* Actions only visible when item is in stock */}
+                  {inStock && (
+                    <div className="food-actions">
+                      <button className="order-btn" onClick={() => placeOrder(item)}>
+                        Place order
+                      </button>
 
-                    <div className="add-btn">
-                      <button onClick={() => decrease(item)}>-</button>
-                      <span>{getQty(item)}</span>
-                      <button onClick={() => increase(item)}>+</button>
+                      <div className="add-btn">
+                        <button onClick={() => decrease(item)}>-</button>
+                        <span>{cartQty}</span>
+                        <button
+                          onClick={() => increase(item)}
+                          disabled={atMaxStock}
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </SwiperSlide>
