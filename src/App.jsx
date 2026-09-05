@@ -72,6 +72,16 @@ import FeedbackWatcher from "./Components/Feedback/FeedbackWatcher.jsx";
 
 const BASE_URL = import.meta.env?.VITE_API_URL || "https://shyamfoodbackend.onrender.com/api";
 
+// 🆕 Fisher-Yates shuffle — randomizes category-section order on every fresh page load/refresh
+const shuffleArray = (arr) => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
 // Set global Axios Authorization header automatically if a token exists
 axios.interceptors.request.use(
   (config) => {
@@ -123,7 +133,7 @@ function AppContent() {
       .then((res) => {
         const categoryData = res.data.categories || res.data.data || res.data || [];
         const names = categoryData.map((cat) => cat.name || cat.title);
-        setCategories(names);
+        setCategories(shuffleArray(names)); // 🆕 random category-section order every page load
       })
       .catch((err) => console.error("Categories fetch error:", err));
   }, []);

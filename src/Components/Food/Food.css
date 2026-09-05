@@ -28,6 +28,24 @@
   /* overflow: hidden; */
 }
 
+.in-stock-icon {
+  color: #27ae60;
+}
+
+.out-stock-icon {
+  color: #e74c3c;
+}
+
+.stock-text-in {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.stock-text-out {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
 .delivery-badge {
   display: inline-block;
   font-size: 13px;

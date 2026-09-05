@@ -9,6 +9,16 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "./Category.css";
 
+// 🆕 Fisher-Yates shuffle — randomizes category order on every fresh page load/refresh
+const shuffleArray = (arr) => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
 const Category = ({ onSelectCategory }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +38,7 @@ const Category = ({ onSelectCategory }) => {
         const categoryData = res.data.categories || res.data.data || res.data || [];
         const visibleCategories = categoryData.filter((cat) => !cat.hidden);
 
-        setCategories(visibleCategories);
+        setCategories(shuffleArray(visibleCategories)); // 🆕 random category order every page load
       } catch (err) {
         console.error("API Error Details:", err.response || err.message || err);
         setError("Failed to load categories. Please try again later.");
