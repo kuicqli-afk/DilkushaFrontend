@@ -163,7 +163,18 @@ const MaidaItems = ({
         const stock = getStock(item);
         const currentQty = getQty(item);
         const currentNum = currentQty === "ADD" ? 0 : Number(currentQty);
-        if (currentNum >= stock) return;
+
+        // Alert on reaching maximum 10-item limit
+        if (currentNum >= 10) {
+            alert("You can add a maximum of 10 items.");
+            return;
+        }
+
+        // Alert on reaching maximum available stock
+        if (currentNum >= stock) {
+            alert(`Only ${stock} items available in stock.`);
+            return;
+        }
 
         addToCart(item, 1);
     };
@@ -233,12 +244,8 @@ const MaidaItems = ({
                 {finalList.map((item) => {
                     const stock = getStock(item);
                     const inStock = isInStock(item);
-                    const cartQty = getQty(item);
-                    const cartQtyNum = cartQty === "ADD" ? 0 : Number(cartQty);
-                    const atMaxStock = stock !== Infinity && cartQtyNum >= stock;
                     const isPublic = item.visibility !== "private";
 
-                    // Dynamic star calculation
                     const currentRating = Number(item.rating) || 0;
                     const ordersCount = item.orders ?? 0;
 
@@ -333,7 +340,6 @@ const MaidaItems = ({
                                         {(item.desc || "").slice(0, 60)}...
                                     </p>
 
-                                    {/* Updated Dynamic Rating & Orders Block */}
                                     <div className="food-rating">
                                         <span className="rating-number">{currentRating.toFixed(1)}</span>
                                         <span className="rating-stars">
@@ -390,7 +396,7 @@ const MaidaItems = ({
                                             <span>{getQty(item)}</span>
                                             <button
                                                 onClick={() => increase(item)}
-                                                disabled={!inStock || atMaxStock}
+                                                disabled={!inStock}
                                             >
                                                 +
                                             </button>

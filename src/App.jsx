@@ -200,7 +200,7 @@ function AppContent() {
               <Items tag="combo" title="Combo Deals" filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
               <Items tag="weekend-special" title="Weekend Special" filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} /> */}
               <Offers filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
-              <AppBanner />
+              {/* <AppBanner /> */}
             </>
           }
         />

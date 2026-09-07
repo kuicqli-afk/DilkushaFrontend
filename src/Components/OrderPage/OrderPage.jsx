@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { FaRegHeart, FaStar } from "react-icons/fa";
+import { FaRegHeart, FaStar, FaRegBookmark, FaBookmark } from "react-icons/fa";
 import { useCart } from "../../Context/CartContext.jsx";
+import { useWishlist } from "../../Context/WishlistContext.jsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbsDown, faThumbsUp } from "@fortawesome/free-solid-svg-icons";
 
@@ -29,16 +30,33 @@ const getGuestId = () => {
   return guestId;
 };
 
-// Helper function to scale portion/weight strings based on current quantity
-const parseAndScalePortion = (portionStr, quantity) => {
-  if (!portionStr) return "";
-  return portionStr.replace(/(\d+(?:\.\d+)?)\s*([a-zA-Z]+)/g, (match, num, unit) => {
-    const val = parseFloat(num);
-    if (isNaN(val)) return match;
-    const scaledVal = val * quantity;
-    const formatted = Number.isInteger(scaledVal) ? scaledVal : parseFloat(scaledVal.toFixed(2));
-    return `${formatted} ${unit}`;
-  });
+// Helper function to scale weight and automatically convert units (e.g., 500g * 2 = 1kg)
+const getScaledWeight = (weight, unit, quantity) => {
+  if (!weight || isNaN(weight)) return "";
+
+  const baseWeight = Number(weight) * quantity;
+  const unitLower = (unit || "").toLowerCase().trim();
+
+  // Convert grams to kg when >= 1000g
+  if (unitLower === "g" || unitLower === "gm" || unitLower === "grams") {
+    if (baseWeight >= 1000) {
+      const kgVal = baseWeight / 1000;
+      return `${Number.isInteger(kgVal) ? kgVal : kgVal.toFixed(2)}kg`;
+    }
+    return `${baseWeight}g`;
+  }
+
+  // Convert ml to L when >= 1000ml
+  if (unitLower === "ml") {
+    if (baseWeight >= 1000) {
+      const lVal = baseWeight / 1000;
+      return `${Number.isInteger(lVal) ? lVal : lVal.toFixed(2)}L`;
+    }
+    return `${baseWeight}ml`;
+  }
+
+  // Fallback for kg, L, pcs, or custom units
+  return `${Number.isInteger(baseWeight) ? baseWeight : baseWeight.toFixed(2)}${unit || ""}`;
 };
 
 const REVIEWS_PAGE_SIZE = 2;
@@ -48,6 +66,7 @@ const OrderPage = () => {
   const navigate = useNavigate();
 
   const { cartItems, setItemQty, getCartKey } = useCart();
+  const { wishlistItems, toggleWishlist, isInWishlist } = useWishlist();
 
   const [restaurant, setRestaurant] = useState(null);
   const [restaurantLoading, setRestaurantLoading] = useState(true);
@@ -89,6 +108,8 @@ const OrderPage = () => {
         ? item.stock > 0
         : item.status?.toLowerCase() !== "out of stock";
 
+  const bookmarked = isInWishlist(item._id);
+
   const resolveCategoryName = (catValue) => {
     if (!catValue) return "";
     if (typeof catValue === "object") {
@@ -105,13 +126,13 @@ const OrderPage = () => {
   const categoryName = resolveCategoryName(item.category);
   const subcategoryName = resolveCategoryName(item.subcategory);
 
-  // Scaled price and portion calculations
+  // Scaled price and weight calculations
   const basePrice = item.price || 0;
   const baseOffer = item.offer || 0;
 
   const scaledPrice = basePrice * qty;
   const scaledOffer = baseOffer * qty;
-  const scaledPortion = parseAndScalePortion(item.portion || "", qty);
+  const scaledWeightDisplay = getScaledWeight(item.weight, item.unit, qty);
 
   useEffect(() => {
     const key = getCartKey(item);
@@ -187,6 +208,11 @@ const OrderPage = () => {
 
   const handleQuantityChange = (newQty) => {
     if (!isAvailable) return;
+    if (newQty > 10) {
+      alert("You can add a maximum of 10 items at a time.");
+      return;
+    }
+
     const targetQty = Math.max(1, newQty);
     setQty(targetQty);
     setItemQty(item, targetQty);
@@ -277,6 +303,8 @@ const OrderPage = () => {
     document.getElementById("customer-reviews-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const currentRating = Number(item.rating) || 0;
+
   return (
     <>
       <div className="food-container">
@@ -306,24 +334,48 @@ const OrderPage = () => {
                 </p>
 
                 <div className="order-status-icons">
-                  <FaRegHeart style={{ fontSize: "25px", marginTop: "2px", cursor: "pointer" }} />
+                  <FaRegHeart style={{ fontSize: "22px", marginTop: "2px", cursor: "pointer" }} />
+                  {bookmarked ? (
+                    <FaBookmark
+                      style={{ fontSize: "20px", cursor: "pointer", color: "#e11d48" }}
+                      title="Remove from Wishlist"
+                      onClick={() => toggleWishlist(item)}
+                    />
+                  ) : (
+                    <FaRegBookmark
+                      style={{ fontSize: "20px", cursor: "pointer" }}
+                      title="Add to Wishlist"
+                      onClick={() => toggleWishlist(item)}
+                    />
+                  )}
                   <img src={SaveIcon} alt="" />
                   <img src={ShareIcon} alt="" />
                 </div>
               </div>
 
               <h2 className="order-food-title">
-                {item.title} {scaledPortion && <span>({scaledPortion})</span>}
+                {item.title} {scaledWeightDisplay && <span>({scaledWeightDisplay})</span>}
               </h2>
 
               <p className="food-desc1">{(item.desc || "").slice(0, 300)}</p>
 
-              <div className="order-rating">
-                <img src={StarIcon} alt="" />
-                <h3>
-                  {item.rating || 0} <span>({item.reviews || 0})</span>
-                </h3>
-                <p>{item.orders || 0} orders last week</p>
+              {/* Rating Section Matched to MaidaItems.jsx */}
+              <div className="food-rating" style={{ display: "flex", alignItems: "center", gap: "6px", margin: "10px 0" }}>
+                <span className="rating-number" style={{ fontWeight: "bold" }}>{currentRating.toFixed(1)}</span>
+                <span className="rating-stars" style={{ display: "flex", gap: "2px" }}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <FaStar
+                      key={n}
+                      size={14}
+                      color={n <= Math.round(currentRating) ? "#ffb300" : "#e0e0e0"}
+                    />
+                  ))}
+                </span>
+                <span className="rating-reviews" style={{ color: "#666", fontSize: "14px" }}>({item.reviews || 0})</span>
+                <span className="rating-dot">•</span>
+                <span className="orders-last-week" style={{ color: "#666", fontSize: "14px" }}>
+                  {item.orders || 0} order{(item.orders || 0) === 1 ? "" : "s"} last week
+                </span>
               </div>
 
               <div className="order-price-row">

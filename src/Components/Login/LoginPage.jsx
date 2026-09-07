@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FiPhone, FiUser, FiLock, FiArrowRight, FiRotateCw } from "react-icons/fi";
+import { FiPhone, FiLock, FiArrowRight, FiRotateCw } from "react-icons/fi";
 import "./LoginPage.css";
 
 const BASE_URL =
@@ -11,12 +11,10 @@ const BASE_URL =
   "https://shyamfoodbackend.onrender.com/api";
 
 const LoginPage = () => {
-  // Destructure 'login' instead of 'setUser'
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
-  const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
 
@@ -55,7 +53,6 @@ const LoginPage = () => {
 
     try {
       const res = await axios.post(`${BASE_URL}/user/send-otp`, {
-        name: name.trim(),
         phone: cleanPhone,
       });
 
@@ -83,7 +80,6 @@ const LoginPage = () => {
 
     try {
       const res = await axios.post(`${BASE_URL}/user/send-otp`, {
-        name: name.trim(),
         phone: cleanPhone,
       });
 
@@ -101,7 +97,6 @@ const LoginPage = () => {
     }
   };
 
-  // VERIFY OTP FUNCTION FIX
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setError("");
@@ -118,16 +113,12 @@ const LoginPage = () => {
 
     try {
       const res = await axios.post(`${BASE_URL}/user/verify-otp`, {
-        name: name.trim(),
         phone: cleanPhone,
         otp: cleanOtp,
       });
 
       if (res.data?.success && res.data?.token) {
-        // AuthContext ke login function me User Data aur Token pass karein
         login(res.data.user, res.data.token);
-
-        // Smooth navigation to profile
         navigate("/profile", { replace: true });
       } else {
         setError(res.data?.message || "Invalid OTP.");
@@ -145,7 +136,7 @@ const LoginPage = () => {
         <h2>{step === 1 ? "Welcome Back" : "Verify OTP"}</h2>
         <p>
           {step === 1
-            ? "Enter your details to receive an OTP code"
+            ? "Enter your mobile number to receive an OTP code"
             : `Enter the code sent to +91 ${phone}`}
         </p>
 
@@ -153,20 +144,6 @@ const LoginPage = () => {
 
         {step === 1 ? (
           <form onSubmit={handleSendOtp}>
-            <div className="form-group">
-              <label htmlFor="name">Full Name</label>
-              <div className="input-wrapper">
-                <FiUser className="input-icon" />
-                <input
-                  id="name"
-                  type="text"
-                  placeholder="Enter your name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-            </div>
-
             <div className="form-group">
               <label htmlFor="phone">Mobile Number</label>
               <div className="input-wrapper">
