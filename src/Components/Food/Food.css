@@ -25,7 +25,6 @@
   gap: 30px;
   row-gap: 60px;
   margin-bottom: 25px;
-  /* overflow: hidden; */
 }
 
 .in-stock-icon {
@@ -112,12 +111,9 @@
 }
 
 /* ================= ROW / SWIPER ================= */
-
-
 .food-card-row::-webkit-scrollbar {
   display: none;
 }
-
 
 .swiper-wrapper {
   padding-top: 25px;
@@ -194,11 +190,13 @@
   margin-left: auto;
   display: flex;
   gap: 5px;
+  color: gray;
 }
 
 .food-status-right-icon img {
   width: 22px;
   cursor: pointer;
+
 }
 
 /* ================= TITLE ================= */
@@ -223,29 +221,43 @@
 
 .food-price {
   display: flex;
+  align-items: center;
   gap: 3px;
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 600;
 }
 
 .food-price .Rs {
-  font-size: 20px;
-  margin-top: 7px;
+  font-size: 16px;
+  margin-top: 12px;
 }
 
+
+/* M.R.P. label - NOT struck */
 .offer {
-  text-decoration: line-through;
+  display: flex;
+  align-items: center;
+  gap: 3px;
   color: gray;
   font-size: 14px;
   margin-top: 8px;
 }
 
+/* Only ₹ + offer price is struck */
+.offer-price {
+  text-decoration: line-through;
+  font-size: 14px;
+}
+
+/* Discount */
 .food-off {
   font-size: 12px;
   background: #e9f7ef;
   color: #1faa59;
   margin-top: 10px;
+  padding: 3px 7px;
   border-radius: 12px;
+  font-weight: 500;
 }
 
 /* ================= DESCRIPTION ================= */
