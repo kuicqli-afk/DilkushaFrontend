@@ -186,6 +186,7 @@
 /* ================= INFO ================= */
 .food-info {
   padding: 10px;
+
   border-radius: 0 0 16px 16px;
   position: relative;
   z-index: 2;
@@ -199,6 +200,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  margin-top: 5px;
 }
 
 .food-status-left img {
@@ -227,7 +229,7 @@
 .food-info h2 {
   font-size: 25px;
   font-weight: 600;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .food-info h2 span {
@@ -240,7 +242,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 8px 0;
+  margin: 0px 0px 8px;
 }
 
 .food-price {
@@ -288,7 +290,7 @@
 .food-desc {
   font-size: 13px;
   color: #555;
-  padding-top: 5px;
+  padding-top: 6px;
 }
 
 /* ================= RATING (redesigned — inline stars) ================= */
@@ -302,15 +304,16 @@
 }
 
 .rating-number {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 700;
   color: #1a1a1a;
+  margin-top: 5px;
 }
 
 .rating-stars {
   display: inline-flex;
   gap: 1px;
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .star-filled {
@@ -327,7 +330,7 @@
 }
 
 .orders-last-week {
-  font-size: 11px;
+  font-size: 14px;
   color: #999;
   margin-left: 4px;
   white-space: nowrap;

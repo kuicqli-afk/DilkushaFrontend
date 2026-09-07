@@ -10,6 +10,7 @@ import { FaLocationDot } from "react-icons/fa6";
 import shyam from "../../assets/syam.png";
 import profile from "../../assets/profile.gif";
 import cart from "../../assets/cart.gif";
+import { FaBookmark } from "react-icons/fa";
 
 const API_URL = "https://shyamfoodbackend.onrender.com/api";
 
@@ -255,29 +256,18 @@ const Navbar = () => {
 
               {showDropdown && (
                 <div className="nav-dropdown-menu">
-                  {/* Option to navigate to Profile Update Page */}
-                  <div
-                    className="dropdown-item"
-                    onClick={() => {
-                      setShowDropdown(false);
-                      navigate("/profile");
-                    }}
-                  >
+                  <div className="dropdown-item" onClick={() => { setShowDropdown(false); navigate("/profile"); }}>
                     <FaUserEdit /> Update Profile
                   </div>
 
-                  {/* My Orders */}
-                  <div
-                    className="dropdown-item"
-                    onClick={() => {
-                      setShowDropdown(false);
-                      navigate("/orders");
-                    }}
-                  >
+                  <div className="dropdown-item" onClick={() => { setShowDropdown(false); navigate("/wishlist"); }}>
+                    <FaBookmark /> Wishlist
+                  </div>
+
+                  <div className="dropdown-item" onClick={() => { setShowDropdown(false); navigate("/orders"); }}>
                     <FaBox /> My Orders
                   </div>
 
-                  {/* Logout */}
                   <div className="dropdown-item logout" onClick={handleLogout}>
                     <FaSignOutAlt /> Logout
                   </div>

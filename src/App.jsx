@@ -69,6 +69,7 @@ import OrderHistory from "./Components/CheckoutPage/OrderHistory.jsx";
 import ProfilePage from "./Components/Login/ProfilePage.jsx";
 import ItemsSectionProducts from "./Components/Food/ItemsSectionProducts.jsx";
 import FeedbackWatcher from "./Components/Feedback/FeedbackWatcher.jsx";
+import WishlistPage from "./Components/Wishlist/Wishlist.jsx";
 
 const BASE_URL = import.meta.env?.VITE_API_URL || "https://shyamfoodbackend.onrender.com/api";
 
@@ -195,9 +196,9 @@ function AppContent() {
                 </div>
               ))}
 
-              <Items tag="trending" title="Hot & Trending Food Offers" filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
+              {/* <Items tag="trending" title="Hot & Trending Food Offers" filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
               <Items tag="combo" title="Combo Deals" filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
-              <Items tag="weekend-special" title="Weekend Special" filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
+              <Items tag="weekend-special" title="Weekend Special" filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} /> */}
               <Offers filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
               <AppBanner />
             </>
@@ -209,7 +210,7 @@ function AppContent() {
         {/* E-Commerce Operations */}
         <Route path="/order" element={<OrderPage />} />
         <Route path="/cart" element={<CartPage />} />
-
+        <Route path="/wishlist" element={<WishlistPage />} />
         {/* Protected Checkout & History */}
         <Route
           path="/checkout"

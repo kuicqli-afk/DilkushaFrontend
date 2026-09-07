@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState, useEffect } from "react";
 import axios from "axios";
 
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaRegHeart, FaCheckCircle, FaTimesCircle, FaSave, FaRegBookmark, FaStar } from "react-icons/fa";
+import { FaEye, FaRegHeart, FaCheckCircle, FaTimesCircle, FaSave, FaBookmark, FaRegBookmark, FaStar } from "react-icons/fa";
 import { FiGlobe, FiLock } from "react-icons/fi";
 import "./Food.css";
 
@@ -17,6 +17,8 @@ import "swiper/css/free-mode";
 import { useCart } from "../../Context/CartContext";
 import { VscEye } from "react-icons/vsc";
 import { LiaStopwatchSolid } from "react-icons/lia";
+
+import { useWishlist } from "../../Context/WishlistContext";
 
 const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
 
@@ -46,7 +48,7 @@ const MaidaItems = ({
     const swiperRef = useRef(null);
 
     const { cartItems, addToCart, updateQty, getCartKey } = useCart();
-
+    const { toggleWishlist, isInWishlist } = useWishlist();
     const [openCardId, setOpenCardId] = useState(null);
     const [selectedSlots, setSelectedSlots] = useState({});
     const [list, setList] = useState([]);
@@ -80,7 +82,7 @@ const MaidaItems = ({
             .get(url)
             .then((res) => {
                 const fetched = res.data[responseKey] || [];
-                setList(shuffleArray(fetched)); // random order every page load
+                setList(shuffleArray(fetched));
             })
             .catch((err) => {
                 console.error(`Error fetching "${category}" products:`, err);
@@ -90,26 +92,18 @@ const MaidaItems = ({
             .finally(() => setLoading(false));
     }, [category, effectiveSubCategory, treatAsAll]);
 
-    // Stock helpers — quantity IS the ONLY stock field (single source of truth from admin panel).
-    // "portion" is a plain description field ("Full", "Half", "500g" etc.) and never affects
-    // stock — an earlier version here also checked portion==="0", which caused false
-    // Out-of-Stock on products whose portion happened to contain "0" for unrelated reasons.
-    // Old products saved before quantity existed have quantity === undefined —
-    // treat those as unlimited stock so nothing that used to be orderable suddenly breaks.
     const getStock = (item) => {
         if (item.quantity === undefined || item.quantity === null || item.quantity === "") {
             return Infinity;
         }
         return Number(item.quantity) || 0;
     };
-    // This single check now drives EVERYTHING — badge, icon, blur, and button disable.
-    // Online/Offline (isOpen/status) is no longer used anywhere in this file.
+
     const isInStock = (item) => getStock(item) > 0;
 
     const baseFilteredList = useMemo(() => {
         let result = [...list];
 
-        // Never show draft products to customers, even if the backend sent one through
         result = result.filter((item) => !item.isDraft && item.status !== "Draft");
 
         if (filter === "veg") {
@@ -164,13 +158,12 @@ const MaidaItems = ({
     };
 
     const increase = (item) => {
-        // Don't allow adding more than what's actually in stock
         if (!isInStock(item)) return;
 
         const stock = getStock(item);
         const currentQty = getQty(item);
         const currentNum = currentQty === "ADD" ? 0 : Number(currentQty);
-        if (currentNum >= stock) return; // already at max available stock
+        if (currentNum >= stock) return;
 
         addToCart(item, 1);
     };
@@ -183,7 +176,7 @@ const MaidaItems = ({
     };
 
     const placeOrder = (item) => {
-        if (!isInStock(item)) return; // guard — no ordering out-of-stock items
+        if (!isInStock(item)) return;
 
         navigate("/order", {
             state: {
@@ -238,14 +231,16 @@ const MaidaItems = ({
                 className="food-card-row"
             >
                 {finalList.map((item) => {
-                    // per-card stock computation — the ONLY thing that decides availability now
                     const stock = getStock(item);
                     const inStock = isInStock(item);
                     const cartQty = getQty(item);
                     const cartQtyNum = cartQty === "ADD" ? 0 : Number(cartQty);
                     const atMaxStock = stock !== Infinity && cartQtyNum >= stock;
-                    // 🆕 Public/Private marketplace visibility — defaults to public if not set
                     const isPublic = item.visibility !== "private";
+
+                    // Dynamic star calculation
+                    const currentRating = Number(item.rating) || 0;
+                    const ordersCount = item.orders ?? 0;
 
                     return (
                         <SwiperSlide key={item._id}>
@@ -273,7 +268,6 @@ const MaidaItems = ({
                                         />
                                     )}
 
-
                                     <div className="view-eye">
                                         <VscEye
                                             style={{
@@ -294,7 +288,6 @@ const MaidaItems = ({
 
                                 <div className="food-info">
                                     <div className="food-status-left">
-                                        {/* Stock-based tick / cross */}
                                         {inStock ? (
                                             <FaCheckCircle className="stock-icon in-stock-icon" title="In Stock" />
                                         ) : (
@@ -304,7 +297,6 @@ const MaidaItems = ({
                                             {inStock ? "In Stock" : "Out of Stock"}
                                         </p>
 
-                                        {/* 🆕 Public/Private visibility badge */}
                                         <span
                                             className={`visibility-badge ${isPublic ? "visibility-public" : "visibility-private"}`}
                                             title={isPublic ? "Public — marketplace + website" : "Private — website only"}
@@ -314,19 +306,22 @@ const MaidaItems = ({
                                         </span>
 
                                         <div className="food-status-right-icon">
-
                                             <FaRegHeart size={16} title="Like" style={{ cursor: "pointer" }} />
-                                            <FaRegBookmark
-                                                size={16}
-                                                title="Add to cart"
-                                                style={{ cursor: "pointer" }}
-                                                onClick={() => {
-                                                    if (inStock && !atMaxStock) {
-                                                        addToCart(item, 1);
-                                                    }
-                                                }}
-                                            />
-
+                                            {isInWishlist(item) ? (
+                                                <FaBookmark
+                                                    size={16}
+                                                    title="Saved to Wishlist"
+                                                    style={{ cursor: "pointer", color: "#ff4757" }}
+                                                    onClick={() => toggleWishlist(item)}
+                                                />
+                                            ) : (
+                                                <FaRegBookmark
+                                                    size={16}
+                                                    title="Save to Wishlist"
+                                                    style={{ cursor: "pointer" }}
+                                                    onClick={() => toggleWishlist(item)}
+                                                />
+                                            )}
                                         </div>
                                     </div>
 
@@ -338,14 +333,15 @@ const MaidaItems = ({
                                         {(item.desc || "").slice(0, 60)}...
                                     </p>
 
+                                    {/* Updated Dynamic Rating & Orders Block */}
                                     <div className="food-rating">
-                                        <span className="rating-number">{item.rating || 0}</span>
+                                        <span className="rating-number">{currentRating.toFixed(1)}</span>
                                         <span className="rating-stars">
                                             {[1, 2, 3, 4, 5].map((n) => (
                                                 <FaStar
                                                     key={n}
                                                     className={
-                                                        n <= Math.round(item.rating || 0)
+                                                        n <= Math.round(currentRating)
                                                             ? "star-filled"
                                                             : "star-empty"
                                                     }
@@ -353,12 +349,10 @@ const MaidaItems = ({
                                             ))}
                                         </span>
                                         <span className="rating-reviews">({item.reviews || 0})</span>
-                                        {/* 🆕 Dynamic orders count — pulled from item.orders */}
-                                        {item.orders > 0 && (
-                                            <span className="orders-last-week">
-                                                {item.orders} order{item.orders === 1 ? "" : "s"} last week
-                                            </span>
-                                        )}
+                                        <span className="rating-dot">•</span>
+                                        <span className="orders-last-week">
+                                            {ordersCount} order{ordersCount === 1 ? "" : "s"} last week
+                                        </span>
                                     </div>
 
                                     <div className="food-price-row">
