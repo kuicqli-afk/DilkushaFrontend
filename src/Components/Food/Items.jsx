@@ -233,7 +233,7 @@ const Items = ({
                   {hasVideo ? (
                     isMp4(videoSrc) ? (
                       <video
-                        className={`food-images${!inStock ? " blurred" : ""}`}
+                        className={`food-image${!inStock ? " blurred" : ""}`}
                         src={videoSrc}
                         autoPlay
                         loop
@@ -244,7 +244,7 @@ const Items = ({
                       />
                     ) : (
                       <iframe
-                        className={`food-images${!inStock ? " blurred" : ""}`}
+                        className={`food-image${!inStock ? " blurred" : ""}`}
                         src={videoSrc}
                         title={item.title}
                         frameBorder="0"
@@ -256,7 +256,7 @@ const Items = ({
                     <img
                       src={item.image}
                       alt={item.title}
-                      className={`food-images${!inStock ? " blurred" : ""}`}
+                      className={`food-image${!inStock ? " blurred" : ""}`}
                     />
                   )}
 
