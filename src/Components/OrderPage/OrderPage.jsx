@@ -13,8 +13,6 @@ import OpenIcon from "../../assets/Open.png";
 import CloseIcon from "../../assets/CLOSE.png";
 import RedArrow from "../../assets/NON VEG.png";
 import GreenArrow from "../../assets/VEG.png";
-import SaveIcon from "../../assets/SaveIcon.png";
-import ShareIcon from "../../assets/ShareIcon.png";
 import StarIcon from "../../assets/StarIcon.png";
 
 import MaidaItems from "../Food/MaidaItems.jsx";
@@ -66,7 +64,7 @@ const OrderPage = () => {
   const navigate = useNavigate();
 
   const { cartItems, setItemQty, getCartKey } = useCart();
-  const { wishlistItems, toggleWishlist, isInWishlist } = useWishlist();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const [restaurant, setRestaurant] = useState(null);
   const [restaurantLoading, setRestaurantLoading] = useState(true);
@@ -108,7 +106,8 @@ const OrderPage = () => {
         ? item.stock > 0
         : item.status?.toLowerCase() !== "out of stock";
 
-  const bookmarked = isInWishlist(item._id);
+  // ✅ Wishlist check uses the same key logic as everywhere else (title + restaurantId)
+  const bookmarked = isInWishlist(item);
 
   const resolveCategoryName = (catValue) => {
     if (!catValue) return "";
@@ -232,6 +231,11 @@ const OrderPage = () => {
     navigate("/cart");
   };
 
+  // ✅ Bookmark click handler — toggles wishlist save/remove
+  const handleToggleWishlist = () => {
+    toggleWishlist(item);
+  };
+
   const handlePostReview = async (e) => {
     if (e) e.preventDefault();
 
@@ -334,22 +338,28 @@ const OrderPage = () => {
                 </p>
 
                 <div className="order-status-icons">
-                  <FaRegHeart style={{ fontSize: "22px", marginTop: "2px", cursor: "pointer" }} />
+                  <FaRegHeart
+                    style={{
+                      fontSize: "22px",
+                      marginTop: "2px",
+                      cursor: "pointer",
+                      color: "#6b7280",
+                    }}
+                  />
+
                   {bookmarked ? (
                     <FaBookmark
-                      style={{ fontSize: "20px", cursor: "pointer", color: "#e11d48" }}
+                      style={{ fontSize: "20px", cursor: "pointer", color: "red" }}
                       title="Remove from Wishlist"
-                      onClick={() => toggleWishlist(item)}
+                      onClick={handleToggleWishlist}
                     />
                   ) : (
                     <FaRegBookmark
-                      style={{ fontSize: "20px", cursor: "pointer" }}
+                      style={{ fontSize: "20px", cursor: "pointer", color: "#6b7280" }}
                       title="Add to Wishlist"
-                      onClick={() => toggleWishlist(item)}
+                      onClick={handleToggleWishlist}
                     />
                   )}
-                  <img src={SaveIcon} alt="" />
-                  <img src={ShareIcon} alt="" />
                 </div>
               </div>
 
