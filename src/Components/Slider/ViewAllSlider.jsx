@@ -12,7 +12,6 @@ const ViewAllSlider = ({ category }) => {
     const [index, setIndex] = useState(0);
 
     const trackRef = useRef(null);
-    const isTransitioning = useRef(false);
 
     const fetchSliders = async () => {
         try {
@@ -26,7 +25,6 @@ const ViewAllSlider = ({ category }) => {
             );
 
             setSlides(active);
-            setIndex(0);
         } catch (err) {
             console.log("Fetch Category Slider Error:", err);
         }
@@ -65,37 +63,37 @@ const ViewAllSlider = ({ category }) => {
 
     const loopSlides = [...slides, ...slides];
 
+    // Continuous auto-slide timer that never stops
     useEffect(() => {
-        if (slides.length === 0) return;
+        if (slides.length <= 1) return;
         const timer = setInterval(() => {
-            if (!isTransitioning.current) {
-                isTransitioning.current = true;
-                setIndex((prev) => prev + 1);
-            }
+            setIndex((prev) => prev + 1);
         }, 3000);
         return () => clearInterval(timer);
-    }, [slides]);
+    }, [slides.length]);
 
+    // Handle seamless transition without getting stuck if tab loses focus
     useEffect(() => {
         if (slides.length === 0) return;
         const track = trackRef.current;
         if (!track) return;
 
-        track.style.transition = "transform 0.8s ease-in-out";
-        track.style.transform = `translateX(-${index * 100}%)`;
+        if (index >= slides.length) {
+            track.style.transition = "transform 0.8s ease-in-out";
+            track.style.transform = `translateX(-${index * 100}%)`;
 
-        const handleTransitionEnd = () => {
-            if (index >= slides.length) {
+            const timeout = setTimeout(() => {
                 track.style.transition = "none";
                 track.style.transform = "translateX(0)";
                 setIndex(0);
-            }
-            isTransitioning.current = false;
-        };
+            }, 800);
 
-        track.addEventListener("transitionend", handleTransitionEnd);
-        return () => track.removeEventListener("transitionend", handleTransitionEnd);
-    }, [index, slides]);
+            return () => clearTimeout(timeout);
+        } else {
+            track.style.transition = "transform 0.8s ease-in-out";
+            track.style.transform = `translateX(-${index * 100}%)`;
+        }
+    }, [index, slides.length]);
 
     if (slides.length === 0) return null;
 

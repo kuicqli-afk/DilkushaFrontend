@@ -316,15 +316,22 @@ const Items = ({
 
                   <div className="food-price-row">
                     <span className="food-price">
-                      <small className="Rs">₹</small> {item.price}
+                      <small className="Rs">₹</small>
+                      {item.price}
                     </span>
+
                     {item.offer > 0 && (
                       <span className="offer">
-                        <small className="offer">₹</small>
-                        {item.offer}
+                        <span>M.R.P.</span>
+                        <small className="offer-price">₹{item.offer}</small>
                       </span>
                     )}
-                    {item.off > 0 && <span className="food-off">{item.off}% OFF</span>}
+
+                    {item.off > 0 && (
+                      <span className="food-off">
+                        {item.off}% OFF
+                      </span>
+                    )}
                   </div>
 
                   {/* Actions only visible when item is in stock */}

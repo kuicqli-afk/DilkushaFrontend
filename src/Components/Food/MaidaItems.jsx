@@ -2,12 +2,12 @@ import React, { useMemo, useRef, useState, useEffect } from "react";
 import axios from "axios";
 
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaRegHeart, FaCheckCircle, FaTimesCircle, FaSave, FaRegBookmark } from "react-icons/fa";
+import { FaEye, FaRegHeart, FaCheckCircle, FaTimesCircle, FaSave, FaRegBookmark, FaStar } from "react-icons/fa";
+import { FiGlobe, FiLock } from "react-icons/fi";
 import "./Food.css";
 
 import RedArrow from "../../assets/NON VEG.png";
 import GreenArrow from "../../assets/VEG.png";
-import StarIcon from "../../assets/StarIcon.png";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Autoplay } from "swiper/modules";
@@ -102,7 +102,7 @@ const MaidaItems = ({
         }
         return Number(item.quantity) || 0;
     };
-    // 🆕 This single check now drives EVERYTHING — badge, icon, blur, and button disable.
+    // This single check now drives EVERYTHING — badge, icon, blur, and button disable.
     // Online/Offline (isOpen/status) is no longer used anywhere in this file.
     const isInStock = (item) => getStock(item) > 0;
 
@@ -244,6 +244,8 @@ const MaidaItems = ({
                     const cartQty = getQty(item);
                     const cartQtyNum = cartQty === "ADD" ? 0 : Number(cartQty);
                     const atMaxStock = stock !== Infinity && cartQtyNum >= stock;
+                    // 🆕 Public/Private marketplace visibility — defaults to public if not set
+                    const isPublic = item.visibility !== "private";
 
                     return (
                         <SwiperSlide key={item._id}>
@@ -292,7 +294,7 @@ const MaidaItems = ({
 
                                 <div className="food-info">
                                     <div className="food-status-left">
-                                        {/* 🆕 Stock-based tick / cross — replaces the old Open/Close (Online/Offline) icon+text */}
+                                        {/* Stock-based tick / cross */}
                                         {inStock ? (
                                             <FaCheckCircle className="stock-icon in-stock-icon" title="In Stock" />
                                         ) : (
@@ -302,24 +304,34 @@ const MaidaItems = ({
                                             {inStock ? "In Stock" : "Out of Stock"}
                                         </p>
 
+                                        {/* 🆕 Public/Private visibility badge */}
+                                        <span
+                                            className={`visibility-badge ${isPublic ? "visibility-public" : "visibility-private"}`}
+                                            title={isPublic ? "Public — marketplace + website" : "Private — website only"}
+                                        >
+                                            {isPublic ? <FiGlobe size={11} /> : <FiLock size={11} />}
+                                            {isPublic ? "Public" : "Private"}
+                                        </span>
+
                                         <div className="food-status-right-icon">
 
-                                            <FaRegHeart size={20} title="Like" style={{ cursor: "pointer" }} />
-                                            {/* <img src={SaveIcon} alt="Save" title="Book Mark" /> */}
-                                            <FaRegBookmark size={20} title="Add to cart" style={{ cursor: "pointer" }} />
+                                            <FaRegHeart size={16} title="Like" style={{ cursor: "pointer" }} />
+                                            <FaRegBookmark
+                                                size={16}
+                                                title="Add to cart"
+                                                style={{ cursor: "pointer" }}
+                                                onClick={() => {
+                                                    if (inStock && !atMaxStock) {
+                                                        addToCart(item, 1);
+                                                    }
+                                                }}
+                                            />
 
                                         </div>
                                     </div>
 
                                     <h2>
-                                        {item.title} <span>{item.weight} {item.unit}</span>
-                                        {/* 🆕 Weight + Unit — same line as title/portion, always space-separated, any unit */}
-                                        {/* {item.weight && (
-                                            <span className="food-weight-inline">
-                                                {" "}
-                                                {item.weight} {item.unit || ""}
-                                            </span>
-                                        )} */}
+                                        {item.title} <span>{item.weight}{item.unit}</span>
                                     </h2>
 
                                     <p className="food-desc">
@@ -327,11 +339,20 @@ const MaidaItems = ({
                                     </p>
 
                                     <div className="food-rating">
-                                        <img src={StarIcon} alt="" />
-                                        <h3>
-                                            {item.rating || 0} <span>({item.reviews || 0})</span>
-                                        </h3>
-                                        <p>{item.orders || 0} orders last week</p>
+                                        <span className="rating-number">{item.rating || 0}</span>
+                                        <span className="rating-stars">
+                                            {[1, 2, 3, 4, 5].map((n) => (
+                                                <FaStar
+                                                    key={n}
+                                                    className={
+                                                        n <= Math.round(item.rating || 0)
+                                                            ? "star-filled"
+                                                            : "star-empty"
+                                                    }
+                                                />
+                                            ))}
+                                        </span>
+                                        <span className="rating-reviews">({item.reviews || 0})</span>
                                     </div>
 
                                     <div className="food-price-row">

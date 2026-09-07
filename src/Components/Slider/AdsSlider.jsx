@@ -51,7 +51,7 @@ const AdsSlider = ({ category }) => {
     return `${API_URL}/${image}`;
   };
 
-  // ✅ Button link ho toh click, warna kuch nahi
+
   const handleSlideClick = (item) => {
     if (!item?.buttonLink) return;
     const link = item.buttonLink.trim();
