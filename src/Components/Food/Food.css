@@ -297,6 +297,8 @@
   align-items: center;
   gap: 6px;
   margin-top: 8px;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .rating-number {
@@ -322,6 +324,15 @@
 .rating-reviews {
   font-size: 13px;
   color: #777;
+}
+
+.orders-last-week {
+  font-size: 11px;
+  color: #999;
+  margin-left: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 

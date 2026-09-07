@@ -353,6 +353,12 @@ const MaidaItems = ({
                                             ))}
                                         </span>
                                         <span className="rating-reviews">({item.reviews || 0})</span>
+                                        {/* 🆕 Dynamic orders count — pulled from item.orders */}
+                                        {item.orders > 0 && (
+                                            <span className="orders-last-week">
+                                                {item.orders} order{item.orders === 1 ? "" : "s"} last week
+                                            </span>
+                                        )}
                                     </div>
 
                                     <div className="food-price-row">
