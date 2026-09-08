@@ -35,7 +35,6 @@ const getScaledWeight = (weight, unit, quantity) => {
   const baseWeight = Number(weight) * quantity;
   const unitLower = (unit || "").toLowerCase().trim();
 
-  // Convert grams to kg when >= 1000g
   if (unitLower === "g" || unitLower === "gm" || unitLower === "grams") {
     if (baseWeight >= 1000) {
       const kgVal = baseWeight / 1000;
@@ -44,7 +43,6 @@ const getScaledWeight = (weight, unit, quantity) => {
     return `${baseWeight}g`;
   }
 
-  // Convert ml to L when >= 1000ml
   if (unitLower === "ml") {
     if (baseWeight >= 1000) {
       const lVal = baseWeight / 1000;
@@ -53,7 +51,6 @@ const getScaledWeight = (weight, unit, quantity) => {
     return `${baseWeight}ml`;
   }
 
-  // Fallback for kg, L, pcs, or custom units
   return `${Number.isInteger(baseWeight) ? baseWeight : baseWeight.toFixed(2)}${unit || ""}`;
 };
 
@@ -73,7 +70,8 @@ const OrderPage = () => {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-
+  const [visibleReviewsCount, setVisibleReviewsCount] = useState(2); // 🆕 pagination — 2, then +3 each click
+  const [showReviewForm, setShowReviewForm] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [newName, setNewName] = useState("");
   const [newRating, setNewRating] = useState(0);
@@ -96,7 +94,6 @@ const OrderPage = () => {
 
   const { item } = state;
 
-  // Compile all available product images (main image + images array)
   const productImages = React.useMemo(() => {
     let imgs = [];
     if (item.images && Array.isArray(item.images)) {
@@ -108,7 +105,6 @@ const OrderPage = () => {
     return imgs.filter(Boolean);
   }, [item]);
 
-  // Determine availability status
   const isAvailable =
     item.isAvailable !== undefined
       ? item.isAvailable
@@ -134,7 +130,6 @@ const OrderPage = () => {
   const categoryName = resolveCategoryName(item.category);
   const subcategoryName = resolveCategoryName(item.subcategory);
 
-  // Scaled price and weight calculations
   const basePrice = item.offer || 0;
   const baseOffer = item.price || 0;
 
@@ -243,11 +238,22 @@ const OrderPage = () => {
     toggleWishlist(item);
   };
 
+  // 🆕 Reset pagination back to 2 every time the modal is opened
+  const handleOpenReviewModal = () => {
+    setVisibleReviewsCount(2);
+    setIsReviewModalOpen(true);
+  };
+
   const handlePostReview = async (e) => {
     if (e) e.preventDefault();
 
+    if (newRating === 0) {
+      alert("Please select a star rating.");
+      return;
+    }
+
     if (!newName.trim() || !newComment.trim()) {
-      alert("Please enter your name and a comment.");
+      alert("Please enter your name and a review comment.");
       return;
     }
 
@@ -258,7 +264,7 @@ const OrderPage = () => {
         productId: item._id,
         name: newName.trim(),
         comment: newComment.trim(),
-        rating: newRating === 0 ? 5 : newRating,
+        rating: newRating,
       });
 
       setNewName("");
@@ -312,8 +318,7 @@ const OrderPage = () => {
           </span>
 
           <div className="order-card">
-            {/* Image Box with Side Thumbnails */}
-            <div className="order-image-box" style={{ display: "flex", gap: "18px", alignItems: "flex-start" }}>
+            <div className="order-image-box" style={{ display: "flex", gap: "60px", alignItems: "flex-start" }}>
               {productImages.length > 1 && (
                 <div
                   className="order-thumbnails"
@@ -407,14 +412,14 @@ const OrderPage = () => {
                     />
                   ))}
                 </span>
+                <span>({reviews.length})</span>
                 <span className="rating-dot">•</span>
                 <span className="orders-last-week" style={{ color: "#666", fontSize: "14px" }}>
                   {item.orders || 0} order{(item.orders || 0) === 1 ? "" : "s"} last week
                 </span>
 
-                {/* Customer Reviews Trigger Button Pushed to the End */}
                 <button
-                  onClick={() => setIsReviewModalOpen(true)}
+                  onClick={handleOpenReviewModal}
                   style={{
                     background: "none",
                     border: "none",
@@ -456,32 +461,18 @@ const OrderPage = () => {
                   {isAvailable ? "Place order" : "Out of Stock"}
                 </button>
 
-                <div
-                  className="adds"
-                  onClick={handleAddToCart}
-                  style={{
-                    cursor: isAvailable ? "pointer" : "not-allowed",
-                    opacity: isAvailable ? 1 : 0.5,
-                  }}
-                >
-
-                </div>
+                <div className="adds" onClick={handleAddToCart} style={{ cursor: isAvailable ? "pointer" : "not-allowed", opacity: isAvailable ? 1 : 0.5 }}></div>
 
                 <div className="add-btnn" style={{ opacity: isAvailable ? 1 : 0.5 }}>
-                  <button onClick={decrease} disabled={!isAvailable}>
-                    -
-                  </button>
+                  <button onClick={decrease} disabled={!isAvailable}>-</button>
                   <span>{qty}</span>
-                  <button onClick={increase} disabled={!isAvailable}>
-                    +
-                  </button>
+                  <button onClick={increase} disabled={!isAvailable}>+</button>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Restaurant Section */}
-          <div className="reviews">
+          <div className="review">
             {restaurantLoading ? (
               <div className="shop">
                 <p className="text-xs text-gray-400">Loading restaurant info...</p>
@@ -527,157 +518,129 @@ const OrderPage = () => {
         </div>
       </div>
 
-      {/* Customer Reviews Modal */}
       {isReviewModalOpen && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-            padding: "20px",
-          }}
-          onClick={() => setIsReviewModalOpen(false)}
-        >
-          <div
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: "12px",
-              width: "100%",
-              maxWidth: "600px",
-              maxHeight: "90vh",
-              overflowY: "auto",
-              padding: "24px",
-              position: "relative",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-              <h2 style={{ fontSize: "20px", fontWeight: "bold", margin: 0 }}>
-                Customer Reviews ({reviews.length})
-              </h2>
-              <button
-                onClick={() => setIsReviewModalOpen(false)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "18px",
-                  color: "#6b7280",
-                }}
-              >
+        <div className="review-modal-overlay" onClick={() => setIsReviewModalOpen(false)}>
+          <div className="review-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="review-modal-header">
+              <h2>Customer Reviews ({reviews.length})</h2>
+              <button onClick={() => setIsReviewModalOpen(false)} className="modal-close-btn">
                 <FaTimes size={20} />
               </button>
             </div>
 
-            {/* Review Submission Form */}
-            <form onSubmit={handlePostReview} className="comments flex flex-col gap-3" style={{ marginBottom: "20px" }}>
-              <div className="flex flex-col gap-2 w-full">
-                <input
-                  type="text"
-                  placeholder="Your name"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  style={{ padding: "10px", borderRadius: "6px", border: "1px solid #d1d5db" }}
-                />
-                <input
-                  type="text"
-                  placeholder="Write a review..."
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  style={{ padding: "10px", borderRadius: "6px", border: "1px solid #d1d5db" }}
-                />
-              </div>
-
-              <div className="flex items-center justify-between w-full">
-                <div className="flex gap-1">
+            <form onSubmit={handlePostReview} className="review-form">
+              <div className="review-form-group">
+                <label className="review-form-label">
+                  Rating <span className="required-star">*</span>
+                </label>
+                <div className="star-rating-picker">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <FaStar
                       key={star}
-                      size={20}
-                      className="cursor-pointer"
+                      size={22}
+                      className="picker-star"
                       color={newRating >= star ? "#ffb300" : "#e0e0e0"}
                       onClick={() => setNewRating(star)}
                     />
                   ))}
                 </div>
+              </div>
 
-                <button
-                  type="submit"
-                  disabled={posting}
-                  style={{
-                    padding: "8px 16px",
-                    backgroundColor: "#880559",
-                    color: "#fff",
-                    borderRadius: "6px",
-                    border: "none",
-                    cursor: "pointer",
-                    fontWeight: "600",
-                  }}
-                >
+              <div className="review-form-group">
+                <input
+                  type="text"
+                  placeholder="Your name"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="review-input"
+                />
+              </div>
+
+              <div className="review-form-group">
+                <textarea
+                  placeholder="Write a review..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  className="review-textarea"
+                  rows="3"
+                />
+              </div>
+
+              <div className="review-form-footer">
+                <button type="submit" disabled={posting} className="post-review-btn">
                   {posting ? "Posting..." : "Post Review"}
                 </button>
               </div>
             </form>
 
-            {/* Reviews List */}
             {reviewsLoading ? (
-              <p className="text-xs text-gray-400 mt-3 text-center">Loading reviews...</p>
+              <p className="reviews-status-text">Loading reviews...</p>
             ) : reviews.length === 0 ? (
-              <p className="text-xs text-gray-400 mt-3 text-center">No reviews yet. Be the first to review!</p>
+              <p className="reviews-status-text">No reviews yet. Be the first to review!</p>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {reviews.map((rev) => (
-                  <div key={rev._id} className="review-card" style={{ display: "flex", gap: "12px", padding: "12px", borderBottom: "1px solid #f3f4f6" }}>
-                    <div
-                      className="review-dp flex items-center justify-center font-semibold text-white"
-                      style={{
-                        background: "#880559",
-                        width: "36px",
-                        height: "36px",
-                        borderRadius: "50%",
-                        flexShrink: 0,
-                      }}
+              <>
+                <div className="reviews-list-container">
+                  {reviews.slice(0, visibleReviewsCount).map((rev) => (
+                    <div key={rev._id} className="review-card-item">
+                      <div className="review-dp">
+                        {rev.name?.charAt(0)?.toUpperCase() || "U"}
+                      </div>
+                      <div className="review-details">
+                        <div className="review-header-row">
+                          <h4 className="reviewer-name">{rev.name}</h4>
+                          <div className="review-stars-display">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <FaStar
+                                key={star}
+                                size={12}
+                                color={rev.rating >= star ? "#ffb300" : "#e0e0e0"}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 🆕 Comment + like/dislike now share one row */}
+                        <div className="review-comment-row">
+                          <p className="review-comment-text">{rev.comment}</p>
+                          <div className="review-action-row">
+                            <button onClick={() => handleLike(rev._id)} className="action-btn">
+                              <FontAwesomeIcon icon={faThumbsUp} />
+                              <span>{rev.likes || 0}</span>
+                            </button>
+                            <button onClick={() => handleDislike(rev._id)} className="action-btn">
+                              <FontAwesomeIcon icon={faThumbsDown} />
+                              <span>{rev.dislikes || 0}</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 🆕 Show More — reveals 3 more each click (2 → 5 → 8 → ...) */}
+                {/* 🆕 Show More / Hide toggle — expands 3 at a time (2 → 5 → 8...), 
+    collapses back to 2 once everything is shown */}
+                <div className="show-more-wrapper">
+                  {visibleReviewsCount < reviews.length ? (
+                    <button
+                      className="show-more-btn"
+                      onClick={() => setVisibleReviewsCount((prev) => prev + 3)}
                     >
-                      {rev.name?.charAt(0)?.toUpperCase() || "U"}
-                    </div>
-                    <div className="review-content flex-1">
-                      <h3 style={{ margin: "0 0 2px 0", fontSize: "15px", fontWeight: "600" }}>{rev.name}</h3>
-
-                      <div className="flex gap-[2px] my-[2px]">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <FaStar
-                            key={star}
-                            size={12}
-                            color={rev.rating >= star ? "#ffb300" : "#e0e0e0"}
-                          />
-                        ))}
-                      </div>
-
-                      <p style={{ margin: "6px 0", fontSize: "14px", color: "#374151" }}>{rev.comment}</p>
-                      <div className="review-actions" style={{ display: "flex", gap: "16px", marginTop: "8px" }}>
-                        <button onClick={() => handleLike(rev._id)} className="flex items-center gap-1" style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}>
-                          <FontAwesomeIcon icon={faThumbsUp} className="likes" />
-                          <span>{rev.likes || 0}</span>
-                        </button>
-
-                        <button onClick={() => handleDislike(rev._id)} className="flex items-center gap-1" style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}>
-                          <FontAwesomeIcon icon={faThumbsDown} className="likes" />
-                          <span>{rev.dislikes || 0}</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                      Show More ({reviews.length - visibleReviewsCount} more)
+                    </button>
+                  ) : (
+                    reviews.length > 2 && (
+                      <button
+                        className="show-more-btn hide-btn"
+                        onClick={() => setVisibleReviewsCount(2)}
+                      >
+                        Hide
+                      </button>
+                    )
+                  )}
+                </div>
+              </>
             )}
           </div>
         </div>

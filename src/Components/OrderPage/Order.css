@@ -7,6 +7,7 @@
 
 .order-container {
   padding: 24px 0;
+  margin-bottom: 45px;
 }
 
 .order-title {
@@ -97,6 +98,15 @@
   color: #444;
 }
 
+/* 🆕 Stock status colors (used inline on .stock-status) */
+.text-green-600 {
+  color: #16a34a;
+}
+
+.text-red-600 {
+  color: #dc2626;
+}
+
 .order-status-icons {
   margin-left: auto;
   display: flex;
@@ -147,6 +157,12 @@
   font-size: 18px;
   color: #777;
   font-weight: 400;
+}
+
+/* 🆕 Rating row on the product detail page (item.rating stars + orders + reviews trigger) */
+.rating-dot {
+  color: #ccc;
+  font-size: 12px;
 }
 
 /* PRICE ROW */
@@ -293,8 +309,8 @@
 }
 
 /* ===== REVIEWS ===== */
-.reviews {
-  padding-top: 4%;
+/* .reviews {
+  padding-top: 2%;
   display: flex;
   justify-content: space-between;
 
@@ -308,12 +324,6 @@
   display: flex;
   gap: 12px;
   padding: 10px 0;
-}
-
-.review-dp {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
 }
 
 .review-content h3 {
@@ -335,15 +345,13 @@
   font-size: 14px;
 }
 
-
-
 .review-actions button {
 
   border: none;
   background: none;
   font-size: 12px;
   cursor: pointer;
-}
+} */
 
 /* COMMENTS INPUT */
 .comments {
@@ -412,6 +420,307 @@
 .shop-text p {
   font-size: 13px;
 }
+
+/* ==============================================================
+   🆕 CUSTOMER REVIEWS MODAL — was missing entirely from this file,
+   without it the modal (overlay, form, review cards, like/dislike)
+   would render completely unstyled.
+   ============================================================== */
+
+.review-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.review-modal-content {
+  background-color: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.review-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.review-modal-header h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.review-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.review-form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.required-star {
+  color: #ef4444;
+}
+
+.star-rating-picker {
+  display: flex;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.picker-star {
+  transition: transform 0.1s ease;
+}
+
+.picker-star:hover {
+  transform: scale(1.15);
+}
+
+.review-input,
+.review-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  background-color: #fff;
+}
+
+.review-input:focus,
+.review-textarea:focus {
+  /* border-color: #ff4d4f; */
+}
+
+.review-form-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 🆕 Write a Review toggle button */
+.write-review-toggle-btn {
+  background: #fff;
+  color: #880559;
+  border: 1.5px solid #880559;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.write-review-toggle-btn:hover {
+  background: #ff4d4f;
+  color: #fff;
+}
+
+.post-review-btn {
+  padding: 10px 20px;
+  background-color: #ff4d4f;
+  color: #fff;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.post-review-btn:hover {
+  background-color: #ff4d4f;
+}
+
+.post-review-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.reviews-status-text {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* Reviews List Styles */
+
+.reviews-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.review-card-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.review-dp {
+  background: #ff4d4f;
+  color: #fff;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.review-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.review-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reviewer-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.review-stars-display {
+  display: flex;
+  gap: 2px;
+}
+
+.review-comment-text {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.4;
+}
+
+.review-action-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 6px;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #6b7280;
+  transition: color 0.2s;
+}
+
+/* .action-btn:hover {
+  color: #880559;
+} */
+
+/* 🆕 Comment + like/dislike share one row */
+.review-comment-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.review-comment-row .review-comment-text {
+  flex: 1;
+  min-width: 180px;
+  margin: 4px 0 0 0;
+}
+
+.review-comment-row .review-action-row {
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+/* 🆕 Show More button */
+.show-more-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.show-more-btn {
+  background: #fff;
+  color: #880559;
+  border: 1.5px solid #880559;
+  border-radius: 999px;
+  padding: 8px 22px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* .show-more-btn:hover {
+  background: #880559;
+  color: #fff;
+} */
+
+.hide-btn {
+  border-color: #999;
+  color: #666;
+}
+
+/* .hide-btn:hover {
+  background: #666;
+  color: #fff;
+} */
 
 /* ===== Overlay ===== */
 .branch-popup-overlay {
