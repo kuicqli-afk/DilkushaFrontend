@@ -33,8 +33,7 @@
 }
 
 .side-img {
-  width: 100%;
-  height: 80px;
+
   border-radius: 10px;
   object-fit: cover;
   cursor: pointer;
@@ -47,23 +46,19 @@
 }
 
 .order-image-box {
-
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
-  width: 450px;
-  height: 450px;
-  min-width: 300px;
-  min-height: 300px;
+
   border-radius: 12px;
   overflow: hidden;
 }
 
 
 .order-image {
-  width: 450px;
-  height: 450px;
+  width: 610px;
+  height: 610px;
   object-fit: cover;
   border-radius: 25px;
 }
@@ -550,8 +545,6 @@
 .select-branch-btn:hover {
   background: #e04e00;
 }
-
-
 
 .selected-branch-info {
   font-size: 13px;

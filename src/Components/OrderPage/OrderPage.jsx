@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { FaRegHeart, FaStar, FaRegBookmark, FaBookmark } from "react-icons/fa";
+import { FaRegHeart, FaStar, FaRegBookmark, FaBookmark, FaTimes } from "react-icons/fa";
 import { useCart } from "../../Context/CartContext.jsx";
 import { useWishlist } from "../../Context/WishlistContext.jsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -57,8 +57,6 @@ const getScaledWeight = (weight, unit, quantity) => {
   return `${Number.isInteger(baseWeight) ? baseWeight : baseWeight.toFixed(2)}${unit || ""}`;
 };
 
-const REVIEWS_PAGE_SIZE = 2;
-
 const OrderPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -74,11 +72,11 @@ const OrderPage = () => {
 
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
-  const [visibleCount, setVisibleCount] = useState(REVIEWS_PAGE_SIZE);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   const [newComment, setNewComment] = useState("");
   const [newName, setNewName] = useState("");
-  const [newRating, setNewRating] = useState(5);
+  const [newRating, setNewRating] = useState(0);
 
   const [posting, setPosting] = useState(false);
 
@@ -98,7 +96,19 @@ const OrderPage = () => {
 
   const { item } = state;
 
-  // Determine availability status (Matching MaidaItems pattern)
+  // Compile all available product images (main image + images array)
+  const productImages = React.useMemo(() => {
+    let imgs = [];
+    if (item.images && Array.isArray(item.images)) {
+      imgs = [...item.images];
+    }
+    if (item.image && !imgs.includes(item.image)) {
+      imgs.unshift(item.image);
+    }
+    return imgs.filter(Boolean);
+  }, [item]);
+
+  // Determine availability status
   const isAvailable =
     item.isAvailable !== undefined
       ? item.isAvailable
@@ -106,7 +116,6 @@ const OrderPage = () => {
         ? item.stock > 0
         : item.status?.toLowerCase() !== "out of stock";
 
-  // ✅ Wishlist check uses the same key logic as everywhere else (title + restaurantId)
   const bookmarked = isInWishlist(item);
 
   const resolveCategoryName = (catValue) => {
@@ -140,8 +149,8 @@ const OrderPage = () => {
   }, [item, cartItems, getCartKey]);
 
   useEffect(() => {
-    setSelectedImage(item.image || "");
-  }, [item]);
+    setSelectedImage(item.image || productImages[0] || "");
+  }, [item, productImages]);
 
   useEffect(() => {
     const restaurantId =
@@ -188,7 +197,6 @@ const OrderPage = () => {
       .get(`${BASE_URL}/reviews/product/${item._id}`)
       .then((res) => {
         setReviews(res.data.data || []);
-        setVisibleCount(REVIEWS_PAGE_SIZE);
       })
       .catch((err) => {
         console.error("Fetch reviews error:", err);
@@ -231,7 +239,6 @@ const OrderPage = () => {
     navigate("/cart");
   };
 
-  // ✅ Bookmark click handler — toggles wishlist save/remove
   const handleToggleWishlist = () => {
     toggleWishlist(item);
   };
@@ -251,12 +258,12 @@ const OrderPage = () => {
         productId: item._id,
         name: newName.trim(),
         comment: newComment.trim(),
-        rating: newRating,
+        rating: newRating === 0 ? 5 : newRating,
       });
 
       setNewName("");
       setNewComment("");
-      setNewRating(5);
+      setNewRating(0);
       fetchReviews();
     } catch (err) {
       console.error("Post review error:", err);
@@ -294,19 +301,6 @@ const OrderPage = () => {
     }
   };
 
-  const visibleReviews = reviews.slice(0, visibleCount);
-  const hasMoreReviews = visibleCount < reviews.length;
-  const isExpanded = visibleCount > REVIEWS_PAGE_SIZE;
-
-  const handleViewAllReviews = () => {
-    setVisibleCount(reviews.length);
-  };
-
-  const handleShowLessReviews = () => {
-    setVisibleCount(REVIEWS_PAGE_SIZE);
-    document.getElementById("customer-reviews-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   const currentRating = Number(item.rating) || 0;
 
   return (
@@ -318,16 +312,50 @@ const OrderPage = () => {
           </span>
 
           <div className="order-card">
-            <div className="order-image-box">
-              {selectedImage && (
-                <img key={selectedImage} src={selectedImage} alt={item.title} className="order-image" />
+            {/* Image Box with Side Thumbnails */}
+            <div className="order-image-box" style={{ display: "flex", gap: "18px", alignItems: "flex-start" }}>
+              {productImages.length > 1 && (
+                <div
+                  className="order-thumbnails"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "18px",
+                    overflowY: "auto",
+                    paddingRight: "2px",
+                  }}
+                >
+                  {productImages.map((imgUrl, idx) => (
+                    <img
+                      key={idx}
+                      src={imgUrl}
+                      alt={`${item.title} thumbnail ${idx + 1}`}
+                      onClick={() => setSelectedImage(imgUrl)}
+                      style={{
+                        width: "140px",
+                        height: "140px",
+                        objectFit: "cover",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        border: selectedImage === imgUrl ? "2px solid #880559" : "2px solid #e5e7eb",
+                        transition: "all 0.2s ease",
+                      }}
+                    />
+                  ))}
+                </div>
               )}
 
-              <img
-                className="order-type-icon"
-                src={item.type === "veg" ? GreenArrow : RedArrow}
-                alt=""
-              />
+              <div style={{ position: "relative", flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                {selectedImage && (
+                  <img key={selectedImage} src={selectedImage} alt={item.title} className="order-image" />
+                )}
+
+                <img
+                  className="order-type-icon"
+                  src={item.type === "veg" ? GreenArrow : RedArrow}
+                  alt=""
+                />
+              </div>
             </div>
 
             <div className="order-details">
@@ -340,8 +368,7 @@ const OrderPage = () => {
                 <div className="order-status-icons">
                   <FaRegHeart
                     style={{
-                      fontSize: "22px",
-                      marginTop: "2px",
+                      fontSize: "24px",
                       cursor: "pointer",
                       color: "#6b7280",
                     }}
@@ -364,12 +391,11 @@ const OrderPage = () => {
               </div>
 
               <h2 className="order-food-title">
-                {item.title} {scaledWeightDisplay && <span>({scaledWeightDisplay})</span>}
+                {item.title} {scaledWeightDisplay && <span>{scaledWeightDisplay}</span>}
               </h2>
 
               <p className="food-desc1">{(item.desc || "").slice(0, 300)}</p>
 
-              {/* Rating Section Matched to MaidaItems.jsx */}
               <div className="food-rating" style={{ display: "flex", alignItems: "center", gap: "6px", margin: "10px 0" }}>
                 <span className="rating-number" style={{ fontWeight: "bold" }}>{currentRating.toFixed(1)}</span>
                 <span className="rating-stars" style={{ display: "flex", gap: "2px" }}>
@@ -381,11 +407,27 @@ const OrderPage = () => {
                     />
                   ))}
                 </span>
-                <span className="rating-reviews" style={{ color: "#666", fontSize: "14px" }}>({item.reviews || 0})</span>
                 <span className="rating-dot">•</span>
                 <span className="orders-last-week" style={{ color: "#666", fontSize: "14px" }}>
                   {item.orders || 0} order{(item.orders || 0) === 1 ? "" : "s"} last week
                 </span>
+
+                {/* Customer Reviews Trigger Button Pushed to the End */}
+                <button
+                  onClick={() => setIsReviewModalOpen(true)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#880559",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    fontSize: "16px",
+                    marginLeft: "auto",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Customer Reviews ({reviews.length})
+                </button>
               </div>
 
               <div className="order-price-row">
@@ -394,7 +436,7 @@ const OrderPage = () => {
                 </small>
                 {baseOffer > 0 && (
                   <span className="offer1">
-                    <span>M.R.P</span><small className="offer1">₹</small>
+                    <small className="offer1">₹</small>
                     {scaledOffer}
                   </span>
                 )}
@@ -422,7 +464,7 @@ const OrderPage = () => {
                     opacity: isAvailable ? 1 : 0.5,
                   }}
                 >
-                  <span>ADD</span>
+
                 </div>
 
                 <div className="add-btnn" style={{ opacity: isAvailable ? 1 : 0.5 }}>
@@ -438,111 +480,8 @@ const OrderPage = () => {
             </div>
           </div>
 
+          {/* Restaurant Section */}
           <div className="reviews">
-            <div className="review-res" id="customer-reviews-section">
-              <h1 className="text-xl font-bold mb-4">Customer Reviews ({reviews.length})</h1>
-
-              <form onSubmit={handlePostReview} className="comments flex flex-col gap-3">
-                <div className="flex flex-col gap-2 w-full">
-                  <input
-                    type="text"
-                    placeholder="Your name"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Write a review..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <FaStar
-                        key={star}
-                        size={20}
-                        className="cursor-pointer"
-                        color={newRating >= star ? "#ffb300" : "#e0e0e0"}
-                        onClick={() => setNewRating(star)}
-                      />
-                    ))}
-                  </div>
-
-                  <button type="submit" disabled={posting}>
-                    {posting ? "Posting..." : "Post"}
-                  </button>
-                </div>
-              </form>
-
-              {reviewsLoading ? (
-                <p className="text-xs text-gray-400 mt-3">Loading reviews...</p>
-              ) : reviews.length === 0 ? (
-                <p className="text-xs text-gray-400 mt-3">No reviews yet. Be the first to review!</p>
-              ) : (
-                <>
-                  {visibleReviews.map((rev) => (
-                    <div key={rev._id} className="review-card">
-                      <div
-                        className="review-dp flex items-center justify-center font-semibold text-white"
-                        style={{ background: "#880559" }}
-                      >
-                        {rev.name?.charAt(0)?.toUpperCase() || "U"}
-                      </div>
-                      <div className="review-content flex-1">
-                        <h3>{rev.name}</h3>
-
-                        <div className="flex gap-[2px] my-[2px]">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <FaStar
-                              key={star}
-                              size={12}
-                              color={rev.rating >= star ? "#ffb300" : "#e0e0e0"}
-                            />
-                          ))}
-                        </div>
-
-                        <p>{rev.comment}</p>
-                        <div className="review-actions">
-                          <button onClick={() => handleLike(rev._id)} className="flex items-center gap-1">
-                            <FontAwesomeIcon icon={faThumbsUp} className="likes" />
-                            <span>{rev.likes || 0}</span>
-                          </button>
-
-                          <button onClick={() => handleDislike(rev._id)} className="flex items-center gap-1">
-                            <FontAwesomeIcon icon={faThumbsDown} className="likes" />
-                            <span>{rev.dislikes || 0}</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-
-                  {(hasMoreReviews || isExpanded) && (
-                    <div className="text-center mt-3.5">
-                      {hasMoreReviews ? (
-                        <button
-                          onClick={handleViewAllReviews}
-                          className="py-2 px-5 rounded-md border border-[#880559] bg-white text-[#880559] font-semibold text-[13px] cursor-pointer"
-                        >
-                          View All {reviews.length} Reviews
-                        </button>
-                      ) : (
-                        <button
-                          onClick={handleShowLessReviews}
-                          className="py-2 px-5 rounded-md border border-gray-300 bg-white text-gray-600 font-semibold text-[13px] cursor-pointer"
-                        >
-                          Show Less
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
             {restaurantLoading ? (
               <div className="shop">
                 <p className="text-xs text-gray-400">Loading restaurant info...</p>
@@ -587,6 +526,162 @@ const OrderPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Customer Reviews Modal */}
+      {isReviewModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+            padding: "20px",
+          }}
+          onClick={() => setIsReviewModalOpen(false)}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "12px",
+              width: "100%",
+              maxWidth: "600px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              padding: "24px",
+              position: "relative",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <h2 style={{ fontSize: "20px", fontWeight: "bold", margin: 0 }}>
+                Customer Reviews ({reviews.length})
+              </h2>
+              <button
+                onClick={() => setIsReviewModalOpen(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "18px",
+                  color: "#6b7280",
+                }}
+              >
+                <FaTimes size={20} />
+              </button>
+            </div>
+
+            {/* Review Submission Form */}
+            <form onSubmit={handlePostReview} className="comments flex flex-col gap-3" style={{ marginBottom: "20px" }}>
+              <div className="flex flex-col gap-2 w-full">
+                <input
+                  type="text"
+                  placeholder="Your name"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  style={{ padding: "10px", borderRadius: "6px", border: "1px solid #d1d5db" }}
+                />
+                <input
+                  type="text"
+                  placeholder="Write a review..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  style={{ padding: "10px", borderRadius: "6px", border: "1px solid #d1d5db" }}
+                />
+              </div>
+
+              <div className="flex items-center justify-between w-full">
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <FaStar
+                      key={star}
+                      size={20}
+                      className="cursor-pointer"
+                      color={newRating >= star ? "#ffb300" : "#e0e0e0"}
+                      onClick={() => setNewRating(star)}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={posting}
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#880559",
+                    color: "#fff",
+                    borderRadius: "6px",
+                    border: "none",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                  }}
+                >
+                  {posting ? "Posting..." : "Post Review"}
+                </button>
+              </div>
+            </form>
+
+            {/* Reviews List */}
+            {reviewsLoading ? (
+              <p className="text-xs text-gray-400 mt-3 text-center">Loading reviews...</p>
+            ) : reviews.length === 0 ? (
+              <p className="text-xs text-gray-400 mt-3 text-center">No reviews yet. Be the first to review!</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {reviews.map((rev) => (
+                  <div key={rev._id} className="review-card" style={{ display: "flex", gap: "12px", padding: "12px", borderBottom: "1px solid #f3f4f6" }}>
+                    <div
+                      className="review-dp flex items-center justify-center font-semibold text-white"
+                      style={{
+                        background: "#880559",
+                        width: "36px",
+                        height: "36px",
+                        borderRadius: "50%",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {rev.name?.charAt(0)?.toUpperCase() || "U"}
+                    </div>
+                    <div className="review-content flex-1">
+                      <h3 style={{ margin: "0 0 2px 0", fontSize: "15px", fontWeight: "600" }}>{rev.name}</h3>
+
+                      <div className="flex gap-[2px] my-[2px]">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <FaStar
+                            key={star}
+                            size={12}
+                            color={rev.rating >= star ? "#ffb300" : "#e0e0e0"}
+                          />
+                        ))}
+                      </div>
+
+                      <p style={{ margin: "6px 0", fontSize: "14px", color: "#374151" }}>{rev.comment}</p>
+                      <div className="review-actions" style={{ display: "flex", gap: "16px", marginTop: "8px" }}>
+                        <button onClick={() => handleLike(rev._id)} className="flex items-center gap-1" style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}>
+                          <FontAwesomeIcon icon={faThumbsUp} className="likes" />
+                          <span>{rev.likes || 0}</span>
+                        </button>
+
+                        <button onClick={() => handleDislike(rev._id)} className="flex items-center gap-1" style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}>
+                          <FontAwesomeIcon icon={faThumbsDown} className="likes" />
+                          <span>{rev.dislikes || 0}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {allCategories.map((cat) => (
         <MaidaItems key={cat} category={cat} excludeId={item._id} />
