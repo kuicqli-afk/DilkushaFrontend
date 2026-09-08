@@ -318,7 +318,7 @@ const OrderPage = () => {
           </span>
 
           <div className="order-card">
-            <div className="order-image-box" style={{ display: "flex", gap: "60px", alignItems: "flex-start" }}>
+            <div className="order-image-box" style={{ display: "flex", gap: "40px", alignItems: "flex-start" }}>
               {productImages.length > 1 && (
                 <div
                   className="order-thumbnails"
@@ -337,12 +337,12 @@ const OrderPage = () => {
                       alt={`${item.title} thumbnail ${idx + 1}`}
                       onClick={() => setSelectedImage(imgUrl)}
                       style={{
-                        width: "135px",
+                        width: "130px",
                         height: "110px",
-                        objectFit: "cover",
+                        objectFit: "fill",
                         borderRadius: "8px",
                         cursor: "pointer",
-                        border: selectedImage === imgUrl ? "2px solid #880559" : "2px solid #e5e7eb",
+                        // border: selectedImage === imgUrl ? "2px solid #880559" : "2px solid #e5e7eb",
                         transition: "all 0.2s ease",
                       }}
                     />
@@ -467,6 +467,145 @@ const OrderPage = () => {
                   <button onClick={decrease} disabled={!isAvailable}>-</button>
                   <span>{qty}</span>
                   <button onClick={increase} disabled={!isAvailable}>+</button>
+                </div>
+              </div>
+            </div>
+
+            <div className="highlights-box">
+              <h3 className="highlights-title">Highlights</h3>
+
+              <div className="highlights-scroll">
+                <div className="highlights-list">
+                  {item.brand && (
+                    <div className="highlight-row">
+                      <span className="highlight-label">Brand</span>
+                      <span className="highlight-value">{item.brand}</span>
+                    </div>
+                  )}
+
+                  {item.productType && (
+                    <div className="highlight-row">
+                      <span className="highlight-label">Product Type</span>
+                      <span className="highlight-value">{item.productType}</span>
+                    </div>
+                  )}
+
+                  {item.type && (
+                    <div className="highlight-row">
+                      <span className="highlight-label">Dietary Preference</span>
+                      <span className="highlight-value">{item.type === "veg" ? "Veg" : "Non-Veg"}</span>
+                    </div>
+                  )}
+
+                  {item.spiceLevel && (
+                    <div className="highlight-row">
+                      <span className="highlight-label">Spice Level</span>
+                      <span className="highlight-value">{item.spiceLevel}</span>
+                    </div>
+                  )}
+
+                  {item.flavour && (
+                    <div className="highlight-row">
+                      <span className="highlight-label">Flavour</span>
+                      <span className="highlight-value">{item.flavour}</span>
+                    </div>
+                  )}
+
+                  {item.weight && (
+                    <div className="highlight-row">
+                      <span className="highlight-label">Weight</span>
+                      <span className="highlight-value">{item.weight}{item.unit && item.unit.toLowerCase() !== "pc" ? item.unit : "g"}</span>
+                    </div>
+                  )}
+
+                  {item.keyFeatures && (
+                    <div className="highlight-row highlight-block">
+                      <span className="highlight-label">Key Features</span>
+                      <p className="highlight-text">{item.keyFeatures}</p>
+                    </div>
+                  )}
+
+                  {item.weight && (
+                    <div className="highlight-row">
+                      <span className="highlight-label">Unit</span>
+                      <span className="highlight-value">
+                        {item.portion ? `${item.portion} ` : " "}
+                        {item.weight && (
+
+                          <div className="highlight-row">
+
+                            <span className="highlight-label"></span>
+
+                            <span className="highlight-value">
+
+                              {item.portion || 1} / ({item.weight}g)
+
+                            </span>
+
+                          </div>
+
+                        )}
+                      </span>
+                    </div>
+                  )}
+
+                  {item.ingredients && (
+                    <div className="highlight-row highlight-block">
+                      <span className="highlight-label">Ingredients</span>
+                      <p className="highlight-text">{item.ingredients}</p>
+                    </div>
+                  )}
+
+                  {item.allergenInfo && (
+                    <div className="highlight-row">
+                      <span className="highlight-label">Allergen Information</span>
+                      <span className="highlight-value">{item.allergenInfo}</span>
+                    </div>
+                  )}
+
+                  {item.fssaiLicense && (
+                    <div className="highlight-row">
+                      <span className="highlight-label">FSSAI License</span>
+                      <span className="highlight-value">{item.fssaiLicense}</span>
+                    </div>
+                  )}
+
+                  {item.nutrition && Object.values(item.nutrition).some((v) => v) && (
+                    <div className="highlight-row highlight-block">
+                      <span className="highlight-label">Nutrition Information</span>
+                      <p className="highlight-text">
+                        Per 100 g: Energy (kcal): {item.nutrition.energyKcal || 0}, Protein (g): {item.nutrition.proteinG || 0}, Total Carbohydrate (g): {item.nutrition.carbsG || 0}, Total Sugar (g): {item.nutrition.sugarG || 0}, Added Sugar (g): {item.nutrition.addedSugarG || 0}, Total Fat (g): {item.nutrition.fatG || 0}, Saturated Fat (g): {item.nutrition.saturatedFatG || 0}, Trans Fat (g): {item.nutrition.transFatG || 0}, Sodium (mg): {item.nutrition.sodiumMg || 0}
+                      </p>
+                    </div>
+                  )}
+
+                  {item.cuisine && (
+                    <div className="highlight-row">
+                      <span className="highlight-label">Cuisine Type</span>
+                      <span className="highlight-value">{item.cuisine}</span>
+                    </div>
+                  )}
+
+                  {item.packagingType && (
+                    <div className="highlight-row">
+                      <span className="highlight-label">Packaging Type</span>
+                      <span className="highlight-value">{item.packagingType}</span>
+                    </div>
+                  )}
+
+                  {item.storageInstruction && (
+                    <div className="highlight-row">
+                      <span className="highlight-label">Storage Instruction</span>
+                      <span className="highlight-value">{item.storageInstruction}</span>
+                    </div>
+                  )}
+
+                  {item.speciality && (
+                    <div className="highlight-row">
+                      <span className="highlight-label">Speciality</span>
+                      <span className="highlight-value">{item.speciality}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
