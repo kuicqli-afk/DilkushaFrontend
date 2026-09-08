@@ -364,13 +364,13 @@ const MaidaItems = ({
                                     <div className="food-price-row">
                                         <span className="food-price">
                                             <small className="Rs">₹</small>
-                                            {item.price}
+                                            {item.offer}
                                         </span>
 
                                         {item.offer > 0 && (
                                             <span className="offer">
                                                 <span>M.R.P.</span>
-                                                <small className="offer-price">₹{item.offer}</small>
+                                                <small className="offer-price">₹{item.price}</small>
                                             </span>
                                         )}
 

@@ -126,8 +126,8 @@ const OrderPage = () => {
   const subcategoryName = resolveCategoryName(item.subcategory);
 
   // Scaled price and weight calculations
-  const basePrice = item.price || 0;
-  const baseOffer = item.offer || 0;
+  const basePrice = item.offer || 0;
+  const baseOffer = item.price || 0;
 
   const scaledPrice = basePrice * qty;
   const scaledOffer = baseOffer * qty;
@@ -394,7 +394,7 @@ const OrderPage = () => {
                 </small>
                 {baseOffer > 0 && (
                   <span className="offer1">
-                    <small className="offer1">₹</small>
+                    <span>M.R.P</span><small className="offer1">₹</small>
                     {scaledOffer}
                   </span>
                 )}
