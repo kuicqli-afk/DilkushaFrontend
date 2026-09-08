@@ -1,13 +1,19 @@
-/* Base Styles */
 .nav-container {
   width: 100%;
-  /* background: #FFC300; */
   color: #A90409;
   padding: 22px 3.1%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
+
+  /* 🆕 Sticky navbar */
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: #fff;
+  /* zaroori — warna sticky hone par neeche ka content transparent se dikhega */
+  transition: box-shadow 0.25s ease, padding 0.25s ease;
 }
 
 .nav-left,

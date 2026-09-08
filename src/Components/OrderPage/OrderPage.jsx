@@ -337,8 +337,8 @@ const OrderPage = () => {
                       alt={`${item.title} thumbnail ${idx + 1}`}
                       onClick={() => setSelectedImage(imgUrl)}
                       style={{
-                        width: "140px",
-                        height: "140px",
+                        width: "135px",
+                        height: "110px",
                         objectFit: "cover",
                         borderRadius: "8px",
                         cursor: "pointer",
@@ -428,7 +428,7 @@ const OrderPage = () => {
                     cursor: "pointer",
                     fontSize: "16px",
                     marginLeft: "auto",
-                    textDecoration: "underline",
+
                   }}
                 >
                   Customer Reviews ({reviews.length})

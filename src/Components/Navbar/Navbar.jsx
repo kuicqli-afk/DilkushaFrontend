@@ -35,7 +35,7 @@ const Navbar = () => {
   const [displayText, setDisplayText] = useState("");
   const [isInputActive, setIsInputActive] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-
+  const [isScrolled, setIsScrolled] = useState(false);
   // ✅ Follow + Total Products state
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
@@ -55,6 +55,15 @@ const Navbar = () => {
   const textIndex = useRef(0);
   const charIndex = useRef(0);
   const direction = useRef("typing");
+
+  // 🆕 scroll listener
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     if (isInputActive) return;
@@ -175,7 +184,7 @@ const Navbar = () => {
   };
 
   return (
-    <div className="nav-container">
+    <div className={`nav-container${isScrolled ? " nav-scrolled" : ""}`}>
       {/* ================= LEFT : Logo + Location + Search ================= */}
       <div className="nav-left">
         <Link to="/" style={{ textDecoration: "none" }}>
