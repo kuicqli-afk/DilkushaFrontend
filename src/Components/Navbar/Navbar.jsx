@@ -5,12 +5,11 @@ import { useCart } from "../../Context/CartContext";
 import { useAuth } from "../../Context/AuthContext";
 import "./Navbar.css";
 
-import { FaSearch, FaUser, FaBox, FaSignOutAlt, FaChevronDown, FaUserEdit, FaCheck, FaPlus } from "react-icons/fa";
+import { FaSearch, FaUser, FaBox, FaSignOutAlt, FaChevronDown, FaUserEdit, FaCheck, FaPlus, FaBookmark } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import shyam from "../../assets/syam.png";
 import profile from "../../assets/profile.gif";
 import cart from "../../assets/cart.gif";
-import { FaBookmark } from "react-icons/fa";
 
 const API_URL = "https://shyamfoodbackend.onrender.com/api";
 
@@ -24,8 +23,6 @@ const PLACEHOLDERS = [
   "Search for sev",
 ];
 
-
-
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { cartItems } = useCart();
@@ -36,11 +33,13 @@ const Navbar = () => {
   const [isInputActive, setIsInputActive] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  // ✅ Follow + Total Products state
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
+
+  // Categories state for bottom navbar strip
+  const [navCategories, setNavCategories] = useState([]);
 
   const dropdownRef = useRef(null);
 
@@ -49,14 +48,10 @@ const Navbar = () => {
     0
   );
 
-  /* =============================
-  SEARCH ANIMATION
-  ============================== */
   const textIndex = useRef(0);
   const charIndex = useRef(0);
   const direction = useRef("typing");
 
-  // 🆕 scroll listener
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -84,8 +79,7 @@ const Navbar = () => {
 
         if (charIndex.current === 0) {
           direction.current = "typing";
-          textIndex.current =
-            (textIndex.current + 1) % PLACEHOLDERS.length;
+          textIndex.current = (textIndex.current + 1) % PLACEHOLDERS.length;
         }
       }
     }, 80);
@@ -93,7 +87,6 @@ const Navbar = () => {
     return () => clearInterval(interval);
   }, [isInputActive]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -105,7 +98,6 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    // sirf logged-in user ke liye follow status check karo
     if (isAuthenticated && user?._id) {
       axios
         .get(`${API_URL}/follow/status/${user._id}`)
@@ -117,7 +109,6 @@ const Navbar = () => {
         })
         .catch((err) => console.error("Follow Status Error:", err));
     } else {
-      // guest ho to sirf total followers count dikhao, following state false rahegi
       axios
         .get(`${API_URL}/follow/count`)
         .then((res) => {
@@ -137,10 +128,18 @@ const Navbar = () => {
         }
       })
       .catch((err) => console.error("Product Count Error:", err));
+
+    axios
+      .get(`${API_URL}/category/categories`)
+      .then((res) => {
+        const categoryData = res.data.categories || res.data.data || res.data || [];
+        const visibleCategories = categoryData.filter((cat) => !cat.hidden);
+        setNavCategories(visibleCategories);
+      })
+      .catch((err) => console.error("Navbar Categories Error:", err));
   }, [isAuthenticated, user]);
 
   const handleFollowToggle = async () => {
-    // 🆕 Agar login nahi hai, seedha login page pe bhej do
     if (!isAuthenticated) {
       navigate("/login");
       return;
@@ -183,119 +182,140 @@ const Navbar = () => {
     navigate("/");
   };
 
+  const handleCategoryClick = (item) => {
+    navigate(`/category/${encodeURIComponent(item.name)}`);
+  };
+
   return (
-    <div className={`nav-container${isScrolled ? " nav-scrolled" : ""}`}>
-      {/* ================= LEFT : Logo + Location + Search ================= */}
-      <div className="nav-left">
-        <Link to="/" style={{ textDecoration: "none" }}>
-          <img className="logo-text" src={shyam} alt="Logo" />
-        </Link>
+    <div className={`nav-container ${isScrolled ? "nav-scrolled" : ""}`}>
+      {/* ================= MAIN NAVBAR ROW ================= */}
+      <div className="nav-main-row">
+        {/* LEFT : Logo + Location + Search */}
+        <div className="nav-left">
+          <Link to="/" style={{ textDecoration: "none" }}>
+            <img className="logo-text" src={shyam} alt="Logo" />
+          </Link>
 
-        <ul>
-          <li>
-            <FaLocationDot />
-            <small>LUCKNOW CITY</small>
-          </li>
-        </ul>
+          <ul>
+            <li>
+              <FaLocationDot />
+              <small>LUCKNOW CITY</small>
+            </li>
+          </ul>
 
-        <div className="search-box">
-          <FaSearch className="search-icon" />
+          <div className="search-box">
+            <FaSearch className="search-icon" />
 
-          <div className="typing-wrapper">
-            {!isInputActive && (
-              <span className="typing-erase">{displayText}</span>
+            <div className="typing-wrapper">
+              {!isInputActive && (
+                <span className="typing-erase">{displayText}</span>
+              )}
+
+              <input
+                type="text"
+                value={searchValue}
+                onFocus={() => setIsInputActive(true)}
+                onBlur={() => {
+                  if (!searchValue) setIsInputActive(false);
+                }}
+                onChange={handleSearch}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT : Products + Follow | Account | Cart */}
+        <div className="nav-right">
+          <div className="store-stats">
+            <span className="total-products-badge">
+              <strong>{totalProducts}</strong> Products
+            </span>
+
+            <span className="stats-divider" />
+
+            <button
+              className={`follow-btn ${isFollowing ? "following" : ""}`}
+              onClick={handleFollowToggle}
+              disabled={followLoading}
+            >
+              {isFollowing ? (
+                <>
+                  <FaCheck size={11} /> Following
+                </>
+              ) : (
+                <>
+                  <FaPlus size={11} /> Follow
+                </>
+              )}
+            </button>
+
+            <span className="followers-count">{followersCount} followers</span>
+          </div>
+
+          <ul className="nav-list">
+            {isAuthenticated ? (
+              <li
+                className="nav-item user-dropdown-container"
+                ref={dropdownRef}
+                onClick={() => setShowDropdown((prev) => !prev)}
+              >
+                <div className="user-profile-badge">
+                  <FaUser className="user-icon" />
+                  <span className="user-name">
+                    {user?.name || user?.phone || "Account"}
+                  </span>
+                  <FaChevronDown className="dropdown-arrow" />
+                </div>
+
+                {showDropdown && (
+                  <div className="nav-dropdown-menu">
+                    <div className="dropdown-item" onClick={() => { setShowDropdown(false); navigate("/profile"); }}>
+                      <FaUserEdit /> Update Profile
+                    </div>
+
+                    <div className="dropdown-item" onClick={() => { setShowDropdown(false); navigate("/wishlist"); }}>
+                      <FaBookmark /> Wishlist
+                    </div>
+
+                    <div className="dropdown-item" onClick={() => { setShowDropdown(false); navigate("/orders"); }}>
+                      <FaBox /> My Orders
+                    </div>
+
+                    <div className="dropdown-item logout" onClick={handleLogout}>
+                      <FaSignOutAlt /> Logout
+                    </div>
+                  </div>
+                )}
+              </li>
+            ) : (
+              <li className="nav-item" onClick={() => navigate("/login")}>
+                <img src={profile} alt="Login" />
+                Login
+              </li>
             )}
 
-            <input
-              type="text"
-              value={searchValue}
-              onFocus={() => setIsInputActive(true)}
-              onBlur={() => {
-                if (!searchValue) setIsInputActive(false);
-              }}
-              onChange={handleSearch}
-            />
-          </div>
+            <Link to="/cart" className="nav-link">
+              <li className="nav-item">
+                <img src={cart} alt="Cart" /> ({count})
+              </li>
+            </Link>
+          </ul>
         </div>
       </div>
 
-      {/* ================= RIGHT : Products + Follow | Account | Cart ================= */}
-      <div className="nav-right">
-        {/* ✅ TOTAL PRODUCTS + FOLLOW — right side */}
-        <div className="store-stats">
-          <span className="total-products-badge">
-            <strong>{totalProducts}</strong> Products
-          </span>
-
-          <span className="stats-divider" />
-
-          <button
-            className={`follow-btn ${isFollowing ? "following" : ""}`}
-            onClick={handleFollowToggle}
-            disabled={followLoading}
-          >
-            {isFollowing ? (
-              <>
-                <FaCheck size={11} /> Following
-              </>
-            ) : (
-              <>
-                <FaPlus size={11} /> Follow
-              </>
-            )}
-          </button>
-
-          <span className="followers-count">{followersCount} followers</span>
-        </div>
-
-        <ul className="nav-list">
-          {isAuthenticated ? (
-            <li
-              className="nav-item user-dropdown-container"
-              ref={dropdownRef}
-              onClick={() => setShowDropdown((prev) => !prev)}
+      {/* ================= BOTTOM CATEGORY NAMES STRIP ================= */}
+      <div className="nav-category-strip">
+        <div className="nav-category-scroll">
+          {navCategories.map((item) => (
+            <span
+              key={item._id}
+              className="nav-category-name-item"
+              onClick={() => handleCategoryClick(item)}
             >
-              <div className="user-profile-badge">
-                <FaUser className="user-icon" />
-                <span className="user-name">
-                  {user?.name || user?.phone || "Account"}
-                </span>
-                <FaChevronDown className="dropdown-arrow" />
-              </div>
-
-              {showDropdown && (
-                <div className="nav-dropdown-menu">
-                  <div className="dropdown-item" onClick={() => { setShowDropdown(false); navigate("/profile"); }}>
-                    <FaUserEdit /> Update Profile
-                  </div>
-
-                  <div className="dropdown-item" onClick={() => { setShowDropdown(false); navigate("/wishlist"); }}>
-                    <FaBookmark /> Wishlist
-                  </div>
-
-                  <div className="dropdown-item" onClick={() => { setShowDropdown(false); navigate("/orders"); }}>
-                    <FaBox /> My Orders
-                  </div>
-
-                  <div className="dropdown-item logout" onClick={handleLogout}>
-                    <FaSignOutAlt /> Logout
-                  </div>
-                </div>
-              )}
-            </li>
-          ) : (
-            <li className="nav-item" onClick={() => navigate("/login")}>
-              <img src={profile} alt="Login" />
-              Login
-            </li>
-          )}
-
-          <Link to="/cart" className="nav-link">
-            <li className="nav-item">
-              <img src={cart} alt="Cart" /> ({count})
-            </li>
-          </Link>
-        </ul>
+              {item.name}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );

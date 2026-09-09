@@ -901,16 +901,22 @@
   flex: 1;
   overflow-y: auto;
   padding-right: 6px;
-  /* scrollbar ke liye thodi space */
+  overscroll-behavior-y: auto; /* 🆕 lets scroll hand off to the page once this box hits its end */
 }
 
-/* 🆕 custom thin scrollbar — Chrome/Edge/Safari */
+/* 🆕 Hide scrollbar completely — Chrome/Edge/Safari */
 .highlights-scroll::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
+}
+
+.highlights-scroll::-webkit-scrollbar-button {
+  display: none;
+  /* removes the up/down arrow buttons */
 }
 
 .highlights-scroll::-webkit-scrollbar-track {
   background: transparent;
+  /* removes the highlighted track line */
 }
 
 .highlights-scroll::-webkit-scrollbar-thumb {
@@ -918,14 +924,16 @@
   border-radius: 10px;
 }
 
-.highlights-scroll::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
-}
-
-/* 🆕 Firefox */
 .highlights-scroll {
   scrollbar-width: thin;
   scrollbar-color: #d1d5db transparent;
+}
+
+/* 🆕 Hide scrollbar completely — Firefox */
+.highlights-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* old Edge/IE, harmless elsewhere */
 }
 
 .highlights-list {

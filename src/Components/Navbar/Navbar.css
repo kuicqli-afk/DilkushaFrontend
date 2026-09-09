@@ -1,7 +1,7 @@
 .nav-container {
   width: 100%;
   color: #A90409;
-  padding: 22px 3.1%;
+  padding: 22px 50px 0px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -427,6 +427,58 @@
   color: #718096;
   font-weight: 500;
   white-space: nowrap;
+}
+
+
+/* Ensure the container stacks the main navbar and bottom strip vertically */
+.nav-container {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100%;
+}
+
+/* Restores your original main navbar row layout */
+.nav-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Bottom Category Strip Styles */
+.nav-category-strip {
+  width: 100%;
+  /* border-top: 1px solid #eaeaea; */
+  background-color: #fff;
+  padding-top: 8px;
+}
+
+.nav-category-scroll {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  /* Hide scrollbar for Firefox */
+}
+
+.nav-category-scroll::-webkit-scrollbar {
+  display: none;
+  /* Hide scrollbar for Chrome/Safari/Edge */
+}
+
+.nav-category-name-item {
+  font-size: 16px;
+  font-weight: 600;
+  color: #4a5568;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.nav-category-name-item:hover {
+  color: #ff6b00;
+  /* Matches your brand highlight color */
 }
 
 /* ================= RESPONSIVE ================= */

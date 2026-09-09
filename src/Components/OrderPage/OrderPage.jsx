@@ -569,15 +569,108 @@ const OrderPage = () => {
                       <span className="highlight-value">{item.fssaiLicense}</span>
                     </div>
                   )}
+                  {item.nutrition && (
+                    (Array.isArray(item.nutrition.rows) && item.nutrition.rows.length > 0) ||
+                    Object.values(item.nutrition).some((v) => v)
+                  ) && (() => {
+                    // New shape: rows array. Old shape: fixed fields — convert on the fly so old products still render.
+                    const displayRows =
+                      Array.isArray(item.nutrition.rows) && item.nutrition.rows.length > 0
+                        ? item.nutrition.rows
+                        : [
+                          ["Energy (Kcal)", item.nutrition.energyKcal],
+                          ["Protein (g)", item.nutrition.proteinG],
+                          ["Carbohydrate (g)", item.nutrition.carbsG],
+                          ["Total Sugar (g)", item.nutrition.sugarG],
+                          ["Added Sugar (g)", item.nutrition.addedSugarG],
+                          ["Total Fat (g)", item.nutrition.fatG],
+                          ["Saturated Fat (g)", item.nutrition.saturatedFatG],
+                          ["Trans Fat (g)", item.nutrition.transFatG],
+                          ["Sodium (mg)", item.nutrition.sodiumMg],
+                        ]
+                          .filter(([, val]) => val !== undefined && val !== null && val !== "")
+                          .map(([label, per100g]) => ({ label, per100g, rda: "" }));
 
-                  {item.nutrition && Object.values(item.nutrition).some((v) => v) && (
-                    <div className="highlight-row highlight-block">
-                      <span className="highlight-label">Nutrition Information</span>
-                      <p className="highlight-text">
-                        Per 100 g: Energy (kcal): {item.nutrition.energyKcal || 0}, Protein (g): {item.nutrition.proteinG || 0}, Total Carbohydrate (g): {item.nutrition.carbsG || 0}, Total Sugar (g): {item.nutrition.sugarG || 0}, Added Sugar (g): {item.nutrition.addedSugarG || 0}, Total Fat (g): {item.nutrition.fatG || 0}, Saturated Fat (g): {item.nutrition.saturatedFatG || 0}, Trans Fat (g): {item.nutrition.transFatG || 0}, Sodium (mg): {item.nutrition.sodiumMg || 0}
-                      </p>
-                    </div>
-                  )}
+                    if (displayRows.length === 0) return null;
+
+                    return (
+                      <div className="highlight-row highlight-block">
+                        <span className="highlight-label">Nutrition Information</span>
+
+                        <div
+                          style={{
+                            marginTop: "8px",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "10px",
+                            overflow: "hidden",
+                            maxWidth: "420px",
+                          }}
+                        >
+                          {(item.nutrition.servingSize || item.nutrition.servingPerPack) && (
+                            <div
+                              style={{
+                                background: "#f8fafc",
+                                padding: "8px 12px",
+                                display: "flex",
+                                justifyContent: "center",
+                                gap: "18px",
+                                borderBottom: "1px solid #e5e7eb",
+                              }}
+                            >
+                              {item.nutrition.servingSize && (
+                                <span style={{ fontSize: "12px", color: "#475569" }}>
+                                  Serving Size: <strong>{item.nutrition.servingSize}</strong>
+                                </span>
+                              )}
+                              {item.nutrition.servingPerPack && (
+                                <span style={{ fontSize: "12px", color: "#475569" }}>
+                                  Per Pack: <strong>{item.nutrition.servingPerPack}</strong>
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+                            <thead>
+                              <tr style={{ background: "#f1f5f9", color: "#475569" }}>
+                                <th style={{ textAlign: "left", padding: "6px 12px", fontWeight: 600 }}>Nutrient</th>
+                                <th style={{ textAlign: "center", padding: "6px 8px", fontWeight: 600 }}>Per 100g</th>
+                                <th style={{ textAlign: "center", padding: "6px 8px", fontWeight: 600 }}>%RDA</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {displayRows.map((row, i) => (
+                                <tr
+                                  key={i}
+                                  style={{
+                                    borderTop: "1px solid #f1f5f9",
+                                    background: i % 2 === 0 ? "#ffffff" : "#fafafa",
+                                  }}
+                                >
+                                  <td style={{ padding: "6px 12px", color: "#334155", fontWeight: 500 }}>{row.label}</td>
+                                  <td style={{ padding: "6px 8px", textAlign: "center", color: "#334155" }}>{row.per100g || "-"}</td>
+                                  <td style={{ padding: "6px 8px", textAlign: "center", color: "#334155" }}>{row.rda || "-"}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+
+                          <div
+                            style={{
+                              background: "#f8fafc",
+                              padding: "6px 12px",
+                              fontSize: "10px",
+                              color: "#64748b",
+                              textAlign: "center",
+                              borderTop: "1px solid #e5e7eb",
+                            }}
+                          >
+                            *%RDA Based on ICMR, 2020 Guidelines (2,000 kcal)
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {item.cuisine && (
                     <div className="highlight-row">
@@ -759,14 +852,14 @@ const OrderPage = () => {
 
                 {/* 🆕 Show More — reveals 3 more each click (2 → 5 → 8 → ...) */}
                 {/* 🆕 Show More / Hide toggle — expands 3 at a time (2 → 5 → 8...), 
-    collapses back to 2 once everything is shown */}
+                    collapses back to 2 once everything is shown */}
                 <div className="show-more-wrapper">
                   {visibleReviewsCount < reviews.length ? (
                     <button
                       className="show-more-btn"
                       onClick={() => setVisibleReviewsCount((prev) => prev + 3)}
                     >
-                      Show More ({reviews.length - visibleReviewsCount} more)
+                      Show More
                     </button>
                   ) : (
                     reviews.length > 2 && (
@@ -774,7 +867,7 @@ const OrderPage = () => {
                         className="show-more-btn hide-btn"
                         onClick={() => setVisibleReviewsCount(2)}
                       >
-                        Hide
+                        Hide less
                       </button>
                     )
                   )}
