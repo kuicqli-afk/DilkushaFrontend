@@ -130,8 +130,8 @@ const OrderPage = () => {
   const categoryName = resolveCategoryName(item.category);
   const subcategoryName = resolveCategoryName(item.subcategory);
 
-  const basePrice = item.offer || 0;
-  const baseOffer = item.price || 0;
+  const basePrice = item.price || 0;
+  const baseOffer = item.offer || 0;
 
   const scaledPrice = basePrice * qty;
   const scaledOffer = baseOffer * qty;
@@ -485,14 +485,14 @@ const OrderPage = () => {
 
                   {item.productType && (
                     <div className="highlight-row">
-                      <span className="highlight-label">Product Type</span>
+                      <span className="highlight-label">Dietary Preference</span>
                       <span className="highlight-value">{item.productType}</span>
                     </div>
                   )}
 
                   {item.type && (
                     <div className="highlight-row">
-                      <span className="highlight-label">Dietary Preference</span>
+                      <span className="highlight-label">Product Type</span>
                       <span className="highlight-value">{item.type === "veg" ? "Veg" : "Non-Veg"}</span>
                     </div>
                   )}
