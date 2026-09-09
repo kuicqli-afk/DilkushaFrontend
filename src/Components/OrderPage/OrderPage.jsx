@@ -319,7 +319,7 @@ const OrderPage = () => {
 
           <div className="order-card">
             <div className="order-image-box" style={{ display: "flex", gap: "40px", alignItems: "flex-start" }}>
-              {productImages.length > 1 && (
+              {productImages.length > 1 ? (
                 <div
                   className="order-thumbnails"
                   style={{
@@ -342,8 +342,31 @@ const OrderPage = () => {
                         objectFit: "fill",
                         borderRadius: "8px",
                         cursor: "pointer",
-                        // border: selectedImage === imgUrl ? "2px solid #880559" : "2px solid #e5e7eb",
                         transition: "all 0.2s ease",
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                // 🆕 Demo placeholder thumbnails — shown only when there are no real side images
+                <div
+                  className="order-thumbnails order-thumbnails-demo"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "18px",
+                    paddingRight: "2px",
+                  }}
+                >
+                  {[1, 2, 3, 4].map((n) => (
+                    <div
+                      key={n}
+                      style={{
+                        width: "130px",
+                        height: "110px",
+                        borderRadius: "8px",
+                        background: "#f1f5f9",
+                        border: "1px dashed #cbd5e1",
                       }}
                     />
                   ))}

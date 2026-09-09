@@ -75,7 +75,7 @@
 }
 
 .order-details {
-  width: 35%;
+  width: 31%;
   height: 90%;
 
 
@@ -901,7 +901,8 @@
   flex: 1;
   overflow-y: auto;
   padding-right: 6px;
-  overscroll-behavior-y: auto; /* 🆕 lets scroll hand off to the page once this box hits its end */
+  overscroll-behavior-y: auto;
+  /* 🆕 lets scroll hand off to the page once this box hits its end */
 }
 
 /* 🆕 Hide scrollbar completely — Chrome/Edge/Safari */
