@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useCart } from "../../Context/CartContext";
 import { useAuth } from "../../Context/AuthContext";
@@ -27,6 +27,7 @@ const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { cartItems } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [searchValue, setSearchValue] = useState("");
   const [displayText, setDisplayText] = useState("");
