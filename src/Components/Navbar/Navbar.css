@@ -1,6 +1,6 @@
 .nav-container {
   width: 100%;
-  padding: 16px 60px 0px;
+  padding: 16px 65px 10px;
   display: flex !important;
   flex-direction: column !important;
   justify-content: space-between;
@@ -11,7 +11,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07), 0 2px 8px rgba(0, 0, 0, 0.02);
   /* 🆕 Sticky navbar */
   position: sticky;
-  margin-bottom: 30px;
+  margin-bottom: 35px;
   top: 0;
   z-index: 999;
   transition: box-shadow 0.25s ease, padding 0.25s ease;
