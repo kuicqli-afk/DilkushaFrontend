@@ -6,7 +6,7 @@
 }
 
 .order-container {
-  padding: 24px 0;
+  padding: opx 0;
   margin-bottom: 45px;
 }
 
@@ -21,7 +21,7 @@
   display: flex;
   gap: 50px;
   flex-wrap: wrap;
-  padding-top: 48px;
+  padding-top: 35px;
 }
 
 /* ===== LEFT THUMBNAILS ===== */
