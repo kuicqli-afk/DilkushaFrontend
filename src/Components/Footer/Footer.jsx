@@ -6,7 +6,21 @@ import instagram from "../../assets/instagram_icon.png";
 import pinterest from "../../assets/pintrest_icon.png";
 import whatsapp from "../../assets/whatsapp_icon.png";
 import logo from "../../assets/syam.png";
-import { FaChevronDown, FaTimes, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
+import {
+  FaChevronDown,
+  FaTimes,
+  FaPhoneAlt,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaShippingFast,
+  FaLeaf,
+  FaLock,
+  FaHeadset,
+  FaCcVisa,
+  FaCcMastercard,
+  FaMobileAlt,
+  FaMoneyBillWave,
+} from "react-icons/fa";
 
 import { Link } from "react-router-dom";
 
@@ -32,6 +46,15 @@ const getCategoryTimestamp = (cat) => {
   return 0;
 };
 
+// 🆕 Trust-badge strip shown across the top of the footer — swap text/icons
+// freely, this array is the only thing that drives that row.
+const TRUST_FEATURES = [
+  { icon: FaShippingFast, title: "Fast Delivery", subtitle: "Within 45 minutes" },
+  { icon: FaLeaf, title: "Fresh & Quality", subtitle: "Made fresh daily" },
+  { icon: FaLock, title: "Secure Payments", subtitle: "100% secure checkout" },
+  { icon: FaHeadset, title: "24/7 Support", subtitle: "We're here to help" },
+];
+
 const Footer = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [popupType, setPopupType] = useState("");
@@ -41,7 +64,7 @@ const Footer = () => {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   const [openSections, setOpenSections] = useState({
-    categories: false, // 🆕
+    categories: false,
     company: false,
     contact: false,
   });
@@ -75,6 +98,24 @@ const Footer = () => {
 
   return (
     <div className="footer" id="footer">
+      {/* 🆕 TRUST FEATURES BAR — sits above everything else */}
+      <div className="footer-features-bar">
+        {TRUST_FEATURES.map((feature) => {
+          const Icon = feature.icon;
+          return (
+            <div className="footer-feature-item" key={feature.title}>
+              <span className="footer-feature-icon">
+                <Icon />
+              </span>
+              <div>
+                <p className="footer-feature-title">{feature.title}</p>
+                <p className="footer-feature-subtitle">{feature.subtitle}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       <div className="footer-content">
         {/* BRAND COLUMN */}
         <div className="footer-content-left">
@@ -82,7 +123,7 @@ const Footer = () => {
           <p>Freshly baked, delivered with care. Quality you can taste in every bite.</p>
         </div>
 
-        {/* 🆕 CATEGORIES COLUMN — collapsible, latest 5, shown before Company */}
+        {/* CATEGORIES COLUMN — collapsible, latest 5, shown before Company */}
         <div className="footer-content-categories">
           <button
             type="button"
@@ -173,6 +214,15 @@ const Footer = () => {
         <p className="footer-copyright">
           Copyright 2025 © Shyam Foods. All Rights Reserved.
         </p>
+
+        {/* 🆕 Payment methods — purely visual trust signal, no real gateway logic */}
+        <div className="footer-payment-icons" aria-label="Accepted payment methods">
+          <FaCcVisa title="Visa" />
+          <FaCcMastercard title="Mastercard" />
+          <FaMobileAlt title="UPI" />
+          <FaMoneyBillWave title="Cash on Delivery" />
+        </div>
+
         <p className="footer-credit">
           Design and Developed by{" "}
           <a href="https://designerbirds.com/" target="_blank" rel="noreferrer">
