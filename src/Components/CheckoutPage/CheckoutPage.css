@@ -50,11 +50,11 @@ select {
 }
 
 .checkout-container {
-  max-width: 1600px;
+  max-width: 1200px;
   margin: 50px auto;
   padding: 0 60px;
   display: grid;
-  grid-template-columns: 1.6fr 1fr;
+  grid-template-columns: 1.5fr 1fr;
   gap: 28px;
   align-items: start;
 }
@@ -154,7 +154,7 @@ select {
   align-items: flex-start;
   gap: 14px;
   flex-wrap: wrap;
-  margin-bottom: 22px;
+
 }
 
 .panel-title {
@@ -326,7 +326,7 @@ select {
 }
 
 .checkout-left h2 {
-  padding-bottom: 20px;
+
   font-weight: 550;
 }
 
@@ -462,7 +462,7 @@ select {
 
 .checkout-right h3 {
   font-family: var(--font-body);
-  margin: 0 0 20px 0;
+  margin: 0 0 10px 0;
   font-size: 22px;
   font-weight: 700;
   color: var(--ink);

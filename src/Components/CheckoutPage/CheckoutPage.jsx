@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useCart } from "../../Context/CartContext";
@@ -16,6 +16,7 @@ import {
   AiOutlineWallet,
 } from "react-icons/ai";
 import "./CheckoutPage.css";
+import { FiArrowLeft } from "react-icons/fi";
 
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
@@ -28,6 +29,18 @@ const STEP_DEFINITIONS = [
   { id: 3, label: "Payment", icon: AiOutlineCreditCard },
   { id: 4, label: "Confirm", icon: AiOutlineCheckCircle },
 ];
+
+// 🆕 SINGLE source of truth for "what the customer actually pays per unit".
+// Same helper used on the Cart page — falls back to item.price only if no
+// offer price exists. Every price on this page (the Step-1 line items, the
+// subtotal, the coupon discount, and the order payload sent to the backend)
+// now runs through this one function instead of mixing .price and .offer.
+const getUnitPrice = (item) => {
+  const offer = Number(item.offer);
+  const price = Number(item.price);
+  if (offer > 0) return offer;
+  return price > 0 ? price : 0;
+};
 
 const getGuestId = () => {
   let guestId = localStorage.getItem("guest_id");
@@ -54,7 +67,7 @@ const loadRazorpayScript = () => {
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { cartItems, totals, clearCart } = useCart();
+  const { cartItems, clearCart } = useCart();
   const { user } = useAuth();
 
   const [step, setStep] = useState(1);
@@ -96,7 +109,13 @@ export default function CheckoutPage() {
   const [userCoords, setUserCoords] = useState(null);
   const [detectedAreaName, setDetectedAreaName] = useState("");
 
-  const subtotal = totals?.subtotal || 0;
+  // 🆕 Computed locally from cartItems using getUnitPrice, instead of trusting
+  // a separate CartContext `totals.subtotal` that could disagree with what's
+  // actually rendered per line item below (and with the order payload).
+  const subtotal = useMemo(
+    () => (cartItems || []).reduce((sum, item) => sum + getUnitPrice(item) * item.quantity, 0),
+    [cartItems]
+  );
 
   // Fetch Delivery Fee from backend
   const fetchDeliveryFee = async (targetAddress, coords = null) => {
@@ -272,6 +291,10 @@ export default function CheckoutPage() {
   const discount = calculateDiscount();
   const foodTotal = Math.max(0, subtotal - discount);
   const total = foodTotal; // Online Razorpay charges Food Total only
+  // 🆕 What the customer's final bill actually is, per payment method — COD
+  // pays food + delivery together (nothing paid online), card/upi only pays
+  // food total online and settles delivery with the driver in cash/UPI.
+  const payableTotal = paymentMethod === "cod" ? foodTotal + deliveryFee : foodTotal;
 
   // Apply Coupon (by Code string or Coupon Object)
   const applyCouponHandler = async (codeToApply) => {
@@ -344,7 +367,7 @@ export default function CheckoutPage() {
         productId: isValidMongoId ? rawId : null,
         title: item.title || item.name,
         image: item.image || item.images?.[0] || "",
-        price: Number(item.price),
+        price: getUnitPrice(item), // 🆕 same helper used everywhere else on this page
         quantity: Number(item.quantity || 1),
       };
     }),
@@ -508,11 +531,25 @@ export default function CheckoutPage() {
 
   return (
     <div className="checkout-container">
+
+
       <ProgressBar />
 
+
       {step === 1 && (
+
         <div className="checkout-left">
+
+          <button
+            type="button"
+            className="back-btn"
+            onClick={() => navigate(-1)}
+          >
+            <FiArrowLeft />
+          </button>
+
           <div className="panel-header">
+
             <h2 className="panel-title">Your cart</h2>
             <span className="panel-count">
               {cartItems.length} item{cartItems.length !== 1 ? "s" : ""}
@@ -520,23 +557,27 @@ export default function CheckoutPage() {
           </div>
 
           <div className="cart-list">
-            {cartItems.map((item) => (
-              <div key={item.key || item._id} className="cart-item">
-                {item.image && (
-                  <img src={item.image} alt={item.title} className="cart-item__thumb" />
-                )}
-                <div className="cart-item__info">
-                  <p className="cart-item__title">{item.title}</p>
-                  <p className="cart-item__qty">Quantity: (x{item.quantity})</p>
+            {cartItems.map((item) => {
+              // 🆕 same price used here as everywhere else on this page
+              const unitPrice = getUnitPrice(item);
+              return (
+                <div key={item.key || item._id} className="cart-item">
+                  {item.image && (
+                    <img src={item.image} alt={item.title} className="cart-item__thumb" />
+                  )}
+                  <div className="cart-item__info">
+                    <p className="cart-item__title">{item.title}</p>
+                    <p className="cart-item__qty">Quantity: (x{item.quantity})</p>
+                  </div>
+                  <div className="cart-item__price">₹ {(unitPrice * item.quantity).toFixed(2)}</div>
                 </div>
-                <div className="cart-item__price">₹ {item.price * item.quantity}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="cart-subtotal">
             <span>Total</span>
-            <span>₹ {subtotal}</span>
+            <span>₹ {subtotal.toFixed(2)}</span>
           </div>
         </div>
       )}
@@ -785,10 +826,23 @@ export default function CheckoutPage() {
               <span>🛵 Delivery Fee</span>
               <strong>₹{Number(orderDetails?.delivery ?? deliveryFee).toFixed(2)}</strong>
             </div>
+            {/* 🆕 label + amount now reflect what was actually paid vs what's
+                still payable to the driver, instead of always showing just
+                the online food total (which understated COD orders) */}
             <div className="order-detail-row">
-              <span>Amount Paid</span>
+              <span>
+                {(orderDetails?.paymentMethod || paymentMethod) === "cod"
+                  ? "Total Payable (COD)"
+                  : "Amount Paid Online"}
+              </span>
               <strong className="amount-highlight">
-                ₹{Number(orderDetails?.total || total).toFixed(2)}
+                ₹{Number(
+                  orderDetails
+                    ? (orderDetails.paymentMethod === "cod"
+                      ? Number(orderDetails.total || 0) + Number(orderDetails.delivery ?? deliveryFee)
+                      : orderDetails.total)
+                    : payableTotal
+                ).toFixed(2)}
               </strong>
             </div>
           </div>
@@ -929,9 +983,7 @@ export default function CheckoutPage() {
                   : `Delivery ₹${deliveryFee} to be paid to driver on arrival`}
               </p>
             </div>
-            <span className="price-total__amount">
-              ₹{paymentMethod === "cod" ? (foodTotal + deliveryFee).toFixed(2) : foodTotal.toFixed(2)}
-            </span>
+            <span className="price-total__amount">₹{payableTotal.toFixed(2)}</span>
           </div>
 
           <div className="summary-action">
@@ -960,7 +1012,7 @@ export default function CheckoutPage() {
                 {placing
                   ? "Processing..."
                   : paymentMethod === "cod"
-                    ? `Place Order (COD ₹${(foodTotal + deliveryFee).toFixed(2)})`
+                    ? `Place Order (COD ₹${payableTotal.toFixed(2)})`
                     : `Pay ₹ ${foodTotal.toFixed(2)} Online`}
               </button>
             )}

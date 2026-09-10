@@ -206,9 +206,7 @@ function CakeAll() {
                                     {item.offer}
                                 </span>
                                 <span className="food-off">{item.off}% OFF</span>
-                                {/* <p className="delivery-badge">
-                    ⏱ {item.deliveryTime}
-                  </p> */}
+                   
                             </div>
 
                             <div className="food-actions">

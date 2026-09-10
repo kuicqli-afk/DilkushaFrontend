@@ -416,10 +416,10 @@ export default function OrderHistory() {
   }
 
   return (
-    <div style={{ padding: "40px 20px", maxWidth: "1200px", margin: "0 auto" }}>
+    <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "22px" }}>
         <div>
-          <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#1a1a1a", fontFamily: "'Montserrat', sans-serif" }}>
+          <h2 style={{ fontSize: "26px", fontWeight: 700, color: "#1a1a1a", fontFamily: "'Montserrat', sans-serif" }}>
             Order History
           </h2>
           <p style={{ fontSize: "12px", color: "#999", marginTop: "2px" }}>

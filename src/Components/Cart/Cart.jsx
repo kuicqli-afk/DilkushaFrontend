@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiArrowRight } from "react-icons/fi";
+import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiArrowRight, FiArrowLeft } from "react-icons/fi";
 import { useCart } from "../../Context/CartContext";
 import "./Cart.css";
 
@@ -15,13 +15,39 @@ const getItemImage = (item) =>
   item.product?.image ||
   "";
 
+// SINGLE source of truth for "what a customer actually pays per unit".
+// Falls back to item.price only if no offer price exists, so every price
+// shown/calculated on this page (unit price, line total, and the summary
+// card) always agrees with each other instead of mixing offer vs price.
+const getUnitPrice = (item) => {
+  const offer = Number(item.offer);
+  const price = Number(item.price);
+  if (offer > 0) return offer;
+  return price > 0 ? price : 0;
+};
+
+const getMrpPrice = (item) => Number(item.price) || getUnitPrice(item);
+
 const Cart = () => {
   const navigate = useNavigate();
-  const { cartItems, updateQty, removeFromCart, totals, clearCart } = useCart();
+  const { cartItems, updateQty, removeFromCart, clearCart } = useCart();
   const [brokenImages, setBrokenImages] = useState({});
 
   const markImageBroken = (key) =>
     setBrokenImages((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
+
+  // All totals derived from the SAME getUnitPrice/getMrpPrice helpers used
+  // for each line item below — this keeps every number on the page
+  // (unit price, line totals, and this summary) consistent with each other.
+  // 🆕 discount = MRP Total - Subtotal (i.e. the sum of price-vs-offer gaps
+  // across every line item). No delivery fee — Total is simply the Subtotal.
+  const summary = useMemo(() => {
+    const list = cartItems || [];
+    const subtotal = list.reduce((sum, item) => sum + getUnitPrice(item) * item.quantity, 0);
+    const mrpTotal = list.reduce((sum, item) => sum + getMrpPrice(item) * item.quantity, 0);
+    const discount = Math.max(0, mrpTotal - subtotal);
+    return { subtotal, mrpTotal, discount, grandTotal: subtotal };
+  }, [cartItems]);
 
   const handleCheckout = () => {
     const token = localStorage.getItem("token");
@@ -29,6 +55,16 @@ const Cart = () => {
       navigate("/login?redirectTo=/checkout");
     } else {
       navigate("/checkout");
+    }
+  };
+
+  const handleBack = () => {
+    // Goes to the previous page in history; falls back to home if there's
+    // no history to go back to (e.g. cart opened directly via URL/refresh).
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/");
     }
   };
 
@@ -52,6 +88,15 @@ const Cart = () => {
   return (
     <div className="cart-wrapper">
       <div className="cart-header">
+        {/* Back button */}
+        <button
+          type="button"
+          className="cart-back-btn"
+          onClick={handleBack}
+          aria-label="Go back"
+        >
+          <FiArrowLeft />
+        </button>
         <h2>Shopping Cart</h2>
         <span className="item-count">
           {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
@@ -63,7 +108,10 @@ const Cart = () => {
         <div className="cart-items-section">
           <div className="cart-list">
             {cartItems.map((item) => {
-              const itemTotal = Number(item.price * item.quantity).toFixed(2);
+              const unitPrice = getUnitPrice(item);
+              const mrpPrice = getMrpPrice(item);
+              const hasDiscount = mrpPrice > unitPrice;
+              const itemTotal = (unitPrice * item.quantity).toFixed(2);
               const imgSrc = getItemImage(item);
               const showImage = imgSrc && !brokenImages[item.key];
               return (
@@ -84,7 +132,14 @@ const Cart = () => {
                     </div>
                     <div className="cart-details">
                       <h4 className="product-title">{item.title}</h4>
-                      <div className="unit-price">₹{item.price} each</div>
+
+                      {/* unit price matches the same price used for the line total */}
+                      <div className="unit-price">
+                        ₹{unitPrice.toFixed(2)} each
+                        {hasDiscount && (
+                          <span className="unit-price-mrp">₹{mrpPrice.toFixed(2)}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -138,20 +193,29 @@ const Cart = () => {
             <h3>Order Summary</h3>
 
             <div className="summary-row">
-              <span>Subtotal</span>
-              <strong>₹{Number(totals?.subtotal || 0).toFixed(2)}</strong>
+              <span>Total MRP</span>
+              <span className={summary.discount > 0 ? "mrp-strike" : ""}>
+                ₹{summary.mrpTotal.toFixed(2)}
+              </span>
             </div>
 
+            {summary.discount > 0 && (
+              <div className="summary-row summary-discount">
+                <span>Discount on MRP</span>
+                <span>− ₹{summary.discount.toFixed(2)}</span>
+              </div>
+            )}
+
             <div className="summary-row">
-              <span>Estimated Shipping</span>
-              <span className="free-tag">Calculated at checkout</span>
+              <span>Subtotal</span>
+              <strong>₹{summary.subtotal.toFixed(2)}</strong>
             </div>
 
             <hr className="summary-divider" />
 
             <div className="summary-row summary-total">
               <span>Total</span>
-              <strong>₹{Number(totals?.subtotal || 0).toFixed(2)}</strong>
+              <strong>₹{summary.grandTotal.toFixed(2)}</strong>
             </div>
 
             <button className="checkout-btn" onClick={handleCheckout}>

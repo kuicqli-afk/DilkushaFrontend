@@ -6,6 +6,10 @@ import instagram from "../../assets/instagram_icon.png";
 import pinterest from "../../assets/pintrest_icon.png";
 import whatsapp from "../../assets/whatsapp_icon.png";
 import logo from "../../assets/syam.png";
+import Razorpay from "../../assets/razorpay.png";
+
+import PlayStore from "../../assets/PlayStore.png";
+import AppStore from "../../assets/AppStore.png";
 import {
   FaChevronDown,
   FaTimes,
@@ -13,26 +17,18 @@ import {
   FaEnvelope,
   FaMapMarkerAlt,
   FaShippingFast,
-  FaLeaf,
   FaLock,
   FaHeadset,
-  FaCcVisa,
-  FaCcMastercard,
-  FaMobileAlt,
   FaMoneyBillWave,
+  FaTag,
 } from "react-icons/fa";
 
 import { Link } from "react-router-dom";
 
 const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
 
-// 🆕 How many categories to show in the footer — change this one number
-// to show more/fewer (e.g. LATEST_CATEGORY_LIMIT = 8).
 const LATEST_CATEGORY_LIMIT = 5;
 
-// 🆕 "Latest" = most recently created. Uses createdAt if the API sends it;
-// otherwise falls back to decoding the timestamp baked into a MongoDB
-// ObjectId (first 8 hex chars), so this works even if createdAt is missing.
 const getCategoryTimestamp = (cat) => {
   if (cat.createdAt) {
     const t = new Date(cat.createdAt).getTime();
@@ -46,11 +42,9 @@ const getCategoryTimestamp = (cat) => {
   return 0;
 };
 
-// 🆕 Trust-badge strip shown across the top of the footer — swap text/icons
-// freely, this array is the only thing that drives that row.
 const TRUST_FEATURES = [
   { icon: FaShippingFast, title: "Fast Delivery", subtitle: "Within 45 minutes" },
-  { icon: FaLeaf, title: "Fresh & Quality", subtitle: "Made fresh daily" },
+  { icon: FaMoneyBillWave, title: "Return & Refund", subtitle: "Money back guarantee" },
   { icon: FaLock, title: "Secure Payments", subtitle: "100% secure checkout" },
   { icon: FaHeadset, title: "24/7 Support", subtitle: "We're here to help" },
 ];
@@ -59,9 +53,12 @@ const Footer = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [popupType, setPopupType] = useState("");
 
-  // 🆕 latest categories for the footer column
   const [latestCategories, setLatestCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+
+  // 🆕 Offer State
+  const [offerText, setOfferText] = useState("");
+  const [offerLoading, setOfferLoading] = useState(true);
 
   const [openSections, setOpenSections] = useState({
     categories: false,
@@ -78,7 +75,7 @@ const Footer = () => {
     setShowPopup(true);
   };
 
-  // 🆕 Fetch categories once, sort newest-first, keep only the top N
+  // Fetch categories
   useEffect(() => {
     axios
       .get(`${BASE_URL}/category/categories`)
@@ -96,9 +93,39 @@ const Footer = () => {
       .finally(() => setCategoriesLoading(false));
   }, []);
 
+  // 🆕 Fetch Offer Text
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}/offer/latest`)
+      .then((res) => {
+        const text =
+          res.data?.data?.title ||
+          res.data?.data?.text ||
+          res.data?.offer ||
+          res.data?.title ||
+          "";
+        setOfferText(text ? text : "No offer available");
+      })
+      .catch((err) => {
+        console.error("Footer offer fetch error:", err);
+        setOfferText("No offer available");
+      })
+      .finally(() => setOfferLoading(false));
+  }, []);
+
   return (
     <div className="footer" id="footer">
-      {/* 🆕 TRUST FEATURES BAR — sits above everything else */}
+      {/* 🆕 TOP SLIM OFFER PATTI (ANNOUNCEMENT BAR) */}
+      <div className="footer-offer-patti">
+        <div className="footer-offer-patti-content">
+          <FaTag className="offer-patti-icon" />
+          <span>
+            {offerLoading ? "Checking active offers..." : offerText}
+          </span>
+        </div>
+      </div>
+
+      {/* TRUST FEATURES BAR */}
       <div className="footer-features-bar">
         {TRUST_FEATURES.map((feature) => {
           const Icon = feature.icon;
@@ -123,7 +150,7 @@ const Footer = () => {
           <p>Freshly baked, delivered with care. Quality you can taste in every bite.</p>
         </div>
 
-        {/* CATEGORIES COLUMN — collapsible, latest 5, shown before Company */}
+        {/* CATEGORIES COLUMN */}
         <div className="footer-content-categories">
           <button
             type="button"
@@ -142,7 +169,6 @@ const Footer = () => {
             ) : (
               latestCategories.map((cat) => (
                 <li key={cat._id}>
-                  {/* NOTE: adjust this route to match your actual category/listing page */}
                   <Link to={`/category/${encodeURIComponent(cat.name || cat.title)}`} state={{ category: cat }}>
                     {cat.name || cat.title}
                   </Link>
@@ -152,7 +178,7 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* COMPANY COLUMN — collapsible */}
+        {/* COMPANY COLUMN */}
         <div className="footer-content-center">
           <button
             type="button"
@@ -171,7 +197,7 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* GET IN TOUCH COLUMN — collapsible */}
+        {/* GET IN TOUCH COLUMN */}
         <div className="footer-content-right">
           <button
             type="button"
@@ -183,13 +209,13 @@ const Footer = () => {
           </button>
 
           <ul className={`footer-collapsible ${openSections.contact ? "open" : ""}`}>
-            <li><FaPhoneAlt className="footer-inline-icon" /><span>+91 70842 20734</span></li>
-            <li><FaEnvelope className="footer-inline-icon" /><span>info@shyamfoods.com</span></li>
+            <li><FaPhoneAlt className="footer-inline-icon" /><span>+91 70805 12292</span></li>
+            <li><FaEnvelope className="footer-inline-icon" /><span>shyamfoods@gmail.com</span></li>
             <li><FaMapMarkerAlt className="footer-inline-icon" /><span>Lucknow — Office | Store | Workshop</span></li>
           </ul>
         </div>
 
-        {/* FOLLOW US COLUMN — social icons */}
+        {/* FOLLOW US COLUMN */}
         <div className="footer-content-follow">
           <h2 className="footer-follow-heading">Follow Us</h2>
           <p className="footer-follow-text">Stay updated with our latest bakes & offers</p>
@@ -207,6 +233,22 @@ const Footer = () => {
               <img src={whatsapp} alt="WhatsApp" />
             </a>
           </div>
+
+          <div className="payment">
+            <span className="payment-label">Payment By</span>
+            <a href="#" target="_self" rel="self" aria-label="Razorpay" className="icon-facebook">
+              <img src={Razorpay} alt="razorpay" />
+            </a>
+          </div>
+
+          <div className="apps">
+            <a href="#" target="_self" rel="self" aria-label="PlayStore" className="icon-facebook">
+              <img src={PlayStore} alt="PlayStore" />
+            </a>
+            <a href="#" target="_self" rel="self" aria-label="AppStore" className="icon-instagram">
+              <img src={AppStore} alt="AppStore" />
+            </a>
+          </div>
         </div>
       </div>
 
@@ -215,13 +257,7 @@ const Footer = () => {
           Copyright 2025 © Shyam Foods. All Rights Reserved.
         </p>
 
-        {/* 🆕 Payment methods — purely visual trust signal, no real gateway logic */}
-        <div className="footer-payment-icons" aria-label="Accepted payment methods">
-          <FaCcVisa title="Visa" />
-          <FaCcMastercard title="Mastercard" />
-          <FaMobileAlt title="UPI" />
-          <FaMoneyBillWave title="Cash on Delivery" />
-        </div>
+        <p className="footer-copyright">Powered by Kuicqli.</p>
 
         <p className="footer-credit">
           Design and Developed by{" "}
@@ -247,7 +283,7 @@ const PopupForm = ({ type, onClose }) => {
       alert("Please fill all fields!");
       return;
     }
-    const whatsappNumber = "917084220734";
+    const whatsappNumber = "917080512292";
     const message = `*New ${type} Request*\n\n👤 Name: ${name}\n📞 Phone: ${phone}\n📝 Your Query: ${yourQuery}`;
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappLink, "_blank");
