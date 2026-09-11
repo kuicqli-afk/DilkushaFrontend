@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "./Footer.css";
-import facebook from "../../assets/facebook_icon.png";
-import instagram from "../../assets/instagram_icon.png";
-import pinterest from "../../assets/pintrest_icon.png";
-import whatsapp from "../../assets/whatsapp_icon.png";
 import logo from "../../assets/syam.png";
 import Razorpay from "../../assets/razorpay.png";
 
@@ -21,13 +17,22 @@ import {
   FaHeadset,
   FaMoneyBillWave,
   FaTag,
+  FaRegCopy,
+  FaCheck,
+  FaFacebookF,
+  FaInstagram,
+  FaPinterestP,
+  FaWhatsapp,
 } from "react-icons/fa";
 
 import { Link } from "react-router-dom";
+import { FiGift } from "react-icons/fi";
 
 const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
 
 const LATEST_CATEGORY_LIMIT = 5;
+
+const FALLBACK_OFFER_MESSAGE = "Freshly baked daily & delivered with care — order now!";
 
 const getCategoryTimestamp = (cat) => {
   if (cat.createdAt) {
@@ -49,6 +54,16 @@ const TRUST_FEATURES = [
   { icon: FaHeadset, title: "24/7 Support", subtitle: "We're here to help" },
 ];
 
+const describeCoupon = (coupon) => {
+  if (!coupon) return "";
+  const discountPart =
+    coupon.discountType === "percentage"
+      ? `${coupon.discountValue}% OFF`
+      : `₹${coupon.discountValue} OFF`;
+  const minOrderPart = coupon.minOrderAmount ? ` on orders above ₹${coupon.minOrderAmount}` : "";
+  return `${discountPart}${minOrderPart}`;
+};
+
 const Footer = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [popupType, setPopupType] = useState("");
@@ -56,9 +71,9 @@ const Footer = () => {
   const [latestCategories, setLatestCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
 
-  // 🆕 Offer State
-  const [offerText, setOfferText] = useState("");
+  const [offerCoupon, setOfferCoupon] = useState(null);
   const [offerLoading, setOfferLoading] = useState(true);
+  const [codeCopied, setCodeCopied] = useState(false);
 
   const [openSections, setOpenSections] = useState({
     categories: false,
@@ -75,7 +90,6 @@ const Footer = () => {
     setShowPopup(true);
   };
 
-  // Fetch categories
   useEffect(() => {
     axios
       .get(`${BASE_URL}/category/categories`)
@@ -93,39 +107,71 @@ const Footer = () => {
       .finally(() => setCategoriesLoading(false));
   }, []);
 
-  // 🆕 Fetch Offer Text
   useEffect(() => {
     axios
-      .get(`${BASE_URL}/offer/latest`)
+      .get(`${BASE_URL}/coupons`)
       .then((res) => {
-        const text =
-          res.data?.data?.title ||
-          res.data?.data?.text ||
-          res.data?.offer ||
-          res.data?.title ||
-          "";
-        setOfferText(text ? text : "No offer available");
+        const data = res.data;
+        let list = [];
+        if (Array.isArray(data)) list = data;
+        else if (Array.isArray(data?.coupons)) list = data.coupons;
+        else if (Array.isArray(data?.data)) list = data.data;
+        else if (data?.data && typeof data.data === "object") list = [data.data];
+
+        const today = new Date().setHours(0, 0, 0, 0);
+        const active = list.filter((c) => {
+          if (c.isActive === false) return false;
+          if (c.expiryDate && new Date(c.expiryDate) < today) return false;
+          return true;
+        });
+
+        setOfferCoupon(active[0] || null);
       })
       .catch((err) => {
         console.error("Footer offer fetch error:", err);
-        setOfferText("No offer available");
+        setOfferCoupon(null);
       })
       .finally(() => setOfferLoading(false));
   }, []);
 
+  const handleCopyCode = () => {
+    if (!offerCoupon?.code) return;
+    navigator.clipboard
+      .writeText(offerCoupon.code)
+      .then(() => {
+        setCodeCopied(true);
+        setTimeout(() => setCodeCopied(false), 2000);
+      })
+      .catch(() => { });
+  };
+
   return (
     <div className="footer" id="footer">
-      {/* 🆕 TOP SLIM OFFER PATTI (ANNOUNCEMENT BAR) */}
       <div className="footer-offer-patti">
-        <div className="footer-offer-patti-content">
-          <FaTag className="offer-patti-icon" />
-          <span>
-            {offerLoading ? "Checking active offers..." : offerText}
-          </span>
-        </div>
+        {offerLoading ? (
+          <div className="footer-offer-patti-content">
+            <FaTag className="offer-patti-icon" />
+            <span className="offer-patti-text">Checking today's offers…</span>
+          </div>
+        ) : offerCoupon ? (
+          <div className="footer-offer-patti-content">
+            <FiGift className="offer-patti-icon" />
+            <span className="offer-patti-text">{describeCoupon(offerCoupon)}</span>
+            <span className="offer-patti-divider">•</span>
+            <span className="offer-patti-code-label">Use code</span>
+            <button type="button" className="offer-patti-code-chip" onClick={handleCopyCode}>
+              {offerCoupon.code}
+              {codeCopied ? <FaCheck /> : <FaRegCopy />}
+            </button>
+          </div>
+        ) : (
+          <div className="footer-offer-patti-content">
+            <FaTag className="offer-patti-icon" />
+            <span className="offer-patti-text">{FALLBACK_OFFER_MESSAGE}</span>
+          </div>
+        )}
       </div>
 
-      {/* TRUST FEATURES BAR */}
       <div className="footer-features-bar">
         {TRUST_FEATURES.map((feature) => {
           const Icon = feature.icon;
@@ -144,13 +190,11 @@ const Footer = () => {
       </div>
 
       <div className="footer-content">
-        {/* BRAND COLUMN */}
         <div className="footer-content-left">
           <img src={logo} alt="Shyam Foods" className="footer-logo" />
           <p>Freshly baked, delivered with care. Quality you can taste in every bite.</p>
         </div>
 
-        {/* CATEGORIES COLUMN */}
         <div className="footer-content-categories">
           <button
             type="button"
@@ -178,7 +222,6 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* COMPANY COLUMN */}
         <div className="footer-content-center">
           <button
             type="button"
@@ -197,7 +240,6 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* GET IN TOUCH COLUMN */}
         <div className="footer-content-right">
           <button
             type="button"
@@ -215,37 +257,37 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* FOLLOW US COLUMN */}
         <div className="footer-content-follow">
           <h2 className="footer-follow-heading">Follow Us</h2>
           <p className="footer-follow-text">Stay updated with our latest bakes & offers</p>
           <div className="footer-social-icons">
-            <a href="#" target="_self" rel="self" aria-label="Facebook" className="icon-facebook">
-              <img src={facebook} alt="Facebook" />
+            <a href="" target="_self" rel="self" aria-label="Facebook" className="icon-facebook">
+              <FaFacebookF />
             </a>
-            <a href="#" target="_self" rel="self" aria-label="Instagram" className="icon-instagram">
-              <img src={instagram} alt="Instagram" />
+            <a href="" target="_self" rel="self" aria-label="Instagram" className="icon-instagram">
+              <FaInstagram />
             </a>
-            <a href="#" target="_self" rel="self" aria-label="Pinterest" className="icon-pinterest">
-              <img src={pinterest} alt="Pinterest" />
+            <a href="" target="_self" rel="self" aria-label="Pinterest" className="icon-pinterest">
+              <FaPinterestP />
             </a>
             <a onClick={() => openPopup("WhatsApp Inquiry")} aria-label="WhatsApp" style={{ cursor: "pointer" }} className="icon-whatsapp">
-              <img src={whatsapp} alt="WhatsApp" />
+              <FaWhatsapp />
             </a>
           </div>
 
           <div className="payment">
             <span className="payment-label">Payment By</span>
-            <a href="#" target="_self" rel="self" aria-label="Razorpay" className="icon-facebook">
-              <img src={Razorpay} alt="razorpay" />
+            <a href="" target="_self" rel="self" aria-label="Razorpay" className="icon-facebook">
+              <img src={Razorpay} alt="Razorpay" />
             </a>
           </div>
 
           <div className="apps">
-            <a href="#" target="_self" rel="self" aria-label="PlayStore" className="icon-facebook">
+            <span className="payment-label">Get Our App</span>
+            <a href="" target="_self" rel="self" aria-label="PlayStore" className="icon-facebook">
               <img src={PlayStore} alt="PlayStore" />
             </a>
-            <a href="#" target="_self" rel="self" aria-label="AppStore" className="icon-instagram">
+            <a href="" target="_self" rel="self" aria-label="AppStore" className="icon-instagram">
               <img src={AppStore} alt="AppStore" />
             </a>
           </div>

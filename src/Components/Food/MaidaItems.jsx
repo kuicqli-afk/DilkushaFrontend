@@ -387,7 +387,7 @@ const MaidaItems = ({
                                             onClick={() => placeOrder(item)}
                                             disabled={!inStock}
                                         >
-                                            {inStock ? "Place order" : "Out of Stock"}
+                                            {inStock ? "View More" : "Out of Stock"}
                                         </button>
                                         <div className="add-btn">
                                             <button onClick={() => decrease(item)} disabled={!inStock}>

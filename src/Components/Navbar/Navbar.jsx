@@ -5,7 +5,7 @@ import { useCart } from "../../Context/CartContext";
 import { useAuth } from "../../Context/AuthContext";
 import "./Navbar.css";
 
-import { FaSearch, FaUser, FaBox, FaSignOutAlt, FaChevronDown, FaUserEdit, FaCheck, FaPlus, FaBookmark } from "react-icons/fa";
+import { FaSearch, FaUser, FaBox, FaSignOutAlt, FaChevronDown, FaUserEdit, FaCheck, FaPlus, FaBookmark, FaExclamationCircle, FaLeaf } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import shyam from "../../assets/syam.png";
 import profile from "../../assets/profile.gif";
@@ -33,11 +33,19 @@ const Navbar = () => {
   const [displayText, setDisplayText] = useState("");
   const [isInputActive, setIsInputActive] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const searchDropdownRef = useRef(null);
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
+
+
 
   // Categories state for bottom navbar strip
   const [navCategories, setNavCategories] = useState([]);
@@ -60,6 +68,33 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!searchValue.trim()) {
+      setSearchResults([]);
+      setShowSearchDropdown(false);
+      setSearchLoading(false);
+      return;
+    }
+
+    setSearchLoading(true);
+    setShowSearchDropdown(true);
+
+    const timer = setTimeout(() => {
+      axios
+        .get(`${API_URL}/products/search`, { params: { q: searchValue.trim() } })
+        .then((res) => {
+          setSearchResults(res.data.products || []);
+        })
+        .catch((err) => {
+          console.error("Search Error:", err);
+          setSearchResults([]);
+        })
+        .finally(() => setSearchLoading(false));
+    }, 400); // debounce — waits 400ms after typing stops
+
+    return () => clearTimeout(timer); // cancels the pending request if user keeps typing
+  }, [searchValue]);
 
   useEffect(() => {
     if (isInputActive) return;
@@ -89,13 +124,13 @@ const Navbar = () => {
   }, [isInputActive]);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
+    const handleClickOutsideSearch = (event) => {
+      if (searchDropdownRef.current && !searchDropdownRef.current.contains(event.target)) {
+        setShowSearchDropdown(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutsideSearch);
+    return () => document.removeEventListener("mousedown", handleClickOutsideSearch);
   }, []);
 
   useEffect(() => {
@@ -177,6 +212,17 @@ const Navbar = () => {
     localStorage.setItem("search", value);
   };
 
+  // 🆕 THE MISSING FUNCTION — was called in JSX but never defined, which
+  // crashed the app on every search-result click. Navigates to the order/
+  // product page carrying the clicked product as route state (same pattern
+  // Order.jsx expects: state.item).
+  const handleSearchResultClick = (product) => {
+    setShowSearchDropdown(false);
+    setIsInputActive(false);
+    setSearchValue("");
+    navigate("/order", { state: { item: product } });
+  };
+
   const handleLogout = () => {
     logout();
     setShowDropdown(false);
@@ -186,6 +232,8 @@ const Navbar = () => {
   const handleCategoryClick = (item) => {
     navigate(`/category/${encodeURIComponent(item.name)}`);
   };
+
+
 
   return (
     <div className={`nav-container ${isScrolled ? "nav-scrolled" : ""}`}>
@@ -204,7 +252,7 @@ const Navbar = () => {
             </li>
           </ul>
 
-          <div className="search-box">
+          <div className="search-box" ref={searchDropdownRef}>
             <FaSearch className="search-icon" />
 
             <div className="typing-wrapper">
@@ -215,18 +263,111 @@ const Navbar = () => {
               <input
                 type="text"
                 value={searchValue}
-                onFocus={() => setIsInputActive(true)}
+                onFocus={() => {
+                  setIsInputActive(true);
+                  if (searchValue.trim()) setShowSearchDropdown(true);
+                }}
                 onBlur={() => {
                   if (!searchValue) setIsInputActive(false);
                 }}
                 onChange={handleSearch}
               />
             </div>
+
+            {/* SEARCH RESULTS DROPDOWN */}
+            {showSearchDropdown && (
+              <div className="search-dropdown">
+                {searchLoading ? (
+                  <div className="search-dropdown-status">
+                    <span className="search-spinner" />
+                    Searching...
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <>
+                    <div className="search-dropdown-header">
+                      {searchResults.length} result{searchResults.length === 1 ? "" : "s"} found
+                    </div>
+                    <div className="search-results-list">
+                      {searchResults.map((product) => {
+                        const inStock =
+                          product.quantity === undefined || product.quantity === null || product.quantity === ""
+                            ? true
+                            : Number(product.quantity) > 0;
+                        const hasOffer = product.offer > 0 && product.offer < product.price;
+
+                        return (
+                          <div
+                            key={product._id}
+                            className={`search-result-item ${!inStock ? "out-of-stock" : ""}`}
+                            onClick={() => handleSearchResultClick(product)}
+                          >
+                            <div className="search-result-img-wrap">
+                              <img
+                                src={product.image}
+                                alt={product.title}
+                                className="search-result-img"
+                                onError={(e) => {
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.src =
+                                    "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'%3E%3Cpath d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/%3E%3C/svg%3E";
+                                }}
+                              />
+                              {!inStock && <span className="search-result-oos-badge">Out of Stock</span>}
+                            </div>
+
+                            <div className="search-result-info">
+                              <span className="search-result-title">{product.title}</span>
+                              <div className="search-result-price-row">
+                                <span className="search-result-price">
+                                  ₹{hasOffer ? product.offer : product.price}
+                                </span>
+                                {hasOffer && (
+                                  <span className="search-result-mrp">₹{product.price}</span>
+                                )}
+                                {product.off > 0 && (
+                                  <span className="search-result-off">{product.off}% OFF</span>
+                                )}
+                              </div>
+                            </div>
+
+                            <span className="search-result-arrow">›</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {searchResults.length > 0 && (
+                      <div
+                        className="search-dropdown-footer"
+                      // onClick={() => {
+                      //   setShowSearchDropdown(false);
+                      //   navigate(`/category/${encodeURIComponent(searchValue)}`);
+                      // }}
+                      >
+                        All results for "{searchValue}"
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="search-dropdown-status no-results">
+                    <FaExclamationCircle size={22} />
+                    <p>No products found for <strong>"{searchValue}"</strong></p>
+                    <span>Try checking the spelling or search something else</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* RIGHT : Products + Follow | Account | Cart */}
+        {/* RIGHT : Vegetarian toggle + Products/Follow | Account | Cart */}
         <div className="nav-right">
+          {/* 🆕 VEGETARIAN TOGGLE — sits right before the store-stats/follow pill */}
+          {/* 🆕 VEGETARIAN — static label, no toggle state */}
+          <span className="veg-badge">
+            <FaLeaf size={12} />
+            Pure Veg
+          </span>
+
           <div className="store-stats">
             <span className="total-products-badge">
               <strong>{totalProducts}</strong> Products

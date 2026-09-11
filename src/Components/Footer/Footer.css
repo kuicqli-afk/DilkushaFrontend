@@ -2,7 +2,7 @@
 .footer {
     position: relative;
     background: #ffffff;
-    color: #ffffff;
+    color: #4b5563;
     padding: 0 60px 0;
     border-top: 1px solid #eef0f2;
     box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.03);
@@ -10,30 +10,88 @@
     margin-top: 45px;
 }
 
-/* ===== 🆕 SLIM OFFER PATTI (ANNOUNCEMENT STRIP) ===== */
+/* =========================================================
+   OFFER STRIP — permanent (no dismiss button), taller, with
+   an icon badge. Plain smooth gradient now — the diagonal
+   stripe texture was removed since it read as unwanted
+   slanted/"italic" lines across the bar.
+   ========================================================= */
 .footer-offer-patti {
-    background: #A90409;
+    position: relative;
+    background: linear-gradient(135deg, #A90409 0%, #d81324 60%, #b30810 100%);
     color: #ffffff;
     margin: 0 -60px;
-    padding: 30px 24px;
+    min-height: 90px;
+    padding: 20px 60px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 13.5px;
-    font-weight: 600;
-    letter-spacing: 0.4px;
 }
 
 .footer-offer-patti-content {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
     text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
 }
 
+/* icon sits inside its own small badge circle instead of floating bare */
 .offer-patti-icon {
-    font-size: 14px;
-    color: #fdeceb;
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #ffffff;
+    margin-top: -3px;
+}
+
+.offer-patti-text {
+    white-space: nowrap;
+}
+
+.offer-patti-divider {
+    opacity: 0.6;
+}
+
+.offer-patti-code-label {
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+/* the coupon code itself, styled as a tappable chip */
+.offer-patti-code-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1.5px dashed rgba(255, 255, 255, 0.6);
+    color: #ffffff;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.offer-patti-code-chip:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.offer-patti-code-chip svg {
+    font-size: 12px;
 }
 
 /* ===== TRUST FEATURES BAR ===== */
@@ -228,30 +286,34 @@
     max-width: 200px;
 }
 
+/* =========================================================
+   SOCIAL MEDIA ICONS — styled with the exact same badge
+   look, brand color (#A90409), and consistent sizing to
+   match the rest of the inline icons.
+   ========================================================= */
 .footer-social-icons {
     display: flex;
-    gap: 6px;
-    margin-top: 2px;
-    margin-left: -8px;
+    gap: 10px;
+    margin-top: 4px;
 }
 
 .footer-social-icons a {
-    width: 38px;
-    height: 38px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #fdeceb;
+    color: #A90409;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.25s ease;
+    transition: transform 0.2s ease, background 0.2s ease;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .footer-social-icons a:hover {
+    background: #f8d9d5;
     transform: translateY(-2px);
-}
-
-.footer-social-icons img {
-    width: 25px;
-    height: 25px;
 }
 
 .payment {
@@ -286,9 +348,14 @@
 
 .apps {
     display: flex;
-    gap: 12px;
-    margin-top: 10px;
-    margin-left: -5px;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 10px;
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 /* ===== BOTTOM BAR ===== */
@@ -454,8 +521,13 @@
 
     .footer-offer-patti {
         margin: 0 -24px;
+        padding: 14px 20px;
+        min-height: 56px;
+    }
+
+    .footer-offer-patti-content {
         font-size: 12.5px;
-        padding: 8px 16px;
+        gap: 8px;
     }
 
     .footer-features-bar {
@@ -489,5 +561,17 @@
         flex-direction: column;
         text-align: center;
         gap: 10px;
+    }
+}
+
+/* ===== 480px — offer strip stacks to two lines cleanly on very small phones ===== */
+@media (max-width: 480px) {
+    .footer-offer-patti-content {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .offer-patti-divider {
+        display: none;
     }
 }
