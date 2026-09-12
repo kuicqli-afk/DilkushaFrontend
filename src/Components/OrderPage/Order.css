@@ -6,7 +6,7 @@
 }
 
 .order-container {
-  padding: opx 0;
+  padding: 0px 0;
   margin-bottom: 45px;
 }
 
@@ -19,66 +19,89 @@
 /* ===== ORDER CARD ===== */
 .order-card {
   display: flex;
-  gap: 50px;
+  gap: 40px;
   flex-wrap: wrap;
   padding-top: 35px;
+  align-items: flex-start;
 }
 
-/* ===== LEFT THUMBNAILS ===== */
-.column {
+/* ===== IMAGE BOX + THUMBNAILS (now class-driven, was inline styles) ===== */
+.order-image-box {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex: 1 1 340px;
+  min-width: 0;
+}
+
+.order-thumbnails {
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  width: 130px;
-  cursor: pointer;
+  gap: 14px;
+  overflow-y: auto;
+  padding-right: 2px;
+  flex-shrink: 0;
+  max-height: 490px;
 }
 
-.side-img {
-
-  border-radius: 10px;
-  /* object-fit: cover; */
+.order-thumb-img {
+  width: 90px;
+  height: 76px;
+  object-fit: cover;
+  border-radius: 8px;
   cursor: pointer;
   border: 2px solid transparent;
-  transition: border 0.2s ease;
+  transition: border 0.2s ease, opacity 0.2s ease;
+  flex-shrink: 0;
 }
 
-.side-img:hover {
+.order-thumb-img:hover {
   opacity: 0.85;
 }
 
-.order-image-box {
+.order-thumb-img.active {
+  border-color: #A90409;
+}
+
+.order-thumb-placeholder {
+  width: 90px;
+  height: 76px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  border: 1px dashed #cbd5e1;
+  flex-shrink: 0;
+}
+
+.order-main-image-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
-
-  border-radius: 12px;
-  overflow: hidden;
 }
 
-
 .order-image {
-  width: 450px;
-  height: 490px;
-  object-fit: fill;
+  width: 100%;
+  max-width: 450px;
+  height: 380px;
+  object-fit: cover;
   border-radius: 20px;
 }
 
 .order-type-icon {
   position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 30px;
-  height: 30px;
+  top: 14px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
   background-color: white;
   border-radius: 6px;
 }
 
 .order-details {
-  width: 31%;
-  height: 90%;
-
-
+  flex: 1 1 320px;
+  min-width: 280px;
 }
 
 /* STATUS */
@@ -87,6 +110,7 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .order-status img {
@@ -99,7 +123,6 @@
   color: #444;
 }
 
-/* 🆕 Stock status colors (used inline on .stock-status) */
 .text-green-600 {
   color: #16a34a;
 }
@@ -130,37 +153,17 @@
 
 /* DESCRIPTION */
 .food-desc1 {
-  font-size: 17px;
+  font-size: 15px;
   color: #555;
-  line-height: 1.8;
+  line-height: 1.7;
   margin-bottom: 18px;
 }
 
 /* RATING */
-.order-rating {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 18px;
+.food-rating {
+  flex-wrap: wrap;
 }
 
-.order-rating img {
-  width: 28px;
-}
-
-.order-rating h3 {
-  font-size: 26px;
-  font-weight: 600;
-  color: #000;
-}
-
-.order-rating h3 span {
-  font-size: 18px;
-  color: #777;
-  font-weight: 400;
-}
-
-/* 🆕 Rating row on the product detail page (item.rating stars + orders + reviews trigger) */
 .rating-dot {
   color: #ccc;
   font-size: 12px;
@@ -172,6 +175,7 @@
   align-items: center;
   gap: 18px;
   margin-bottom: 25px;
+  flex-wrap: wrap;
 }
 
 .add-btnn button {
@@ -184,7 +188,6 @@
   transition: transform 0.2s ease;
 }
 
-
 .add-btnn span {
   min-width: 28px;
   text-align: center;
@@ -194,10 +197,11 @@
 
 /* FOOD TITLE */
 .order-food-title {
-  font-size: 45px;
+  font-size: 32px;
   font-weight: 700;
   margin: 20px 0 12px 0;
   line-height: 1.2;
+  word-break: break-word;
 }
 
 .order-food-title span {
@@ -206,22 +210,21 @@
 }
 
 .order-price {
-  font-size: 55px;
+  font-size: 40px;
   font-weight: 600;
   color: #000;
 }
 
 .order-price .rs {
-  font-size: 30px;
-  margin-right: -10px;
+  font-size: 24px;
+  margin-right: -6px;
   margin-top: 3px;
-
 }
 
 .offer1 {
   text-decoration: line-through;
   color: gray;
-  font-size: 20px;
+  font-size: 18px;
   margin-top: 8px;
 }
 
@@ -230,7 +233,6 @@
   font-weight: 500;
 }
 
-/* DESCRIPTION */
 .order-desc {
   font-size: 16px;
   color: #555;
@@ -239,12 +241,12 @@
 
 .order-rating p,
 .order-rating h3 span:not(.number) {
-  font-size: 25px;
+  font-size: 20px;
   font-weight: 400;
 }
 
 .order-rating .number {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 600;
   color: #000;
 }
@@ -275,7 +277,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .order-btnn {
@@ -284,9 +287,10 @@
   border: none;
   padding: 10px 20px;
   border-radius: 0px 18px 18px 0px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .adds {
@@ -295,7 +299,6 @@
   color: #333;
   display: flex;
   align-items: center;
-  margin-left: 100px;
 }
 
 .add-btnn {
@@ -305,54 +308,9 @@
   background: #e11c1c;
   color: #fff;
   border-radius: 18px 0px 0px 18px;
-  padding: 8px 25px;
+  padding: 8px 22px;
   gap: 10px;
 }
-
-/* ===== REVIEWS ===== */
-/* .reviews {
-  padding-top: 2%;
-  display: flex;
-  justify-content: space-between;
-
-}
-
-.review-res {
-  width: 40%;
-}
-
-.review-card {
-  display: flex;
-  gap: 12px;
-  padding: 10px 0;
-}
-
-.review-content h3 {
-  font-size: 14px;
-}
-
-.review-content p {
-  font-size: 13px;
-  color: #555;
-}
-
-.review-content .review-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.likes {
-  padding-top: 10px;
-  font-size: 14px;
-}
-
-.review-actions button {
-
-  border: none;
-  background: none;
-  font-size: 12px;
-  cursor: pointer;
-} */
 
 /* COMMENTS INPUT */
 .comments {
@@ -385,14 +343,17 @@
 }
 
 /* ===== RESTAURANT INFO ===== */
+.review {
+  margin-top: 30px;
+}
+
 .shop {
-  padding: 25px;
+  padding: 20px;
   border-radius: 14px;
   background: #fff;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-  width: 47%;
-  height: 10%;
-
+  width: 100%;
+  max-width: 520px;
 }
 
 .shop-image {
@@ -400,13 +361,15 @@
   height: 60px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
 .img {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   padding-top: 10px;
   padding-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .shop-text h3 {
@@ -422,12 +385,7 @@
   font-size: 13px;
 }
 
-/* ==============================================================
-   🆕 CUSTOMER REVIEWS MODAL — was missing entirely from this file,
-   without it the modal (overlay, form, review cards, like/dislike)
-   would render completely unstyled.
-   ============================================================== */
-
+/* ===== CUSTOMER REVIEWS MODAL ===== */
 .review-modal-overlay {
   position: fixed;
   top: 0;
@@ -439,7 +397,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  padding: 20px;
+  padding: 16px;
 }
 
 .review-modal-content {
@@ -449,7 +407,7 @@
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  padding: 24px;
+  padding: 20px;
   position: relative;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
@@ -462,7 +420,7 @@
 }
 
 .review-modal-header h2 {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
   margin: 0;
 }
@@ -475,6 +433,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .review-form {
@@ -529,17 +488,11 @@
   background-color: #fff;
 }
 
-.review-input:focus,
-.review-textarea:focus {
-  /* border-color: #ff4d4f; */
-}
-
 .review-form-footer {
   display: flex;
   justify-content: flex-end;
 }
 
-/* 🆕 Write a Review toggle button */
 .write-review-toggle-btn {
   background: #fff;
   color: #880559;
@@ -568,10 +521,7 @@
   font-weight: 600;
   font-size: 14px;
   transition: background-color 0.2s;
-}
-
-.post-review-btn:hover {
-  background-color: #ff4d4f;
+  width: 100%;
 }
 
 .post-review-btn:disabled {
@@ -585,8 +535,6 @@
   margin-top: 12px;
   text-align: center;
 }
-
-/* Reviews List Styles */
 
 .reviews-list-container {
   display: flex;
@@ -617,6 +565,7 @@
 
 .review-details {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -626,6 +575,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .reviewer-name {
@@ -645,6 +596,7 @@
   font-size: 14px;
   color: #374151;
   line-height: 1.4;
+  word-break: break-word;
 }
 
 .review-action-row {
@@ -665,11 +617,6 @@
   transition: color 0.2s;
 }
 
-/* .action-btn:hover {
-  color: #880559;
-} */
-
-/* 🆕 Comment + like/dislike share one row */
 .review-comment-row {
   display: flex;
   align-items: flex-end;
@@ -689,7 +636,6 @@
   flex-shrink: 0;
 }
 
-/* 🆕 Show More button */
 .show-more-wrapper {
   display: flex;
   justify-content: center;
@@ -708,34 +654,22 @@
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-/* .show-more-btn:hover {
-  background: #880559;
-  color: #fff;
-} */
-
 .hide-btn {
   border-color: #999;
   color: #666;
 }
 
-/* .hide-btn:hover {
-  background: #666;
-  color: #fff;
-} */
-
-/* ===== Overlay ===== */
+/* ===== Branch popup (unchanged) ===== */
 .branch-popup-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
   z-index: 9999;
-
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* ===== Popup ===== */
 .branch-popup {
   background: #fff;
   width: 92%;
@@ -747,7 +681,6 @@
   position: relative;
 }
 
-/* ===== Animation ===== */
 @keyframes popupFade {
   from {
     transform: translateY(10px) scale(0.96);
@@ -760,7 +693,6 @@
   }
 }
 
-/* ===== Header ===== */
 .branch-header {
   border-bottom: 1px solid #eee;
   padding-bottom: 12px;
@@ -779,7 +711,6 @@
   margin-top: 4px;
 }
 
-/* ===== Close Button ===== */
 .close-btn {
   position: absolute;
   top: 14px;
@@ -798,14 +729,12 @@
   background: #e5e5e5;
 }
 
-/* ===== Branch List ===== */
 .branch-list {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-/* ===== Branch Row ===== */
 .branch-row {
   display: flex;
   justify-content: space-between;
@@ -814,6 +743,7 @@
   border: 1px solid #e6e6e6;
   border-radius: 12px;
   transition: box-shadow 0.2s ease, border 0.2s ease;
+  flex-wrap: wrap;
 }
 
 .branch-row:hover {
@@ -821,7 +751,6 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
-/* ===== Left Content ===== */
 .branch-details p {
   margin: 4px 0;
   font-size: 14px;
@@ -833,7 +762,6 @@
   color: #000;
 }
 
-/* ===== Right Button ===== */
 .branch-action {
   display: flex;
   align-items: center;
@@ -860,7 +788,6 @@
   font-size: 13px;
 }
 
-
 .selected-branch-info p {
   margin: 2px 0;
   font-size: 14px;
@@ -871,18 +798,17 @@
   color: #ff5a00;
 }
 
-/* // highlists */
-/* // highlists */
+/* ===== HIGHLIGHTS BOX ===== */
 .highlights-box {
-  width: 24%;
+  flex: 1 1 260px;
+  min-width: 240px;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 16px;
-  height: 490px;
+  max-height: 490px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* title kabhi scroll ke saath nahi jayega */
 }
 
 .highlights-title {
@@ -891,50 +817,21 @@
   margin-bottom: 12px;
   color: #111827;
   flex-shrink: 0;
-  /* 🆕 title fixed rahega upar */
   padding-bottom: 8px;
   border-bottom: 1px solid #f0f0f0;
 }
 
-/* 🆕 sirf ye area scroll karega, mouse wheel se */
 .highlights-scroll {
   flex: 1;
   overflow-y: auto;
   padding-right: 6px;
   overscroll-behavior-y: auto;
-  /* 🆕 lets scroll hand off to the page once this box hits its end */
-}
-
-/* 🆕 Hide scrollbar completely — Chrome/Edge/Safari */
-.highlights-scroll::-webkit-scrollbar {
-  width: 5px;
-}
-
-.highlights-scroll::-webkit-scrollbar-button {
-  display: none;
-  /* removes the up/down arrow buttons */
-}
-
-.highlights-scroll::-webkit-scrollbar-track {
-  background: transparent;
-  /* removes the highlighted track line */
-}
-
-.highlights-scroll::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 10px;
-}
-
-.highlights-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: #d1d5db transparent;
-}
-
-/* 🆕 Hide scrollbar completely — Firefox */
-.highlights-scroll {
   scrollbar-width: none;
   -ms-overflow-style: none;
-  /* old Edge/IE, harmless elsewhere */
+}
+
+.highlights-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 .highlights-list {
@@ -950,6 +847,7 @@
   font-size: 12px;
   border-bottom: 1px dashed #eee;
   padding-bottom: 8px;
+  flex-wrap: wrap;
 }
 
 .highlight-block {
@@ -976,147 +874,201 @@
   margin: 0;
 }
 
-/* ===== 1200px (Large laptops) ===== */
+/* ======================================================================
+   RESPONSIVE — clean, ordered chain (desktop → smallest), no duplicates
+   ====================================================================== */
+
+/* ---------- ≤1200px (Large laptops) ---------- */
 @media (max-width: 1200px) {
-  .order-card {
-    gap: 50px;
-  }
-
-  .order-details {
-    width: 45%;
-  }
-
-  .order-image-box {
-    width: 452px;
-    height: 466px;
-  }
-}
-
-
-/* ===== 1024px (Small laptops / tablets landscape) ===== */
-@media (max-width: 1024px) {
   .container {
     padding: 0 40px;
   }
 
-  .order-food-title {
-    font-size: 30px;
-  }
-
-  .order-price {
-    font-size: 38px;
-  }
-
-  .order-image-box {
-    width: 340px;
+  .order-image {
     height: 340px;
   }
-}
 
-
-/* ===== 900px (Tablet transition) ===== */
-@media (max-width: 900px) {
-  .order-card {
-    flex-direction: column;
-    align-items: center;
-    gap: 40px;
-  }
-
-  .order-details {
-    width: 100%;
-  }
-
-  .column {
-    flex-direction: row;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .reviews {
-    flex-direction: column;
-    gap: 30px;
-  }
-
-  .review-res,
-  .shop {
-    width: 100%;
+  .order-thumbnails {
+    max-height: 340px;
   }
 }
 
-
-/* ===== 768px (Tablet portrait) ===== */
-@media (max-width: 768px) {
+/* ---------- ≤1024px (Small laptops / tablets landscape) ---------- */
+@media (max-width: 1024px) {
   .container {
-    padding: 0 20px;
-  }
-
-  .order-title {
-    font-size: 28px;
-  }
-
-  .order-image-box {
-    width: 300px;
-    height: 300px;
+    padding: 0 30px;
   }
 
   .order-food-title {
-    font-size: 26px;
+    font-size: 28px;
   }
 
   .order-price {
     font-size: 34px;
   }
 
-  .food-action {
+  .order-image {
+    height: 300px;
+  }
+
+  .order-thumbnails {
+    max-height: 300px;
+  }
+
+  .highlights-box {
+    max-height: none;
+  }
+}
+
+/* ---------- ≤900px (Tablet) : stack image/details/highlights vertically ---------- */
+@media (max-width: 900px) {
+  .order-card {
     flex-direction: column;
-    /* align-items: flex-start; */
-    gap: 15px;
+    align-items: stretch;
+    gap: 30px;
   }
-}
 
-
-/* ===== 600px (Large mobile) ===== */
-@media (max-width: 600px) {
   .order-image-box {
-    width: 260px;
-    height: 260px;
+    flex: 1 1 auto;
+    width: 100%;
   }
 
-  .side-img {
-    height: 60px;
+  .order-details {
+    width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
-  .order-price-row {
-    flex-wrap: wrap;
-    gap: 10px;
+  .highlights-box {
+    width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-height: 320px;
   }
 
-  .adds {
-    margin-left: 0;
+  .shop {
+    width: 100%;
+    max-width: none;
   }
 }
 
+/* ---------- ≤768px (Tablet portrait) ---------- */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 20px;
+  }
 
-/* ===== 480px (Mobile) ===== */
-@media (max-width: 480px) {
   .order-title {
-    font-size: 24px;
+    font-size: 26px;
   }
 
   .order-food-title {
-    font-size: 22px;
+    font-size: 24px;
   }
 
   .order-price {
     font-size: 30px;
   }
 
+  .order-image {
+    height: 260px;
+  }
+
+  .order-thumbnails {
+    max-height: 260px;
+  }
+
+  .order-thumb-img,
+  .order-thumb-placeholder {
+    width: 70px;
+    height: 60px;
+  }
+
+  .food-action {
+    justify-content: flex-start;
+  }
+
+  .review-modal-content {
+    padding: 16px;
+  }
+}
+
+/* ---------- ≤600px (Large mobile) : thumbnails go horizontal above image ---------- */
+@media (max-width: 600px) {
+  .order-image-box {
+    flex-direction: column;
+  }
+
+  .order-thumbnails {
+    flex-direction: row;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+  }
+
+  .order-thumb-img,
+  .order-thumb-placeholder {
+    width: 64px;
+    height: 54px;
+  }
+
+  .order-image {
+    height: 240px;
+    max-width: 100%;
+  }
+
+  .order-price-row {
+    gap: 10px;
+  }
+
+  .food-action {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .order-btnn,
+  .add-btnn {
+    width: 100%;
+    justify-content: center;
+    border-radius: 12px;
+  }
+
+  .adds {
+    display: none;
+    /* purely decorative spacer element on small screens */
+  }
+}
+
+/* ---------- ≤480px (Mobile) ---------- */
+@media (max-width: 480px) {
+  .order-title {
+    font-size: 22px;
+  }
+
+  .order-food-title {
+    font-size: 21px;
+  }
+
+  .order-price {
+    font-size: 27px;
+  }
+
+  .order-price .rs {
+    font-size: 18px;
+  }
+
+  .order-image {
+    height: 210px;
+  }
+
   .order-rating h3 {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .order-rating img {
-    width: 22px;
+    width: 20px;
   }
 
   .comments {
@@ -1126,21 +1078,47 @@
   .comments button {
     width: 100%;
   }
+
+  .review-modal-header h2 {
+    font-size: 16px;
+  }
+
+  .highlights-box {
+    padding: 12px;
+  }
+
+  .highlight-label {
+    min-width: 90px;
+    font-size: 11.5px;
+  }
+
+  .highlight-value {
+    font-size: 11.5px;
+  }
 }
 
-
-/* ===== 360px (Small mobile) ===== */
+/* ---------- ≤360px (Small mobile) ---------- */
 @media (max-width: 360px) {
-  .order-image-box {
-    width: 220px;
-    height: 220px;
+  .order-image {
+    height: 190px;
   }
 
   .order-food-title {
-    font-size: 20px;
+    font-size: 19px;
   }
 
   .order-price {
-    font-size: 26px;
+    font-size: 24px;
+  }
+
+  .order-thumb-img,
+  .order-thumb-placeholder {
+    width: 54px;
+    height: 46px;
+  }
+
+  .shop-image {
+    width: 48px;
+    height: 48px;
   }
 }

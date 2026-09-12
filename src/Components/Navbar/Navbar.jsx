@@ -23,6 +23,13 @@ const PLACEHOLDERS = [
   "Search for sev",
 ];
 
+const getProductStock = (product) => {
+  if (product.quantity === undefined || product.quantity === null || product.quantity === "") {
+    return Infinity;
+  }
+  return Number(product.quantity) || 0;
+};
+
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { cartItems } = useCart();
@@ -44,8 +51,6 @@ const Navbar = () => {
   const [followersCount, setFollowersCount] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
-
-
 
   // Categories state for bottom navbar strip
   const [navCategories, setNavCategories] = useState([]);
@@ -91,9 +96,9 @@ const Navbar = () => {
           setSearchResults([]);
         })
         .finally(() => setSearchLoading(false));
-    }, 400); // debounce — waits 400ms after typing stops
+    }, 400);
 
-    return () => clearTimeout(timer); // cancels the pending request if user keeps typing
+    return () => clearTimeout(timer);
   }, [searchValue]);
 
   useEffect(() => {
@@ -131,6 +136,17 @@ const Navbar = () => {
     };
     document.addEventListener("mousedown", handleClickOutsideSearch);
     return () => document.removeEventListener("mousedown", handleClickOutsideSearch);
+  }, []);
+
+  // 🆕 Added outside click listener to close user profile dropdown when clicking anywhere outside
+  useEffect(() => {
+    const handleClickOutsideDropdown = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutsideDropdown);
+    return () => document.removeEventListener("mousedown", handleClickOutsideDropdown);
   }, []);
 
   useEffect(() => {
@@ -212,11 +228,13 @@ const Navbar = () => {
     localStorage.setItem("search", value);
   };
 
-  // 🆕 THE MISSING FUNCTION — was called in JSX but never defined, which
-  // crashed the app on every search-result click. Navigates to the order/
-  // product page carrying the clicked product as route state (same pattern
-  // Order.jsx expects: state.item).
   const handleSearchResultClick = (product) => {
+    const stock = getProductStock(product);
+    if (stock <= 0) {
+      alert("This item is currently out of stock.");
+      return;
+    }
+
     setShowSearchDropdown(false);
     setIsInputActive(false);
     setSearchValue("");
@@ -232,8 +250,6 @@ const Navbar = () => {
   const handleCategoryClick = (item) => {
     navigate(`/category/${encodeURIComponent(item.name)}`);
   };
-
-
 
   return (
     <div className={`nav-container ${isScrolled ? "nav-scrolled" : ""}`}>
@@ -289,10 +305,7 @@ const Navbar = () => {
                     </div>
                     <div className="search-results-list">
                       {searchResults.map((product) => {
-                        const inStock =
-                          product.quantity === undefined || product.quantity === null || product.quantity === ""
-                            ? true
-                            : Number(product.quantity) > 0;
+                        const inStock = getProductStock(product) > 0;
                         const hasOffer = product.offer > 0 && product.offer < product.price;
 
                         return (
@@ -335,17 +348,6 @@ const Navbar = () => {
                         );
                       })}
                     </div>
-                    {searchResults.length > 0 && (
-                      <div
-                        className="search-dropdown-footer"
-                      // onClick={() => {
-                      //   setShowSearchDropdown(false);
-                      //   navigate(`/category/${encodeURIComponent(searchValue)}`);
-                      // }}
-                      >
-                        All results for "{searchValue}"
-                      </div>
-                    )}
                   </>
                 ) : (
                   <div className="search-dropdown-status no-results">
@@ -361,11 +363,9 @@ const Navbar = () => {
 
         {/* RIGHT : Vegetarian toggle + Products/Follow | Account | Cart */}
         <div className="nav-right">
-          {/* 🆕 VEGETARIAN TOGGLE — sits right before the store-stats/follow pill */}
-          {/* 🆕 VEGETARIAN — static label, no toggle state */}
           <span className="veg-badge">
             <FaLeaf size={12} />
-            Pure Veg
+            <span className="veg-badge-text">Pure Veg</span>
           </span>
 
           <div className="store-stats">

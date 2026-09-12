@@ -55,6 +55,9 @@ const MaidaItems = ({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    // State for continuous automatic image sliding & dot indicators
+    const [activeImageIndices, setActiveImageIndices] = useState({});
+
     const effectiveSubCategory = subCategory ?? subCategoryName;
     const treatAsAll = isAll || category === "all";
 
@@ -91,6 +94,34 @@ const MaidaItems = ({
             })
             .finally(() => setLoading(false));
     }, [category, effectiveSubCategory, treatAsAll]);
+
+    // Continuous automatic background sliding effect for cards with multiple images
+    useEffect(() => {
+        if (!list || list.length === 0) return;
+
+        const interval = setInterval(() => {
+            setActiveImageIndices((prev) => {
+                const next = { ...prev };
+                list.forEach((item) => {
+                    const images = item.images && item.images.length > 0 
+                        ? item.images 
+                        : [item.image].filter(Boolean);
+                    if (images.length > 1) {
+                        const current = prev[item._id] || 0;
+                        next[item._id] = (current + 1) % images.length;
+                    }
+                });
+                return next;
+            });
+        }, 2200); // Changes image automatically every 2.2 seconds without needing hover
+
+        return () => clearInterval(interval);
+    }, [list]);
+
+    const handleDotClick = (itemId, index, e) => {
+        e.stopPropagation();
+        setActiveImageIndices((prev) => ({ ...prev, [itemId]: index }));
+    };
 
     const getStock = (item) => {
         if (item.quantity === undefined || item.quantity === null || item.quantity === "") {
@@ -164,13 +195,11 @@ const MaidaItems = ({
         const currentQty = getQty(item);
         const currentNum = currentQty === "ADD" ? 0 : Number(currentQty);
 
-        // Alert on reaching maximum 10-item limit
         if (currentNum >= 10) {
             alert("You can add a maximum of 10 items.");
             return;
         }
 
-        // Alert on reaching maximum available stock
         if (currentNum >= stock) {
             alert(`Only ${stock} items available in stock.`);
             return;
@@ -249,13 +278,20 @@ const MaidaItems = ({
                     const currentRating = Number(item.rating) || 0;
                     const ordersCount = item.orders ?? 0;
 
+                    // Extract image array supporting item.images or fallback to single image
+                    const images = item.images && item.images.length > 0 
+                        ? item.images 
+                        : [item.image].filter(Boolean);
+                    const currentImgIdx = activeImageIndices[item._id] || 0;
+                    const isVideo = item.video && item.video.endsWith(".mp4");
+
                     return (
                         <SwiperSlide key={item._id}>
                             <div className={`food-card${!inStock ? " out-of-stock" : ""}`}>
                                 {item.video && <div className="add-badge">Ads</div>}
 
                                 <div className="food-image-wrapper">
-                                    {item.video && item.video.endsWith(".mp4") && (
+                                    {isVideo ? (
                                         <video
                                             className={`food-image${!inStock ? " blurred" : ""}`}
                                             src={item.video}
@@ -265,14 +301,25 @@ const MaidaItems = ({
                                             playsInline
                                             preload="metadata"
                                         />
-                                    )}
-
-                                    {!item.video && (
-                                        <img
-                                            src={item.image}
-                                            alt={item.title}
-                                            className={`food-image${!inStock ? " blurred" : ""}`}
-                                        />
+                                    ) : (
+                                        <>
+                                            <img
+                                                src={images[currentImgIdx] || item.image}
+                                                alt={item.title}
+                                                className={`food-image slide-transition${!inStock ? " blurred" : ""}`}
+                                            />
+                                            {images.length > 1 && (
+                                                <div className="card-dots-container">
+                                                    {images.map((_, idx) => (
+                                                        <span
+                                                            key={idx}
+                                                            className={`card-dot ${idx === currentImgIdx ? 'active' : ''}`}
+                                                            onClick={(e) => handleDotClick(item._id, idx, e)}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </>
                                     )}
 
                                     <div className="view-eye">

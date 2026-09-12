@@ -105,12 +105,21 @@ const OrderPage = () => {
     return imgs.filter(Boolean);
   }, [item]);
 
+  // 🆕 FIXED — the old chain checked item.isAvailable / item.stock / a
+  // string comparison against item.status === "out of stock". None of
+  // those actually exist on the real product model: stock is tracked via
+  // item.quantity everywhere else in the app (search, category cards), and
+  // the admin's manual toggle uses item.status = "Online"/"Offline", never
+  // the literal string "out of stock". So the old check silently always
+  // evaluated to "available" — this is why Place Order could stay enabled
+  // (or behave inconsistently) for out-of-stock items reached via search.
+  const quantityInStock =
+    item.quantity === undefined || item.quantity === null || item.quantity === ""
+      ? true // no quantity tracked for this product = treat as unlimited/in stock
+      : Number(item.quantity) > 0;
+  const manuallyOffline = typeof item.status === "string" && item.status.toLowerCase() === "offline";
   const isAvailable =
-    item.isAvailable !== undefined
-      ? item.isAvailable
-      : item.stock !== undefined
-        ? item.stock > 0
-        : item.status?.toLowerCase() !== "out of stock";
+    item.isAvailable !== undefined ? item.isAvailable : quantityInStock && !manuallyOffline;
 
   const bookmarked = isInWishlist(item);
 
@@ -271,6 +280,7 @@ const OrderPage = () => {
       setNewComment("");
       setNewRating(0);
       fetchReviews();
+      setIsReviewModalOpen(false); // 🆕 close the modal once the review is posted successfully
     } catch (err) {
       console.error("Post review error:", err);
       alert(err.response?.data?.message || "Failed to post review.");
@@ -318,62 +328,28 @@ const OrderPage = () => {
           </span>
 
           <div className="order-card">
-            <div className="order-image-box" style={{ display: "flex", gap: "40px", alignItems: "flex-start" }}>
+            <div className="order-image-box">
               {productImages.length > 1 ? (
-                <div
-                  className="order-thumbnails"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "18px",
-                    overflowY: "auto",
-                    paddingRight: "2px",
-                  }}
-                >
+                <div className="order-thumbnails">
                   {productImages.map((imgUrl, idx) => (
                     <img
                       key={idx}
                       src={imgUrl}
                       alt={`${item.title} thumbnail ${idx + 1}`}
                       onClick={() => setSelectedImage(imgUrl)}
-                      style={{
-                        width: "130px",
-                        height: "110px",
-                        objectFit: "fill",
-                        borderRadius: "8px",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                      }}
+                      className={`order-thumb-img ${selectedImage === imgUrl ? "active" : ""}`}
                     />
                   ))}
                 </div>
               ) : (
-                // 🆕 Demo placeholder thumbnails — shown only when there are no real side images
-                <div
-                  className="order-thumbnails order-thumbnails-demo"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "18px",
-                    paddingRight: "2px",
-                  }}
-                >
+                <div className="order-thumbnails order-thumbnails-demo">
                   {[1, 2, 3].map((n) => (
-                    <div
-                      key={n}
-                      style={{
-                        width: "130px",
-                        height: "110px",
-                        borderRadius: "8px",
-                        background: "#f1f5f9",
-                        border: "1px dashed #cbd5e1",
-                      }}
-                    />
+                    <div key={n} className="order-thumb-placeholder" />
                   ))}
                 </div>
               )}
 
-              <div style={{ position: "relative", flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+              <div className="order-main-image-wrap">
                 {selectedImage && (
                   <img key={selectedImage} src={selectedImage} alt={item.title} className="order-image" />
                 )}
@@ -385,7 +361,6 @@ const OrderPage = () => {
                 />
               </div>
             </div>
-
             <div className="order-details">
               <div className="order-status">
                 <img src={item.isOpen ? OpenIcon : CloseIcon} alt="" />
