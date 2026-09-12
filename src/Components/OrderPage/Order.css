@@ -878,6 +878,21 @@
    RESPONSIVE — clean, ordered chain (desktop → smallest), no duplicates
    ====================================================================== */
 
+@media (max-width: 2250px) {
+  .container {
+    padding: 0 30px;
+  }
+
+  .highlights-box {
+    max-height: none;
+  }
+
+  .order-type-icon {
+    right: 30px;
+  }
+}
+
+
 /* ---------- ≤1200px (Large laptops) ---------- */
 @media (max-width: 1200px) {
   .container {
@@ -1005,12 +1020,19 @@
     overflow-x: auto;
     overflow-y: hidden;
     width: 100%;
+    order: 2;
+    /* 🆕 thumbnails ab neeche aayenge */
+  }
+
+  .order-main-image-wrap {
+    order: 1;
+    /* 🆕 main image upar rahega */
   }
 
   .order-thumb-img,
   .order-thumb-placeholder {
-    width: 64px;
-    height: 54px;
+    width: 70px;
+    height: 70px;
   }
 
   .order-image {
@@ -1037,7 +1059,6 @@
 
   .adds {
     display: none;
-    /* purely decorative spacer element on small screens */
   }
 }
 
@@ -1060,7 +1081,7 @@
   }
 
   .order-image {
-    height: 210px;
+    height: 440px;
   }
 
   .order-rating h3 {
@@ -1094,6 +1115,13 @@
 
   .highlight-value {
     font-size: 11.5px;
+  }
+
+  .order-type-icon {
+    top: 15px;
+    right: 15px;
+    width: 26px;
+    height: 26px;
   }
 }
 
