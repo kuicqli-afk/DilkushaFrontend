@@ -756,6 +756,7 @@
   .veg-badge {
     padding: 6px 8px;
     margin-right: 4px;
+    display: none;
   }
 
   .typing-erase {
