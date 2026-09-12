@@ -746,6 +746,9 @@ select:focus {
 @media (min-width: 400px) {
   .food-card-grid {
     grid-template-columns: repeat(1, 1fr);
+    justify-content: center;
+    align-items: center;
+    place-items: center;
   }
 }
 

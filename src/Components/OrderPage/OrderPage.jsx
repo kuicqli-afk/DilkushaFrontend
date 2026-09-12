@@ -343,7 +343,7 @@ const OrderPage = () => {
                 </div>
               ) : (
                 <div className="order-thumbnails order-thumbnails-demo">
-                  {[1, 2, 3].map((n) => (
+                  {[1, 2, 3, 4].map((n) => (
                     <div key={n} className="order-thumb-placeholder" />
                   ))}
                 </div>
@@ -601,7 +601,7 @@ const OrderPage = () => {
                             border: "1px solid #e5e7eb",
                             borderRadius: "10px",
                             overflow: "hidden",
-                            maxWidth: "420px",
+                            maxWidth: "600px",
                           }}
                         >
                           {(item.nutrition.servingSize || item.nutrition.servingPerPack) && (

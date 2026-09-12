@@ -763,8 +763,13 @@
     font-size: 12px;
   }
 
-  .search-box input {
+  .search-box {
     font-size: 13px;
+    padding: 10px;
+  }
+
+  .search-box input {
+    width: 150px;
   }
 
   .nav-category-name-item {

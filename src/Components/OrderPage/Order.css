@@ -42,31 +42,37 @@
   padding-right: 2px;
   flex-shrink: 0;
   max-height: 490px;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* old Edge/IE */
+}
+
+.order-thumbnails::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari/Edge */
 }
 
 .order-thumb-img {
-  width: 90px;
-  height: 76px;
-  object-fit: cover;
+  width: 130px;
+  height: 150px;
+  object-fit: contain;
   border-radius: 8px;
   cursor: pointer;
-  border: 2px solid transparent;
   transition: border 0.2s ease, opacity 0.2s ease;
   flex-shrink: 0;
 }
 
-.order-thumb-img:hover {
-  opacity: 0.85;
-}
 
 .order-thumb-img.active {
   border-color: #A90409;
 }
 
 .order-thumb-placeholder {
-  width: 90px;
-  height: 76px;
+  width: 130px;
+  height: 150px;
   border-radius: 8px;
+  object-fit: contain;
   background: #f1f5f9;
   border: 1px dashed #cbd5e1;
   flex-shrink: 0;
@@ -84,7 +90,7 @@
 .order-image {
   width: 100%;
   max-width: 450px;
-  height: 380px;
+  height: 490px;
   object-fit: cover;
   border-radius: 20px;
 }
@@ -798,14 +804,20 @@
   color: #ff5a00;
 }
 
-/* ===== HIGHLIGHTS BOX ===== */
+/* =========================================================
+   HIGHLIGHTS BOX
+   ========================================================= */
 .highlights-box {
   flex: 1 1 260px;
   min-width: 240px;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 16px;
-  max-height: 490px;
+  /* 🆕 height (not max-height) so this box always has a real fixed size
+     to scroll inside of — max-height alone was getting reset to "none"
+     by an over-broad media query below, which is why scrolling stopped
+     working entirely (the box just grew to fit all the content instead) */
+  height: 490px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -821,11 +833,12 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
+/* Scrolling works (thanks to the height fix above), but the scrollbar
+   itself stays hidden — same look as before, just now it actually scrolls. */
 .highlights-scroll {
   flex: 1;
   overflow-y: auto;
   padding-right: 6px;
-  overscroll-behavior-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -883,13 +896,13 @@
     padding: 0 30px;
   }
 
-  .highlights-box {
-    max-height: none;
-  }
-
   .order-type-icon {
     right: 30px;
   }
+
+  /* 🆕 the old ".highlights-box { max-height: none; }" rule here has been
+     removed — it applied to virtually every real screen size and was the
+     actual cause of the scroller never engaging. */
 }
 
 
@@ -930,9 +943,8 @@
     max-height: 300px;
   }
 
-  .highlights-box {
-    max-height: none;
-  }
+  /* 🆕 removed ".highlights-box { max-height: none; }" here too, for the
+     same reason as the 2250px breakpoint above */
 }
 
 /* ---------- ≤900px (Tablet) : stack image/details/highlights vertically ---------- */
@@ -958,7 +970,7 @@
     width: 100%;
     flex: 1 1 auto;
     min-width: 0;
-    max-height: 320px;
+    height: 320px;
   }
 
   .shop {
@@ -1021,12 +1033,12 @@
     overflow-y: hidden;
     width: 100%;
     order: 2;
-    /* 🆕 thumbnails ab neeche aayenge */
+    /* thumbnails ab neeche aayenge */
   }
 
   .order-main-image-wrap {
     order: 1;
-    /* 🆕 main image upar rahega */
+    /* main image upar rahega */
   }
 
   .order-thumb-img,
