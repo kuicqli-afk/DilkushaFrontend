@@ -94,9 +94,9 @@
 
 .search-box:focus-within,
 .search-box:hover {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  box-shadow: 0 0 0 3px rgba(169, 4, 9, 0.08);
+  background: rgba(247, 248, 249, 0.98);
+  border-color: #b1bece;
+  box-shadow: 0 0 0 1px rgba(169, 4, 9, 0.08);
 }
 
 /* ===============================
@@ -416,10 +416,6 @@
   white-space: nowrap;
 }
 
-.nav-item:hover {
-  color: #A90409;
-  background: #fef2f2;
-}
 
 .nav-item img {
   height: 30px;
@@ -521,7 +517,7 @@
 }
 
 .total-products-badge strong {
-  color: #A90409;
+  color: #d81324;
   font-weight: 700;
 }
 
@@ -535,7 +531,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  background-color: #A90409;
+  background-color: #d81324;
   color: white;
   border: none;
   padding: 4px 12px;
@@ -548,7 +544,7 @@
 }
 
 .follow-btn:hover {
-  background-color: #8b0307;
+  background-color: #d81324;
   transform: translateY(-1px);
 }
 

@@ -139,8 +139,8 @@ const OrderPage = () => {
   const categoryName = resolveCategoryName(item.category);
   const subcategoryName = resolveCategoryName(item.subcategory);
 
-  const basePrice = item.price || 0;
-  const baseOffer = item.offer || 0;
+  const basePrice = item.offer || 0;
+  const baseOffer = item.price || 0;
 
   const scaledPrice = basePrice * qty;
   const scaledOffer = baseOffer * qty;

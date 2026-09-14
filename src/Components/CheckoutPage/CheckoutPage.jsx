@@ -16,12 +16,16 @@ import {
   AiOutlineWallet,
 } from "react-icons/ai";
 import "./CheckoutPage.css";
-import { FiArrowLeft } from "react-icons/fi";
+import { FiArrowLeft, FiMinus, FiPlus, FiTrash2, FiShoppingBag } from "react-icons/fi";
 
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
   (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
   "https://shyamfoodbackend.onrender.com/api";
+
+// Same key Cart.jsx writes to when the customer taps "Detect my location"
+// there — reading it here means they don't have to detect it twice.
+const DELIVERY_LOCATION_KEY = "cart_delivery_location";
 
 const STEP_DEFINITIONS = [
   { id: 1, label: "Cart", icon: AiOutlineShoppingCart },
@@ -30,7 +34,18 @@ const STEP_DEFINITIONS = [
   { id: 4, label: "Confirm", icon: AiOutlineCheckCircle },
 ];
 
-// 🆕 SINGLE source of truth for "what the customer actually pays per unit".
+// Product images can arrive under different keys depending on where the item
+// was added from (images[], image, img, or nested inside `product`). Same
+// fallback chain used on the Cart page, so thumbnails behave identically here.
+const getItemImage = (item) =>
+  item.images?.[0] ||
+  item.image ||
+  item.img ||
+  item.product?.images?.[0] ||
+  item.product?.image ||
+  "";
+
+// SINGLE source of truth for "what the customer actually pays per unit".
 // Same helper used on the Cart page — falls back to item.price only if no
 // offer price exists. Every price on this page (the Step-1 line items, the
 // subtotal, the coupon discount, and the order payload sent to the backend)
@@ -40,6 +55,24 @@ const getUnitPrice = (item) => {
   const price = Number(item.price);
   if (offer > 0) return offer;
   return price > 0 ? price : 0;
+};
+
+// Factorial helper — 1!=1, 2!=2, 3!=6, 4!=24, 5!=120, 6!=720 ...
+const factorial = (n) => {
+  if (n <= 1) return 1;
+  let result = 1;
+  for (let i = 2; i <= n; i++) result *= i;
+  return result;
+};
+
+// Final delivery fee = distance-based baseFare (from the API below,
+// NOT a static number) divided by the factorial of the product count:
+// fee(n) = baseFare / n!  →  e.g. base=50 → 50, 25, 8.33, 2.08, 0.42, ~0 ...
+// Negligible amounts (<₹0.5) are shown as FREE.
+const getDynamicDeliveryFee = (baseFare, productCount) => {
+  const count = Math.max(1, productCount);
+  const fee = baseFare / factorial(count);
+  return fee < 0.5 ? 0 : fee;
 };
 
 const getGuestId = () => {
@@ -67,12 +100,21 @@ const loadRazorpayScript = () => {
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { cartItems, clearCart } = useCart();
+  // 🆕 Pulling in updateQty / removeFromCart too, so Step 1 can offer the
+  // same +/- quantity controls and remove button as the Cart page, instead
+  // of just showing a read-only quantity.
+  const { cartItems, clearCart, updateQty, removeFromCart } = useCart();
   const { user } = useAuth();
 
   const [step, setStep] = useState(1);
   const [placing, setPlacing] = useState(false);
   const [orderError, setOrderError] = useState("");
+
+  // 🆕 Tracks any item thumbnails that fail to load, same as Cart.jsx, so we
+  // can fall back to a placeholder icon instead of a broken image.
+  const [brokenImages, setBrokenImages] = useState({});
+  const markImageBroken = (key) =>
+    setBrokenImages((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
 
   // Address State
   const [address, setAddress] = useState({
@@ -101,23 +143,49 @@ export default function CheckoutPage() {
   const [showCouponList, setShowCouponList] = useState(false);
   const [, setFetchingCoupons] = useState(false);
 
-  // Delivery Fee States
-  const [deliveryFee, setDeliveryFee] = useState(49);
+  // 🆕 Delivery Fee States — baseFare is the raw distance-based amount from
+  // the backend; deliveryFee is what actually gets charged, after the
+  // divide-by-factorial formula is applied on top of baseFare.
+  const [baseFare, setBaseFare] = useState(50); // distance-based, replaces the old static 49
+  const [deliveryFee, setDeliveryFee] = useState(50);
   const [distanceInfo, setDistanceInfo] = useState(null);
   const [deliveryLoading, setDeliveryLoading] = useState(false);
   const [detectingLocation, setDetectingLocation] = useState(false);
   const [userCoords, setUserCoords] = useState(null);
   const [detectedAreaName, setDetectedAreaName] = useState("");
+  // 🆕 Where the current delivery fee's location came from — mirrors the
+  // Cart page's deliverySource pattern so the customer always knows why the
+  // fee is what it is: "estimate" (nothing set yet), "saved-address"
+  // (picked from the dropdown / prefilled from account), "gps" (detected
+  // via geolocation, here or handed off from the Cart page), or "manual"
+  // (customer typed the address fields themselves).
+  const [deliverySource, setDeliverySource] = useState("estimate");
 
-  // 🆕 Computed locally from cartItems using getUnitPrice, instead of trusting
+  // Computed locally from cartItems using getUnitPrice, instead of trusting
   // a separate CartContext `totals.subtotal` that could disagree with what's
   // actually rendered per line item below (and with the order payload).
+  // Because this reads straight from cartItems, editing quantity or removing
+  // an item on Step 1 recalculates this automatically — no extra wiring.
   const subtotal = useMemo(
     () => (cartItems || []).reduce((sum, item) => sum + getUnitPrice(item) * item.quantity, 0),
     [cartItems]
   );
 
-  // Fetch Delivery Fee from backend
+  // 🆕 Total product count = sum of quantities — this is "n" in fee(n) = base/n!
+  const productCount = useMemo(
+    () => (cartItems || []).reduce((sum, item) => sum + (item.quantity || 0), 0),
+    [cartItems]
+  );
+
+  // 🆕 Recompute the final delivery fee whenever baseFare or productCount
+  // changes — this is what keeps the fee "distance-based, not static", and
+  // also what makes it react live to +/- quantity changes on Step 1.
+  useEffect(() => {
+    setDeliveryFee(getDynamicDeliveryFee(baseFare, productCount));
+  }, [baseFare, productCount]);
+
+  // Fetch the distance-based BASE fare from backend (before the
+  // divide-by-factorial formula is applied on top of it here).
   const fetchDeliveryFee = async (targetAddress, coords = null) => {
     const addr = targetAddress || address;
     const currentCoords = coords || userCoords;
@@ -137,7 +205,10 @@ export default function CheckoutPage() {
       });
 
       if (res.data?.success) {
-        setDeliveryFee(Number(res.data.deliveryFee) || 49);
+        // 🆕 This is the raw distance-based fare — NOT the final charged
+        // amount. The divide-by-factorial formula runs on top of it via
+        // the useEffect above.
+        setBaseFare(Number(res.data.deliveryFee) || 50);
         setDistanceInfo({
           distanceKm: res.data.distanceKm,
           duration: res.data.durationText || "25 mins",
@@ -149,6 +220,44 @@ export default function CheckoutPage() {
       setDeliveryLoading(false);
     }
   };
+
+  // 🆕 If the customer already tapped "Detect my location" on the Cart page,
+  // pick that up here so they don't have to detect it a second time. Only
+  // used to prefill — the customer can still edit the address fields.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DELIVERY_LOCATION_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+
+      // Ignore stale detections older than ~30 minutes.
+      if (!saved?.detectedAt || Date.now() - saved.detectedAt > 30 * 60 * 1000) return;
+
+      if (saved.coords) setUserCoords(saved.coords);
+
+      if (saved.address) {
+        setAddress((prev) => ({
+          ...prev,
+          street: saved.address.street || prev.street,
+          city: saved.address.city || prev.city,
+          state: saved.address.state || prev.state,
+          pincode: saved.address.pincode || prev.pincode,
+        }));
+        if (saved.address.street || saved.address.city) {
+          setDetectedAreaName(
+            [saved.address.street, saved.address.city].filter(Boolean).join(", ")
+          );
+        }
+      }
+
+      if (saved.coords) {
+        fetchDeliveryFee(address, saved.coords);
+      }
+    } catch (err) {
+      console.warn("Could not read handed-off location:", err.message);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Auto calculate when step is 2/3 or address / coordinates change
   useEffect(() => {
@@ -290,11 +399,15 @@ export default function CheckoutPage() {
 
   const discount = calculateDiscount();
   const foodTotal = Math.max(0, subtotal - discount);
-  const total = foodTotal; // Online Razorpay charges Food Total only
-  // 🆕 What the customer's final bill actually is, per payment method — COD
-  // pays food + delivery together (nothing paid online), card/upi only pays
-  // food total online and settles delivery with the driver in cash/UPI.
-  const payableTotal = paymentMethod === "cod" ? foodTotal + deliveryFee : foodTotal;
+  // Grand Total = food + delivery (what the customer pays, always in full)
+  const grandTotal = foodTotal + deliveryFee;
+  // 🆕 One payment, no split: card/UPI now charge the FULL grand total
+  // (food + dynamic delivery fee) online, in one go. Nothing is collected
+  // separately by the delivery partner anymore.
+  const onlinePayable = grandTotal;
+  // COD: everything is paid to the driver on delivery (unchanged — this is
+  // still a single payment, just made in person instead of online).
+  const payableTotal = paymentMethod === "cod" ? grandTotal : onlinePayable;
 
   // Apply Coupon (by Code string or Coupon Object)
   const applyCouponHandler = async (codeToApply) => {
@@ -367,7 +480,7 @@ export default function CheckoutPage() {
         productId: isValidMongoId ? rawId : null,
         title: item.title || item.name,
         image: item.image || item.images?.[0] || "",
-        price: getUnitPrice(item), // 🆕 same helper used everywhere else on this page
+        price: getUnitPrice(item),
         quantity: Number(item.quantity || 1),
       };
     }),
@@ -381,8 +494,8 @@ export default function CheckoutPage() {
     subtotal: subtotal,
     delivery: deliveryFee,
     discount: discount,
-    total: foodTotal,
-    deliveryPayToDriver: true,
+    // Send grand total = food + delivery to backend
+    total: grandTotal,
     couponCode: appliedCoupon?.code || null,
   });
 
@@ -403,10 +516,11 @@ export default function CheckoutPage() {
 
     const payload = buildOrderPayload(guestId);
 
+    // 🆕 Charge the full grand total (food + delivery) online in one shot.
     const createRes = await axios.post(
       `${BASE_URL}/orders/create-razorpay-order`,
       {
-        amount: total,
+        amount: onlinePayable,
         guestId,
         paymentMethod,
         items: payload.items,
@@ -488,6 +602,13 @@ export default function CheckoutPage() {
       if (result.success) {
         setOrderDetails(result.data);
         clearCart();
+        // Location hand-off from Cart has served its purpose once an order
+        // is placed — clear it so a stale location isn't reused next time.
+        try {
+          localStorage.removeItem(DELIVERY_LOCATION_KEY);
+        } catch (err) {
+          // non-fatal
+        }
         setStep(4);
       } else {
         setOrderError(result.message || "Failed to place order.");
@@ -531,13 +652,8 @@ export default function CheckoutPage() {
 
   return (
     <div className="checkout-container">
-
-
       <ProgressBar />
-
-
       {step === 1 && (
-
         <div className="checkout-left">
 
           <button
@@ -556,24 +672,101 @@ export default function CheckoutPage() {
             </span>
           </div>
 
-          <div className="cart-list">
-            {cartItems.map((item) => {
-              // 🆕 same price used here as everywhere else on this page
-              const unitPrice = getUnitPrice(item);
-              return (
-                <div key={item.key || item._id} className="cart-item">
-                  {item.image && (
-                    <img src={item.image} alt={item.title} className="cart-item__thumb" />
-                  )}
-                  <div className="cart-item__info">
-                    <p className="cart-item__title">{item.title}</p>
-                    <p className="cart-item__qty">Quantity: (x{item.quantity})</p>
+          {cartItems.length === 0 ? (
+            <div className="cart-item" style={{ justifyContent: "center", padding: "24px 0" }}>
+              <p style={{ margin: 0, color: "#6b7280" }}>Your cart is empty.</p>
+            </div>
+          ) : (
+            <div className="cart-list">
+              {cartItems.map((item) => {
+                const unitPrice = getUnitPrice(item);
+                const itemKey = item.key || item._id;
+                const imgSrc = getItemImage(item);
+                const showImage = imgSrc && !brokenImages[itemKey];
+                return (
+                  <div key={itemKey} className="cart-item">
+                    {showImage ? (
+                      <img
+                        src={imgSrc}
+                        alt={item.title}
+                        className="cart-item__thumb"
+                        onError={() => markImageBroken(itemKey)}
+                      />
+                    ) : (
+                      <div
+                        className="cart-item__thumb"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          background: "#f3f4f6",
+                          color: "#9ca3af",
+                        }}
+                      >
+                        <FiShoppingBag />
+                      </div>
+                    )}
+
+                    <div className="cart-item__info">
+                      <p className="cart-item__title">{item.title}</p>
+
+                      {/* 🆕 Editable quantity control — same +/- pattern as
+                          Cart.jsx. Any change here flows straight into
+                          subtotal → delivery fee → grand total below since
+                          they're all derived from cartItems. */}
+                      <div
+                        className="quantity-control"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          marginTop: "6px",
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => updateQty(itemKey, item.quantity - 1)}
+                          disabled={item.quantity <= 1}
+                          aria-label="Decrease quantity"
+                        >
+                          <FiMinus />
+                        </button>
+                        <span>{item.quantity}</span>
+                        <button
+                          type="button"
+                          onClick={() => updateQty(itemKey, item.quantity + 1)}
+                          aria-label="Increase quantity"
+                        >
+                          <FiPlus />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                      }}
+                    >
+                      <div className="cart-item__price">₹ {(unitPrice * item.quantity).toFixed(2)}</div>
+
+                      {/* 🆕 Remove item — same as Cart.jsx's remove button */}
+                      <button
+                        type="button"
+                        className="remove-btn"
+                        onClick={() => removeFromCart(itemKey)}
+                        title="Remove item"
+                        aria-label="Remove item"
+                      >
+                        <FiTrash2 />
+                      </button>
+                    </div>
                   </div>
-                  <div className="cart-item__price">₹ {(unitPrice * item.quantity).toFixed(2)}</div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           <div className="cart-subtotal">
             <span>Total</span>
@@ -760,37 +953,22 @@ export default function CheckoutPage() {
               <span className="payment-option__radio" />
             </div>
 
-            {/* <div
-              className={`payment-option ${paymentMethod === "cod" ? "active" : ""}`}
-              onClick={() => setPaymentMethod("cod")}
-            >
-              <input type="radio" checked={paymentMethod === "cod"} readOnly />
-              <span className="payment-option__icon">
-                <AiOutlineWallet />
-              </span>
-              <div className="payment-option__body">
-                <span className="payment-option__title">Cash on Delivery</span>
-                <span className="payment-option__meta">Pay when it arrives</span>
-              </div>
-              <span className="payment-option__radio" />
-            </div> */}
-
             {paymentMethod === "cod" && (
               <div className="payment-note payment-note--warning">
                 <p>💵 Cash on Delivery (Pay on Arrival)</p>
                 <p>
-                  Pay Food Total (₹{foodTotal.toFixed(2)}) + Delivery Charge (₹{deliveryFee})
-                  directly to the delivery partner when your order arrives.
+                  Pay Grand Total (₹{grandTotal.toFixed(2)}) directly to the delivery partner —
+                  that includes Food ₹{foodTotal.toFixed(2)} + Delivery ₹{deliveryFee.toFixed(2)}.
                 </p>
               </div>
             )}
 
             {(paymentMethod === "card" || paymentMethod === "upi") && (
               <div className="payment-note payment-note--success">
-                <p>💳 Pay Food Order Online: ₹{foodTotal.toFixed(2)}</p>
+                <p>💳 Pay Online Now: ₹{onlinePayable.toFixed(2)}</p>
                 <p>
-                  🛵 Delivery fee (₹{deliveryFee}) will be paid directly to the delivery partner
-                  in cash/UPI upon delivery.
+                  One single payment — Food ₹{foodTotal.toFixed(2)} + Delivery ₹{deliveryFee.toFixed(2)}
+                  {" "}are both included. Nothing more to pay on arrival.
                 </p>
               </div>
             )}
@@ -826,25 +1004,30 @@ export default function CheckoutPage() {
               <span>🛵 Delivery Fee</span>
               <strong>₹{Number(orderDetails?.delivery ?? deliveryFee).toFixed(2)}</strong>
             </div>
-            {/* 🆕 label + amount now reflect what was actually paid vs what's
-                still payable to the driver, instead of always showing just
-                the online food total (which understated COD orders) */}
             <div className="order-detail-row">
-              <span>
+              <span>📦 Food Total</span>
+              <strong>₹{Number(orderDetails?.subtotal ?? subtotal).toFixed(2)}</strong>
+            </div>
+            <div className="order-detail-row" style={{ borderTop: '2px solid #e5e7eb', paddingTop: '10px', marginTop: '4px' }}>
+              <span style={{ fontWeight: 700 }}>
                 {(orderDetails?.paymentMethod || paymentMethod) === "cod"
-                  ? "Total Payable (COD)"
-                  : "Amount Paid Online"}
+                  ? "💰 Grand Total (COD - Pay to Driver)"
+                  : "💰 Grand Total"}
               </span>
               <strong className="amount-highlight">
                 ₹{Number(
                   orderDetails
-                    ? (orderDetails.paymentMethod === "cod"
-                      ? Number(orderDetails.total || 0) + Number(orderDetails.delivery ?? deliveryFee)
-                      : orderDetails.total)
-                    : payableTotal
+                    ? Number(orderDetails.subtotal || 0) + Number(orderDetails.delivery || 0) - Number(orderDetails.discount || 0)
+                    : grandTotal
                 ).toFixed(2)}
               </strong>
             </div>
+            {(orderDetails?.paymentMethod || paymentMethod) !== "cod" && (
+              <div className="order-detail-row" style={{ color: '#6b7280', fontSize: '12px' }}>
+                <span>✅ Paid Online (Food + Delivery)</span>
+                <span>₹{Number(orderDetails?.total ?? onlinePayable).toFixed(2)}</span>
+              </div>
+            )}
           </div>
 
           <div className="success-actions">
@@ -880,13 +1063,18 @@ export default function CheckoutPage() {
                 <span className="delivery-card__label">
                   🛵 Delivery Fee {distanceInfo ? `(${distanceInfo.distanceKm} km)` : ""}
                 </span>
-                <span className="delivery-card__amount">
-                  {deliveryLoading ? "..." : `₹ ${deliveryFee}`}
-                </span>
+                {deliveryFee > 0 ? (
+                  <span className="delivery-card__amount">
+                    {deliveryLoading ? "..." : `₹ ${deliveryFee.toFixed(2)}`}
+                  </span>
+                ) : (
+                  <span className="delivery-card__amount free-delivery-badge">FREE</span>
+                )}
               </div>
               <p className="delivery-card__eta">
-                ⏱️ Est. {distanceInfo?.duration || "25 mins"} · <strong>Pay to Driver on Delivery</strong>
+                ⏱️ Est. {distanceInfo?.duration || "25 mins"} · <strong>Included in your total</strong>
               </p>
+
             </div>
           )}
 
@@ -974,16 +1162,13 @@ export default function CheckoutPage() {
 
           <div className="price-total">
             <div>
-              <span className="price-total__label">
-                {paymentMethod === "cod" ? "TOTAL ORDER VALUE" : "PAY NOW (FOOD TOTAL)"}
-              </span>
+              <span className="price-total__label">GRAND TOTAL</span>
               <p className="price-total__sub">
-                {paymentMethod === "cod"
-                  ? `Food ₹${foodTotal.toFixed(2)} + Delivery ₹${deliveryFee}`
-                  : `Delivery ₹${deliveryFee} to be paid to driver on arrival`}
+                Food ₹{foodTotal.toFixed(2)} + Delivery ₹{deliveryFee.toFixed(2)}
+                {paymentMethod !== "cod" ? " · Paid together online" : " · Paid together on delivery"}
               </p>
             </div>
-            <span className="price-total__amount">₹{payableTotal.toFixed(2)}</span>
+            <span className="price-total__amount">₹{grandTotal.toFixed(2)}</span>
           </div>
 
           <div className="summary-action">
@@ -1012,8 +1197,8 @@ export default function CheckoutPage() {
                 {placing
                   ? "Processing..."
                   : paymentMethod === "cod"
-                    ? `Place Order (COD ₹${payableTotal.toFixed(2)})`
-                    : `Pay ₹ ${foodTotal.toFixed(2)} Online`}
+                    ? `Place Order — Pay ₹${grandTotal.toFixed(2)} on Delivery`
+                    : `Pay ₹${onlinePayable.toFixed(2)} Online`}
               </button>
             )}
           </div>

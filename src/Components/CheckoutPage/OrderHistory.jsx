@@ -38,10 +38,10 @@ const getStepIndex = (status) => {
 
 const STATUS_COLORS = {
   Pending: { bg: "#fff3cd", text: "#856404" },
-  Confirmed: { bg: "#e8f4fd", text: "#0c5460" },
-  Preparing: { bg: "#f1e7fb", text: "#5a3d8a" },
+  Confirmed: { bg: "#e0f7ec", text: "#0f7a4f" },
+  Preparing: { bg: "#e0f7ec", text: "#0f7a4f" },
   "Out for Delivery": { bg: "#e6f0ff", text: "#004085" },
-  Delivered: { bg: "#e3f9e9", text: "#155724" },
+  Delivered: { bg: "#17b932ff", text: "#ffffffff" },
   Cancelled: { bg: "#fbe9ea", text: "#a51c22" },
 };
 
@@ -93,9 +93,9 @@ function OrderTracker({ status }) {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  background: isDone ? "linear-gradient(135deg, #880559, #C2185B)" : "#f1e4ec",
-                  color: isDone ? "#fff" : "#c7a7b8",
-                  boxShadow: isCurrent ? "0 0 0 4px rgba(136,5,89,0.15)" : "none",
+                  background: isDone ? "linear-gradient(135deg, #0CA678, #12B76A)" : "#eef1f0",
+                  color: isDone ? "#fff" : "#a9b3ae",
+                  boxShadow: isCurrent ? "0 0 0 4px rgba(18,183,106,0.18)" : "none",
                   transition: "all 0.3s ease",
                 }}
               >
@@ -105,7 +105,7 @@ function OrderTracker({ status }) {
                 style={{
                   fontSize: "10.5px",
                   fontWeight: isCurrent ? 700 : 500,
-                  color: isDone ? "#880559" : "#aaa",
+                  color: isDone ? "#0CA678" : "#aaa",
                   marginTop: "6px",
                   textAlign: "center",
                   maxWidth: "100px",
@@ -121,7 +121,7 @@ function OrderTracker({ status }) {
                   flex: 2,
                   height: "3px",
                   marginTop: "17px",
-                  background: idx < currentIndex ? "linear-gradient(90deg, #880559, #C2185B)" : "#f1e4ec",
+                  background: idx < currentIndex ? "linear-gradient(90deg, #0CA678, #12B76A)" : "#eef1f0",
                   borderRadius: "2px",
                   transition: "background 0.3s ease",
                 }}
@@ -218,13 +218,19 @@ function OrderCard({ order, onOpenCancel, cancelling }) {
 
           <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px dashed #e5d3de", fontSize: "12px", color: "#888" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
-              <span>Subtotal</span><span>₹ {order.subtotal}</span>
+              <span>📦 Food Subtotal</span><span style={{ fontWeight: 600, color: '#444' }}>₹ {Number(order.subtotal || 0).toFixed(2)}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
-              <span>Delivery</span><span>₹ {order.delivery}</span>
+              <span>🛵 Delivery Fee</span><span style={{ fontWeight: 600, color: '#444' }}>₹ {Number(order.delivery || 0).toFixed(2)}</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span>Service</span><span>₹ {order.service}</span>
+            {order.discount > 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
+                <span>🎟️ Coupon Discount</span><span style={{ fontWeight: 600, color: '#16a34a' }}>- ₹ {Number(order.discount || 0).toFixed(2)}</span>
+              </div>
+            )}
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px", paddingTop: "6px", borderTop: "1.5px solid #e5d3de" }}>
+              <span style={{ fontWeight: 700, color: '#1a1a1a', fontSize: '13px' }}>💰 Grand Total</span>
+              <span style={{ fontWeight: 700, color: '#d81324', fontSize: '14px' }}>₹ {(Number(order.subtotal || 0) + Number(order.delivery || 0) - Number(order.discount || 0)).toFixed(2)}</span>
             </div>
           </div>
 
@@ -267,7 +273,9 @@ function OrderCard({ order, onOpenCancel, cancelling }) {
           background: "#fbf6f9",
         }}
       >
-        <p style={{ fontWeight: 700, fontSize: "15px", color: "#1a1a1a" }}>Total: ₹ {order.total}</p>
+        <p style={{ fontWeight: 700, fontSize: "15px", color: "#d81324" }}>
+          Grand Total: ₹ {(Number(order.subtotal || 0) + Number(order.delivery || 0) - Number(order.discount || 0)).toFixed(2)}
+        </p>
 
         {canCancel && (
           <button
