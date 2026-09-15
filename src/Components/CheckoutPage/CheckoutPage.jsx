@@ -75,6 +75,59 @@ const getDynamicDeliveryFee = (baseFare, productCount) => {
   return fee < 0.5 ? 0 : fee;
 };
 
+// 🆕 Try to reserve stock for every item with a valid productId.
+// Returns { ok: true } if all succeeded, or { ok: false, failed: [...] } if
+// any item didn't have enough stock — in which case whatever DID succeed
+// gets rolled back automatically, so nothing is left half-decremented.
+const reserveStockForOrder = async (items) => {
+  const reservable = items.filter((item) => item.productId);
+  const succeeded = [];
+  const failed = [];
+
+  for (const item of reservable) {
+    try {
+      await axios.put(`${BASE_URL}/products/${item.productId}/decrement-stock`, {
+        quantity: item.quantity,
+      });
+      succeeded.push(item);
+    } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        `${item.title} is out of stock.`;
+      failed.push({ ...item, message: msg });
+      break; // stop at the first failure — no point reserving the rest
+    }
+  }
+
+  if (failed.length > 0) {
+    // Roll back anything we already decremented for this order attempt
+    await Promise.allSettled(
+      succeeded.map((item) =>
+        axios.put(`${BASE_URL}/products/${item.productId}/increment-stock`, {
+          quantity: item.quantity,
+        })
+      )
+    );
+    return { ok: false, failed };
+  }
+
+  return { ok: true, reserved: succeeded };
+};
+
+// 🆕 Undo a successful reservation — used if order creation fails AFTER
+// stock was already decremented (e.g. Razorpay verify step throws).
+const rollbackReservedStock = async (items) => {
+  await Promise.allSettled(
+    items
+      .filter((item) => item.productId)
+      .map((item) =>
+        axios.put(`${BASE_URL}/products/${item.productId}/increment-stock`, {
+          quantity: item.quantity,
+        })
+      )
+  );
+};
+
 const getGuestId = () => {
   let guestId = localStorage.getItem("guest_id");
   if (!guestId) {
@@ -587,6 +640,29 @@ export default function CheckoutPage() {
     setPlacing(true);
     setOrderError("");
 
+    // 🆕 Build the same items shape used in buildOrderPayload, so productId
+    // matches exactly what will be sent to the order API.
+    const orderItems = cartItems.map((item) => {
+      const rawId =
+        item.productId || item._id || item.id || item.product?._id || item.product;
+      const isValidMongoId = typeof rawId === "string" && /^[0-9a-fA-F]{24}$/.test(rawId);
+      return {
+        productId: isValidMongoId ? rawId : null,
+        title: item.title || item.name,
+        quantity: Number(item.quantity || 1),
+      };
+    });
+
+    // 🆕 STEP 1 — reserve stock before touching payment/order APIs at all.
+    const reservation = await reserveStockForOrder(orderItems);
+    if (!reservation.ok) {
+      setPlacing(false);
+      const names = reservation.failed.map((f) => f.message).join("\n");
+      alert(`Some items are no longer available:\n\n${names}\n\nPlease update your cart.`);
+      setOrderError("One or more items went out of stock. Please review your cart.");
+      return;
+    }
+
     try {
       const guestId = getGuestId();
       const token = localStorage.getItem("token");
@@ -602,8 +678,6 @@ export default function CheckoutPage() {
       if (result.success) {
         setOrderDetails(result.data);
         clearCart();
-        // Location hand-off from Cart has served its purpose once an order
-        // is placed — clear it so a stale location isn't reused next time.
         try {
           localStorage.removeItem(DELIVERY_LOCATION_KEY);
         } catch (err) {
@@ -611,9 +685,14 @@ export default function CheckoutPage() {
         }
         setStep(4);
       } else {
+        // 🆕 Order API itself said no — give the stock back
+        await rollbackReservedStock(orderItems);
         setOrderError(result.message || "Failed to place order.");
       }
     } catch (err) {
+      // 🆕 Any thrown error (network, Razorpay cancel, verify failure) —
+      // give the stock back so it isn't stuck decremented.
+      await rollbackReservedStock(orderItems);
       console.error("Place Order Error:", err);
       setOrderError(
         err.response?.data?.message || err.message || "Failed to place order. Please try again."
