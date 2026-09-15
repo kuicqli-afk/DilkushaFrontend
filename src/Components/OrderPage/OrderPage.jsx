@@ -94,16 +94,17 @@ const OrderPage = () => {
 
   const { item } = state;
 
-  const productImages = React.useMemo(() => {
-    let imgs = [];
-    if (item.images && Array.isArray(item.images)) {
-      imgs = [...item.images];
-    }
-    if (item.image && !imgs.includes(item.image)) {
-      imgs.unshift(item.image);
-    }
-    return imgs.filter(Boolean);
+  // Main image — single, first one only
+  const mainImage = React.useMemo(() => {
+    if (Array.isArray(item.image)) return item.image[0] || "";
+    return item.image || "";
   }, [item]);
+
+  // Thumbnails — additional/side images
+  const productImages = React.useMemo(() => {
+    return Array.isArray(item.images) ? item.images.filter(Boolean) : [];
+  }, [item]);
+
 
   // 🆕 FIXED — the old chain checked item.isAvailable / item.stock / a
   // string comparison against item.status === "out of stock". None of
@@ -153,8 +154,8 @@ const OrderPage = () => {
   }, [item, cartItems, getCartKey]);
 
   useEffect(() => {
-    setSelectedImage(item.image || productImages[0] || "");
-  }, [item, productImages]);
+    setSelectedImage(mainImage || "");
+  }, [item, mainImage]);
 
   useEffect(() => {
     const restaurantId =
@@ -353,6 +354,7 @@ const OrderPage = () => {
                 {selectedImage && (
                   <img key={selectedImage} src={selectedImage} alt={item.title} className="order-image" />
                 )}
+
 
                 <img
                   className="order-type-icon"
@@ -746,7 +748,7 @@ const OrderPage = () => {
             ) : null}
           </div>
         </div>
-      </div>
+      </div >
 
       {isReviewModalOpen && (
         <div className="review-modal-overlay" onClick={() => setIsReviewModalOpen(false)}>
@@ -874,11 +876,14 @@ const OrderPage = () => {
             )}
           </div>
         </div>
-      )}
+      )
+      }
 
-      {allCategories.map((cat) => (
-        <MaidaItems key={cat} category={cat} excludeId={item._id} />
-      ))}
+      {
+        allCategories.map((cat) => (
+          <MaidaItems key={cat} category={cat} excludeId={item._id} />
+        ))
+      }
     </>
   );
 };

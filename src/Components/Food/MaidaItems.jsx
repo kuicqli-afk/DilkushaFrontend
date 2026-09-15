@@ -32,6 +32,12 @@ const shuffleArray = (arr) => {
     return a;
 };
 
+const getItemImages = (item) => {
+    if (Array.isArray(item.image) && item.image.length > 0) return item.image;
+    if (item.images && item.images.length > 0) return item.images;
+    return [];
+};
+
 const MaidaItems = ({
     selectedCategory,
     filter,
@@ -103,9 +109,7 @@ const MaidaItems = ({
             setActiveImageIndices((prev) => {
                 const next = { ...prev };
                 list.forEach((item) => {
-                    const images = item.images && item.images.length > 0 
-                        ? item.images 
-                        : [item.image].filter(Boolean);
+                    const images = getItemImages(item);   // ✅ use shared helper
                     if (images.length > 1) {
                         const current = prev[item._id] || 0;
                         next[item._id] = (current + 1) % images.length;
@@ -113,7 +117,7 @@ const MaidaItems = ({
                 });
                 return next;
             });
-        }, 2200); // Changes image automatically every 2.2 seconds without needing hover
+        }, 2200);
 
         return () => clearInterval(interval);
     }, [list]);
@@ -279,9 +283,7 @@ const MaidaItems = ({
                     const ordersCount = item.orders ?? 0;
 
                     // Extract image array supporting item.images or fallback to single image
-                    const images = item.images && item.images.length > 0 
-                        ? item.images 
-                        : [item.image].filter(Boolean);
+                    const images = getItemImages(item);
                     const currentImgIdx = activeImageIndices[item._id] || 0;
                     const isVideo = item.video && item.video.endsWith(".mp4");
 
@@ -304,7 +306,7 @@ const MaidaItems = ({
                                     ) : (
                                         <>
                                             <img
-                                                src={images[currentImgIdx] || item.image}
+                                                src={images[currentImgIdx] || images[0] || ""}
                                                 alt={item.title}
                                                 className={`food-image slide-transition${!inStock ? " blurred" : ""}`}
                                             />
