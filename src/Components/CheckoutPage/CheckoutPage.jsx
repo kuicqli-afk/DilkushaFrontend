@@ -34,15 +34,19 @@ const STEP_DEFINITIONS = [
   { id: 4, label: "Confirm", icon: AiOutlineCheckCircle },
 ];
 
-// Product images can arrive under different keys depending on where the item
-// was added from (images[], image, img, or nested inside `product`). Same
-// fallback chain used on the Cart page, so thumbnails behave identically here.
+// Returns a plain string image URL, no matter whether the source field is
+// a string or an array (Cloudinary sometimes hands back arrays).
+const toImageString = (val) => {
+  if (Array.isArray(val)) return val[0] || "";
+  return val || "";
+};
+
 const getItemImage = (item) =>
-  item.images?.[0] ||
-  item.image ||
-  item.img ||
-  item.product?.images?.[0] ||
-  item.product?.image ||
+  toImageString(item.images?.[0]) ||
+  toImageString(item.image) ||
+  toImageString(item.img) ||
+  toImageString(item.product?.images?.[0]) ||
+  toImageString(item.product?.image) ||
   "";
 
 // SINGLE source of truth for "what the customer actually pays per unit".
@@ -532,7 +536,7 @@ export default function CheckoutPage() {
       return {
         productId: isValidMongoId ? rawId : null,
         title: item.title || item.name,
-        image: item.image || item.images?.[0] || "",
+        image: getItemImage(item), // ✅ always a string now
         price: getUnitPrice(item),
         quantity: Number(item.quantity || 1),
       };

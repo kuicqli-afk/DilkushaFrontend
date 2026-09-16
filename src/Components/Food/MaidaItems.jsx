@@ -222,6 +222,19 @@ const MaidaItems = ({
     const placeOrder = (item) => {
         if (!isInStock(item)) return;
 
+        // 🆕 Fire-and-forget view increment — don't block navigation on it
+        axios
+            .put(`${BASE_URL}/products/${item._id}/increment-view`)
+            .catch((err) => console.warn("View count update failed:", err.message));
+
+        // 🆕 Optimistically update the local list so the eye-count badge
+        // reflects the click immediately, without waiting for a refetch
+        setList((prev) =>
+            prev.map((p) =>
+                p._id === item._id ? { ...p, view: (p.view || 0) + 1 } : p
+            )
+        );
+
         navigate("/order", {
             state: {
                 item,
@@ -230,7 +243,6 @@ const MaidaItems = ({
             },
         });
     };
-
     if (loading) return null;
     if (error) return null;
     if (!finalList.length) return null;
