@@ -16,7 +16,7 @@ import "swiper/css/free-mode";
 
 import { useCart } from "../../Context/CartContext";
 import { VscEye } from "react-icons/vsc";
-import { LiaStopwatchSolid } from "react-icons/lia";
+
 
 import { useWishlist } from "../../Context/WishlistContext";
 
@@ -86,7 +86,6 @@ const MaidaItems = ({
             url = `${BASE_URL}/products/category-products/${encodeURIComponent(category)}`;
             responseKey = "products";
         }
-
         axios
             .get(url)
             .then((res) => {
@@ -448,7 +447,7 @@ const MaidaItems = ({
                                             onClick={() => placeOrder(item)}
                                             disabled={!inStock}
                                         >
-                                            {inStock ? "View More" : "Out of Stock"}
+                                            {inStock ? "Shop Now" : "Out of Stock"}
                                         </button>
                                         <div className="add-btn">
                                             <button onClick={() => decrease(item)} disabled={!inStock}>

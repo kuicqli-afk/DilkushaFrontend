@@ -316,7 +316,7 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
                                             onClick={() => placeOrder(item)}
                                             disabled={!inStock}
                                         >
-                                            {inStock ? "View More" : "Out of Stock"}
+                                            {inStock ? "Shop Now" : "Out of Stock"}
                                         </button>
                                         <div className="add-btn">
                                             <button onClick={() => decrease(item)} disabled={!inStock}>

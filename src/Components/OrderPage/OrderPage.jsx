@@ -355,7 +355,6 @@ const OrderPage = () => {
                   <img key={selectedImage} src={selectedImage} alt={item.title} className="order-image" />
                 )}
 
-
                 <img
                   className="order-type-icon"
                   src={item.type === "veg" ? GreenArrow : RedArrow}
