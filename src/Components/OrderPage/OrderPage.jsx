@@ -1763,7 +1763,7 @@ const OrderPage = () => {
 
                 {/* 🆕 Show More — reveals 3 more each click (2 → 5 → 8 → ...) */}
                 {/* 🆕 Show More / Hide toggle — expands 3 at a time (2 → 5 → 8...), 
-                    collapses back to 2 once everything is shown */}
+                  collapses back to 2 once everything is shown */}
                 <div className="show-more-wrapper">
                   {visibleReviewsCount < reviews.length ? (
                     <button
