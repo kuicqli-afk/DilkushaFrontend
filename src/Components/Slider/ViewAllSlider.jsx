@@ -16,13 +16,16 @@ const ViewAllSlider = ({ category }) => {
     const fetchSliders = async () => {
         try {
             const res = await axios.get(
-                `${API_URL}/api/sliders?category=${encodeURIComponent(category)}&status=Active&showOnViewAll=true`
+                `${API_URL}/api/sliders?category=${encodeURIComponent(category)}&status=Active`
             );
 
             const list = res.data?.data || res.data?.sliders || [];
-            const active = list.filter(
-                (s) => (s.status === "Active" || s.status === "active") && (s.showOnViewAll === true || (!s.showOnHome && !s.showOnViewAll))
-            );
+            const active = list.filter((s) => {
+                const isActive = s.status === "Active" || s.status === "active";
+                // Only exclude if explicitly set for Home Middle Ads AND NOT for View All
+                const isExclusiveHomeAd = (s.showOnHome === true || s.showOnHome === "true") && (s.showOnViewAll !== true && s.showOnViewAll !== "true");
+                return isActive && !isExclusiveHomeAd;
+            });
 
             setSlides(active);
         } catch (err) {
