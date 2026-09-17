@@ -133,8 +133,14 @@ function AppContent() {
       .get(`${BASE_URL}/category/categories`)
       .then((res) => {
         const categoryData = res.data.categories || res.data.data || res.data || [];
-        const names = categoryData.map((cat) => cat.name || cat.title);
-        setCategories(shuffleArray(names)); // 🆕 random category-section order every page load
+
+        // Fix top category 
+        const pinnedCategories = categoryData.filter((cat) => cat.isPinned);
+        const unpinnedCategories = categoryData.filter((cat) => !cat.isPinned);
+
+        const orderedCategories = [...pinnedCategories, ...shuffleArray(unpinnedCategories)];
+        const names = orderedCategories.map((cat) => cat.name || cat.title);
+        setCategories(names); // 🆕 random category-section order every page load
       })
       .catch((err) => console.error("Categories fetch error:", err));
   }, []);
