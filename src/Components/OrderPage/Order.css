@@ -895,9 +895,9 @@
     padding: 0 30px;
   }
 
-  .order-type-icon {
+  /* .order-type-icon {
     right: 30px;
-  }
+  } */
 
   /* 🆕 the old ".highlights-box { max-height: none; }" rule here has been
      removed — it applied to virtually every real screen size and was the

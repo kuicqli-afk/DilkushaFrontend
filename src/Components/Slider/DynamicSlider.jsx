@@ -160,7 +160,7 @@ const DynamicSlider = () => {
   }, [index, slides]);
 
   if (loading) {
-    return <div className="slider-container">Loading banner...</div>;
+    return <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }} className="slider-container">Loading Sliders...</div>;
   }
 
   if (slides.length === 0) return null;

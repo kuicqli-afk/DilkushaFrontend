@@ -23,7 +23,7 @@ const AdsSlider = ({ category }) => {
 
       const list = res.data?.data || res.data?.sliders || [];
       const active = list.filter(
-        (s) => s.status === "Active" || s.status === "active"
+        (s) => (s.status === "Active" || s.status === "active") && (s.showOnHome === true || s.showOnHome === "true")
       );
 
       setSlides(active);

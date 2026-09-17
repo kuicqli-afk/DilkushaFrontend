@@ -16,12 +16,12 @@ const ViewAllSlider = ({ category }) => {
     const fetchSliders = async () => {
         try {
             const res = await axios.get(
-                `${API_URL}/api/sliders?category=${encodeURIComponent(category)}&status=Active`
+                `${API_URL}/api/sliders?category=${encodeURIComponent(category)}&status=Active&showOnViewAll=true`
             );
 
             const list = res.data?.data || res.data?.sliders || [];
             const active = list.filter(
-                (s) => s.status === "Active" || s.status === "active"
+                (s) => (s.status === "Active" || s.status === "active") && (s.showOnViewAll === true || (!s.showOnHome && !s.showOnViewAll))
             );
 
             setSlides(active);
