@@ -214,7 +214,7 @@ function AppContent() {
         <Route path="/section/:tag" element={<ItemsSectionProducts />} />
 
         {/* E-Commerce Operations */}
-        <Route path="/order" element={<OrderPage />} />
+        <Route path="/order/:id" element={<OrderPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/wishlist" element={<WishlistPage />} />
         {/* Protected Checkout & History */}

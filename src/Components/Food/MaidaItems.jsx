@@ -234,7 +234,7 @@ const MaidaItems = ({
             )
         );
 
-        navigate("/order", {
+        navigate(`/order/${item._id}`, {
             state: {
                 item,
                 quantity: getQty(item),
