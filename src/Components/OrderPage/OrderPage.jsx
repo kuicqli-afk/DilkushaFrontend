@@ -71,7 +71,7 @@ const OrderPage = () => {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [visibleReviewsCount, setVisibleReviewsCount] = useState(2); // 🆕 pagination — 2, then +3 each click
+  const [visibleReviewsCount, setVisibleReviewsCount] = useState(2); // pagination — 2, then +3 each click
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [newName, setNewName] = useState("");
@@ -82,6 +82,8 @@ const OrderPage = () => {
   const [categoriesData, setCategoriesData] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
 
+  // NEW: item can arrive two ways — via navigate() state (fast path, from inside
+  // the app) or via the URL's :id (direct link / refresh / promotion link)
   const [item, setItem] = useState(state?.item || null);
   const [itemLoading, setItemLoading] = useState(!state?.item);
 
@@ -106,6 +108,116 @@ const OrderPage = () => {
       .finally(() => setItemLoading(false));
   }, [id, state]);
 
+  // FIX (React error #310 — hooks order): every hook below now runs on EVERY
+  // render, whether "item" is loaded yet or not. Each one guards itself
+  // internally instead of the component bailing out with an early return
+  // before some of them ran. The two "no item yet" returns are moved to the
+  // very end, after all hooks, right before the JSX return.
+
+  // UNIFIED IMAGE GALLERY — merges "image" field + "images" field into ONE
+  // ordered, de-duplicated list, used for both the big preview and thumbnails.
+  const allImages = React.useMemo(() => {
+    if (!item) return [];
+
+    const imageField = Array.isArray(item.image)
+      ? item.image.filter(Boolean)
+      : item.image
+        ? [item.image]
+        : [];
+
+    const imagesField = Array.isArray(item.images) ? item.images.filter(Boolean) : [];
+
+    const combined = [...imageField, ...imagesField];
+
+    // de-duplicate while preserving the original upload order
+    return [...new Set(combined)];
+  }, [item]);
+
+  // Main image — first image in the unified list by default
+  const mainImage = allImages[0] || "";
+
+  // Thumbnails — the full unified list (same images, same order)
+  const productImages = allImages;
+
+  useEffect(() => {
+    if (!item) return;
+    const key = getCartKey(item);
+    const found = cartItems.find((x) => x.key === key);
+    setQty(found ? found.quantity : 1);
+  }, [item, cartItems, getCartKey]);
+
+  useEffect(() => {
+    setSelectedImage(mainImage || "");
+  }, [item, mainImage]);
+
+  useEffect(() => {
+    if (!item) {
+      setRestaurantLoading(false);
+      return;
+    }
+
+    const restaurantId =
+      typeof item.restaurantId === "object" ? item.restaurantId?._id : item.restaurantId;
+
+    if (!restaurantId) {
+      setRestaurantLoading(false);
+      return;
+    }
+
+    setRestaurantLoading(true);
+
+    axios
+      .get(`${BASE_URL}/restaurant/${restaurantId}`)
+      .then((res) => setRestaurant(res.data.data || null))
+      .catch((err) => {
+        console.error("Fetch restaurant error:", err);
+        setRestaurant(null);
+      })
+      .finally(() => setRestaurantLoading(false));
+  }, [item]);
+
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}/category/categories`)
+      .then((res) => {
+        const categoryData = res.data.categories || res.data.data || res.data || [];
+        setCategoriesData(categoryData);
+        const names = categoryData.map((cat) => cat.name || cat.title);
+        setAllCategories(names);
+      })
+      .catch((err) => console.error("Categories fetch error:", err));
+  }, []);
+
+  const fetchReviews = useCallback(() => {
+    if (!item?._id) {
+      setReviewsLoading(false);
+      return;
+    }
+
+    setReviewsLoading(true);
+
+    axios
+      .get(`${BASE_URL}/reviews/product/${item._id}`)
+      .then((res) => {
+        setReviews(res.data.data || []);
+      })
+      .catch((err) => {
+        console.error("Fetch reviews error:", err);
+        setReviews([]);
+      })
+      .finally(() => setReviewsLoading(false));
+  }, [item?._id]);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, [item]);
+
+  // NOW it's safe to bail out — every hook above has already run this render,
+  // in the same order, on every render, whether item is null or not.
   if (itemLoading) {
     return (
       <div style={{ textAlign: "center", padding: "60px 20px" }}>
@@ -125,38 +237,7 @@ const OrderPage = () => {
     );
   }
 
-
-
-  // 🆕 UNIFIED IMAGE GALLERY — merges "image" field + "images" field into
-  // ONE ordered, de-duplicated list. Earlier, mainImage came from item.image[0]
-  // while the thumbnail row came from a completely different field (item.images),
-  // so images uploaded under "image" never showed up as thumbnails at all.
-  // Now everything you upload (1st, 2nd, 3rd...) lands in the same list, in the
-  // same order, and is used for BOTH the big preview and the thumbnail row.
-  const allImages = React.useMemo(() => {
-    if (!item) return [];
-    const imageField = Array.isArray(item.image)
-      ? item.image.filter(Boolean)
-      : item.image ? [item.image] : [];
-    const imagesField = Array.isArray(item.images) ? item.images.filter(Boolean) : [];
-    return [...new Set([...imageField, ...imagesField])];
-  }, [item]);
-
-  const mainImage = allImages[0] || "";
-  const productImages = allImages;
-  useEffect(() => {
-    if (!item) return;
-    const key = getCartKey(item);
-    const found = cartItems.find((x) => x.key === key);
-    setQty(found ? found.quantity : 1);
-  }, [item, cartItems, getCartKey]);
-
-  // Main image — single, first one only
-
-  // Thumbnails — additional/side images
-
-
-  // 🆕 FIXED — the old chain checked item.isAvailable / item.stock / a
+  // FIXED — the old chain checked item.isAvailable / item.stock / a
   // string comparison against item.status === "out of stock". None of
   // those actually exist on the real product model: stock is tracked via
   // item.quantity everywhere else in the app (search, category cards), and
@@ -197,77 +278,6 @@ const OrderPage = () => {
   const scaledOffer = baseOffer * qty;
   const scaledWeightDisplay = getScaledWeight(item.weight, item.unit, qty);
 
-  useEffect(() => {
-    const key = getCartKey(item);
-    const found = cartItems.find((x) => x.key === key);
-    setQty(found ? found.quantity : 1);
-  }, [item, cartItems, getCartKey]);
-
-  useEffect(() => {
-    setSelectedImage(mainImage || "");
-  }, [item, mainImage]);
-
-  useEffect(() => {
-    const restaurantId =
-      typeof item.restaurantId === "object" ? item.restaurantId?._id : item.restaurantId;
-
-    if (!restaurantId) {
-      setRestaurantLoading(false);
-      return;
-    }
-
-    setRestaurantLoading(true);
-
-    axios
-      .get(`${BASE_URL}/restaurant/${restaurantId}`)
-      .then((res) => setRestaurant(res.data.data || null))
-      .catch((err) => {
-        console.error("Fetch restaurant error:", err);
-        setRestaurant(null);
-      })
-      .finally(() => setRestaurantLoading(false));
-  }, [item]);
-
-  useEffect(() => {
-    axios
-      .get(`${BASE_URL}/category/categories`)
-      .then((res) => {
-        const categoryData = res.data.categories || res.data.data || res.data || [];
-        setCategoriesData(categoryData);
-        const names = categoryData.map((cat) => cat.name || cat.title);
-        setAllCategories(names);
-      })
-      .catch((err) => console.error("Categories fetch error:", err));
-  }, []);
-
-  const fetchReviews = useCallback(() => {
-    if (!item._id) {
-      setReviewsLoading(false);
-      return;
-    }
-
-    setReviewsLoading(true);
-
-    axios
-      .get(`${BASE_URL}/reviews/product/${item._id}`)
-      .then((res) => {
-        setReviews(res.data.data || []);
-      })
-      .catch((err) => {
-        console.error("Fetch reviews error:", err);
-        setReviews([]);
-      })
-      .finally(() => setReviewsLoading(false));
-  }, [item._id]);
-
-  useEffect(() => {
-    fetchReviews();
-  }, [fetchReviews]);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-  }, [item]);
-
   const handleQuantityChange = (newQty) => {
     if (!isAvailable) return;
     if (newQty > 10) {
@@ -298,7 +308,7 @@ const OrderPage = () => {
     toggleWishlist(item);
   };
 
-  // 🆕 Reset pagination back to 2 every time the modal is opened
+  // Reset pagination back to 2 every time the modal is opened
   const handleOpenReviewModal = () => {
     setVisibleReviewsCount(2);
     setIsReviewModalOpen(true);
@@ -331,7 +341,7 @@ const OrderPage = () => {
       setNewComment("");
       setNewRating(0);
       fetchReviews();
-      setIsReviewModalOpen(false); // 🆕 close the modal once the review is posted successfully
+      setIsReviewModalOpen(false); // close the modal once the review is posted successfully
     } catch (err) {
       console.error("Post review error:", err);
       alert(err.response?.data?.message || "Failed to post review.");
@@ -880,7 +890,7 @@ const OrderPage = () => {
                           </div>
                         </div>
 
-                        {/* 🆕 Comment + like/dislike now share one row */}
+                        {/* Comment + like/dislike now share one row */}
                         <div className="review-comment-row">
                           <p className="review-comment-text">{rev.comment}</p>
                           <div className="review-action-row">
@@ -899,9 +909,8 @@ const OrderPage = () => {
                   ))}
                 </div>
 
-                {/* 🆕 Show More — reveals 3 more each click (2 → 5 → 8 → ...) */}
-                {/* 🆕 Show More / Hide toggle — expands 3 at a time (2 → 5 → 8...), 
-                  collapses back to 2 once everything is shown */}
+                {/* Show More / Hide toggle — expands 3 at a time (2 → 5 → 8...),
+                    collapses back to 2 once everything is shown */}
                 <div className="show-more-wrapper">
                   {visibleReviewsCount < reviews.length ? (
                     <button
