@@ -134,25 +134,22 @@ const OrderPage = () => {
   // Now everything you upload (1st, 2nd, 3rd...) lands in the same list, in the
   // same order, and is used for BOTH the big preview and the thumbnail row.
   const allImages = React.useMemo(() => {
+    if (!item) return [];
     const imageField = Array.isArray(item.image)
       ? item.image.filter(Boolean)
-      : item.image
-        ? [item.image]
-        : [];
-
+      : item.image ? [item.image] : [];
     const imagesField = Array.isArray(item.images) ? item.images.filter(Boolean) : [];
-
-    const combined = [...imageField, ...imagesField];
-
-    // de-duplicate while preserving the original upload order
-    return [...new Set(combined)];
+    return [...new Set([...imageField, ...imagesField])];
   }, [item]);
 
-  // Main image — first image in the unified list by default
   const mainImage = allImages[0] || "";
-
-  // Thumbnails — the full unified list (same images, same order)
   const productImages = allImages;
+  useEffect(() => {
+    if (!item) return;
+    const key = getCartKey(item);
+    const found = cartItems.find((x) => x.key === key);
+    setQty(found ? found.quantity : 1);
+  }, [item, cartItems, getCartKey]);
 
   // Main image — single, first one only
 
