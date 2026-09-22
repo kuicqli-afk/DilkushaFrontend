@@ -56,6 +56,7 @@ const getScaledWeight = (weight, unit, quantity) => {
 
 const OrderPage = () => {
   const { state } = useLocation();
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const { cartItems, setItemQty, getCartKey } = useCart();
@@ -124,7 +125,7 @@ const OrderPage = () => {
     );
   }
 
-  // const { item } = state;
+
 
   // 🆕 UNIFIED IMAGE GALLERY — merges "image" field + "images" field into
   // ONE ordered, de-duplicated list. Earlier, mainImage came from item.image[0]
