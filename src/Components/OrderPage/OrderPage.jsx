@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Link, useNavigate, useLocation, useParams } from "react-router-dom";
-import { FaRegHeart, FaStar, FaRegBookmark, FaBookmark, FaTimes } from "react-icons/fa";
+import { FaRegHeart, FaHeart, FaStar, FaRegBookmark, FaBookmark, FaTimes } from "react-icons/fa";
 import { useCart } from "../../Context/CartContext.jsx";
 import { useWishlist } from "../../Context/WishlistContext.jsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -20,15 +20,14 @@ import MaidaItems from "../Food/MaidaItems.jsx";
 const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
 
 const getGuestId = () => {
-  let guestId = localStorage.getItem("guest_id");
+  let guestId = localStorage.getItem("shop_guest_id");
   if (!guestId) {
-    guestId = "guest_" + Date.now() + "_" + Math.random().toString(36).slice(2, 9);
-    localStorage.setItem("guest_id", guestId);
+    guestId = "guest_" + Math.random().toString(36).substring(2, 15);
+    localStorage.setItem("shop_guest_id", guestId);
   }
   return guestId;
 };
 
-// Helper function to scale weight and automatically convert units (e.g., 500g * 2 = 1kg)
 const getScaledWeight = (weight, unit, quantity) => {
   if (!weight || isNaN(weight)) return "";
 
@@ -67,11 +66,12 @@ const OrderPage = () => {
 
   const [qty, setQty] = useState(1);
   const [selectedImage, setSelectedImage] = useState(null);
+  const guestId = React.useMemo(() => getGuestId(), []);
 
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [visibleReviewsCount, setVisibleReviewsCount] = useState(2); // pagination — 2, then +3 each click
+  const [visibleReviewsCount, setVisibleReviewsCount] = useState(2);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [newName, setNewName] = useState("");
@@ -82,8 +82,6 @@ const OrderPage = () => {
   const [categoriesData, setCategoriesData] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
 
-  // NEW: item can arrive two ways — via navigate() state (fast path, from inside
-  // the app) or via the URL's :id (direct link / refresh / promotion link)
   const [item, setItem] = useState(state?.item || null);
   const [itemLoading, setItemLoading] = useState(!state?.item);
 
@@ -107,38 +105,19 @@ const OrderPage = () => {
       })
       .finally(() => setItemLoading(false));
   }, [id, state]);
-
-  // FIX (React error #310 — hooks order): every hook below now runs on EVERY
-  // render, whether "item" is loaded yet or not. Each one guards itself
-  // internally instead of the component bailing out with an early return
-  // before some of them ran. The two "no item yet" returns are moved to the
-  // very end, after all hooks, right before the JSX return.
-
-  // UNIFIED IMAGE GALLERY — merges "image" field + "images" field into ONE
-  // ordered, de-duplicated list, used for both the big preview and thumbnails.
   const allImages = React.useMemo(() => {
     if (!item) return [];
-
     const imageField = Array.isArray(item.image)
       ? item.image.filter(Boolean)
       : item.image
         ? [item.image]
         : [];
-
     const imagesField = Array.isArray(item.images) ? item.images.filter(Boolean) : [];
-
     const combined = [...imageField, ...imagesField];
-
-    // de-duplicate while preserving the original upload order
     return [...new Set(combined)];
   }, [item]);
-
-  // Main image — first image in the unified list by default
   const mainImage = allImages[0] || "";
-
-  // Thumbnails — the full unified list (same images, same order)
   const productImages = allImages;
-
   useEffect(() => {
     if (!item) return;
     const key = getCartKey(item);
@@ -237,17 +216,9 @@ const OrderPage = () => {
     );
   }
 
-  // FIXED — the old chain checked item.isAvailable / item.stock / a
-  // string comparison against item.status === "out of stock". None of
-  // those actually exist on the real product model: stock is tracked via
-  // item.quantity everywhere else in the app (search, category cards), and
-  // the admin's manual toggle uses item.status = "Online"/"Offline", never
-  // the literal string "out of stock". So the old check silently always
-  // evaluated to "available" — this is why Place Order could stay enabled
-  // (or behave inconsistently) for out-of-stock items reached via search.
   const quantityInStock =
     item.quantity === undefined || item.quantity === null || item.quantity === ""
-      ? true // no quantity tracked for this product = treat as unlimited/in stock
+      ? true
       : Number(item.quantity) > 0;
   const manuallyOffline = typeof item.status === "string" && item.status.toLowerCase() === "offline";
   const isAvailable =
@@ -308,7 +279,26 @@ const OrderPage = () => {
     toggleWishlist(item);
   };
 
-  // Reset pagination back to 2 every time the modal is opened
+  const handleToggleLike = async (e) => {
+    if (e) e.stopPropagation();
+    try {
+      // Optimistic update — turant UI update kar do
+      setItem((prev) => {
+        const likedByList = prev.likedBy || [];
+        const isLiked = likedByList.includes(guestId);
+        const updatedLikedBy = isLiked
+          ? likedByList.filter((id) => id !== guestId)
+          : [...likedByList, guestId];
+        return { ...prev, likedBy: updatedLikedBy };
+      });
+
+      // Backend call
+      await axios.put(`${BASE_URL}/products/${item._id}/like`, { guestId });
+    } catch (err) {
+      console.error("Error toggling like:", err);
+    }
+  };
+
   const handleOpenReviewModal = () => {
     setVisibleReviewsCount(2);
     setIsReviewModalOpen(true);
@@ -341,7 +331,7 @@ const OrderPage = () => {
       setNewComment("");
       setNewRating(0);
       fetchReviews();
-      setIsReviewModalOpen(false); // close the modal once the review is posted successfully
+      setIsReviewModalOpen(false);
     } catch (err) {
       console.error("Post review error:", err);
       alert(err.response?.data?.message || "Failed to post review.");
@@ -430,13 +420,27 @@ const OrderPage = () => {
                 </p>
 
                 <div className="order-status-icons">
-                  <FaRegHeart
-                    style={{
-                      fontSize: "24px",
-                      cursor: "pointer",
-                      color: "#6b7280",
-                    }}
-                  />
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
+                    onClick={handleToggleLike}
+                  >
+                    {item.likedBy?.includes(guestId) ? (
+                      <FaHeart
+                        size={24}
+                        title="Unlike"
+                        style={{ color: "red" }}
+                      />
+                    ) : (
+                      <FaRegHeart
+                        size={24}
+                        title="Like"
+                        style={{ color: "#6b7280" }}
+                      />
+                    )}
+                    <span style={{ fontSize: "14px", fontWeight: "600" }}>
+                      {item.likedBy?.length || 0}
+                    </span>
+                  </div>
 
                   {bookmarked ? (
                     <FaBookmark
@@ -632,7 +636,6 @@ const OrderPage = () => {
                     (Array.isArray(item.nutrition.rows) && item.nutrition.rows.length > 0) ||
                     Object.values(item.nutrition).some((v) => v)
                   ) && (() => {
-                    // New shape: rows array. Old shape: fixed fields — convert on the fly so old products still render.
                     const displayRows =
                       Array.isArray(item.nutrition.rows) && item.nutrition.rows.length > 0
                         ? item.nutrition.rows
@@ -688,7 +691,6 @@ const OrderPage = () => {
                               )}
                             </div>
                           )}
-
                           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
                             <thead>
                               <tr style={{ background: "#f1f5f9", color: "#475569" }}>
@@ -889,8 +891,6 @@ const OrderPage = () => {
                             ))}
                           </div>
                         </div>
-
-                        {/* Comment + like/dislike now share one row */}
                         <div className="review-comment-row">
                           <p className="review-comment-text">{rev.comment}</p>
                           <div className="review-action-row">
@@ -908,9 +908,6 @@ const OrderPage = () => {
                     </div>
                   ))}
                 </div>
-
-                {/* Show More / Hide toggle — expands 3 at a time (2 → 5 → 8...),
-                    collapses back to 2 once everything is shown */}
                 <div className="show-more-wrapper">
                   {visibleReviewsCount < reviews.length ? (
                     <button
@@ -924,8 +921,7 @@ const OrderPage = () => {
                       <button
                         className="show-more-btn hide-btn"
                         onClick={() => setVisibleReviewsCount(2)}
-                      >
-                        Hide less
+                      > Hide less
                       </button>
                     )
                   )}
@@ -936,7 +932,6 @@ const OrderPage = () => {
         </div>
       )
       }
-
       {
         allCategories.map((cat) => (
           <MaidaItems key={cat} category={cat} excludeId={item._id} />

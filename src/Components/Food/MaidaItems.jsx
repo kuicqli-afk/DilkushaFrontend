@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState, useEffect } from "react";
 import axios from "axios";
 
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaRegHeart, FaCheckCircle, FaTimesCircle, FaSave, FaBookmark, FaRegBookmark, FaStar } from "react-icons/fa";
+import { FaEye, FaHeart, FaRegHeart, FaCheckCircle, FaTimesCircle, FaSave, FaBookmark, FaRegBookmark, FaStar } from "react-icons/fa";
 import { FiGlobe, FiLock } from "react-icons/fi";
 import "./Food.css";
 
@@ -38,6 +38,15 @@ const getItemImages = (item) => {
     return [];
 };
 
+const getGuestId = () => {
+    let guestId = localStorage.getItem("shop_guest_id");
+    if (!guestId) {
+        guestId = "guest_" + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem("shop_guest_id", guestId);
+    }
+    return guestId;
+};
+
 const MaidaItems = ({
     selectedCategory,
     filter,
@@ -66,6 +75,36 @@ const MaidaItems = ({
 
     const effectiveSubCategory = subCategory ?? subCategoryName;
     const treatAsAll = isAll || category === "all";
+
+
+    const guestId = useMemo(() => getGuestId(), []);
+
+    const handleToggleLike = async (productId, e) => {
+        e.stopPropagation();
+        try {
+            // 1. UI ko turant update karo (Optimistic Update)
+            setList((prev) =>
+                prev.map((item) => {
+                    if (item._id === productId) {
+                        const likedByList = item.likedBy || [];
+                        const isLiked = likedByList.includes(guestId);
+                        const updatedLikedBy = isLiked
+                            ? likedByList.filter((id) => id !== guestId)
+                            : [...likedByList, guestId];
+                        return { ...item, likedBy: updatedLikedBy };
+                    }
+                    return item;
+                })
+            );
+
+            // 2. Backend API call hit karo
+            await axios.put(`${BASE_URL}/products/${productId}/like`, { guestId });
+        } catch (err) {
+            console.error("Error toggling like:", err);
+        }
+    };
+
+
 
     useEffect(() => {
         if (!category && !treatAsAll) {
@@ -372,21 +411,49 @@ const MaidaItems = ({
                                             {isPublic ? "Public" : "Private"}
                                         </span>
 
-                                        <div className="food-status-right-icon">
-                                            <FaRegHeart size={16} title="Like" style={{ cursor: "pointer" }} />
+                                        <div className="food-status-right-icon" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                            {/* Like Icon + Count */}
+                                            <div
+                                                style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
+                                                onClick={(e) => handleToggleLike(item._id, e)}
+                                            >
+                                                {item.likedBy?.includes(guestId) ? (
+                                                    <FaHeart
+                                                        size={16}
+                                                        title="Unlike"
+                                                        style={{ color: "#ff4757" }}
+                                                    />
+                                                ) : (
+                                                    <FaRegHeart
+                                                        size={16}
+                                                        title="Like"
+                                                    />
+                                                )}
+                                                <span style={{ fontSize: "13px", fontWeight: "600" }}>
+                                                    {item.likedBy?.length || 0}
+                                                </span>
+                                            </div>
+
+                                            {/* Existing Wishlist Bookmark */}
                                             {isInWishlist(item) ? (
                                                 <FaBookmark
                                                     size={16}
                                                     title="Saved to Wishlist"
                                                     style={{ cursor: "pointer", color: "#ff4757" }}
-                                                    onClick={() => toggleWishlist(item)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleWishlist(item);
+                                                    }}
                                                 />
                                             ) : (
                                                 <FaRegBookmark
                                                     size={16}
                                                     title="Save to Wishlist"
                                                     style={{ cursor: "pointer" }}
-                                                    onClick={() => toggleWishlist(item)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleWishlist(item);
+                                                    }}
                                                 />
                                             )}
                                         </div>

@@ -29,17 +29,16 @@ const WishlistPage = () => {
             <div className="wishlist-grid">
                 {wishlistItems.map((item, index) => (
                     <div className="wishlist-card" key={item._id || item.id || index}>
-                        {/* Clicking the image or title navigates to the Order Page with the item state */}
                         <div
                             className="wishlist-image-container"
-                            onClick={() => navigate("/order", { state: { item } })}
+                            onClick={() => navigate(`/order/${item._id}`, { state: { item } })}
                             style={{ cursor: "pointer" }}
                         >
                             <img src={item.image} alt={item.title || "Product"} />
                         </div>
                         <div className="wishlist-info">
                             <h3
-                                onClick={() => navigate("/order", { state: { item } })}
+                                onClick={() => navigate(`/order/${item._id}`, { state: { item } })}
                                 style={{ cursor: "pointer" }}
                             >
                                 {item.title}
@@ -50,14 +49,13 @@ const WishlistPage = () => {
                                     className="add-to-cart-btn"
                                     onClick={() => {
                                         addToCart(item, 1);
-                                        navigate("/order", { state: { item } });
+                                        navigate(`/order/${item._id}`, { state: { item } });
                                     }}
                                 >
                                     Place Order
                                 </button>
                                 <FaTrash
                                     className="remove-icon"
-                                   
                                     title="Remove"
                                     onClick={() => toggleWishlist(item)}
                                 />

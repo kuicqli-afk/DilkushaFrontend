@@ -147,14 +147,10 @@
   width: 26px;
   height: 26px;
   cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  /* transition: transform 0.2s ease, opacity 0.2s ease; */
 }
 
-.order-status-icons img:hover,
-.order-status-icons svg:hover {
-  transform: scale(1.1);
-  opacity: 0.8;
-}
+
 
 /* DESCRIPTION */
 .food-desc1 {
