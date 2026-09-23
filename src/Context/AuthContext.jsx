@@ -1,4 +1,10 @@
 import React, { createContext, useContext, useState } from "react";
+import axios from "axios";
+
+const API_URL =
+  import.meta.env?.VITE_API_URL ||
+  (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
+  "https://shyamfoodbackend.onrender.com/api";
 
 const AuthContext = createContext();
 
@@ -18,11 +24,21 @@ export const AuthProvider = ({ children }) => {
     // Dynamic boolean check: True when both token and user exist
     const isAuthenticated = Boolean(token && user);
 
-    const login = (userData, userToken) => {
+    const login = async (userData, userToken) => {
         localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem("token", userToken);
         setUserState(userData);
         setTokenState(userToken);
+
+        // Automatically follow store whenever customer logs in anywhere
+        if (userData?._id) {
+            try {
+                await axios.post(`${API_URL}/follow`, { userId: userData._id });
+                window.dispatchEvent(new CustomEvent("follow-status-changed", { detail: { following: true } }));
+            } catch (err) {
+                console.warn("Auto-follow on login error:", err);
+            }
+        }
     };
 
     const logout = () => {

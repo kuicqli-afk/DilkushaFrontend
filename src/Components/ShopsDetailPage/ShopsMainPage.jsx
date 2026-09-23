@@ -27,35 +27,34 @@ import { LiaStopwatchSolid } from "react-icons/lia";
 
 
 // import "./Food.css";
-import Footer from "../Footer/Footer";
-import ShyamList from "../ShopsData/ShyamData";
+import { useAuth } from "../../Context/AuthContext";
+import axios from "axios";
 
+const API_URL =
+  import.meta.env?.VITE_API_URL ||
+  (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
+  "https://shyamfoodbackend.onrender.com/api";
 
 const slides = [slide1, slide2, slide3];
 const loopSlides = [...slides, ...slides];
-const [index, setIndex] = useState(0);
-const trackRef = useRef(null);
-const isTransitioning = useRef(false);
 
-
-// const slides = [slide1, slide2, slide3];
-// const loopSlides = [...slides, ...slides];
 function ShopsMainPage() {
-     const location = useLocation();
-      const item = location.state?.restaurant;
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { isAuthenticated, user } = useAuth();
+    const item = location.state?.restaurant;
     
-      if (!item) {
-        return <h1>Restaurant data not found. Go back and select again.</h1>;
-      }
-    
-      const [activeCategory, setActiveCategory] = useState(null);
-      const [currentTime, setCurrentTime] = useState(new Date());
-     
-    
-      const trackRef = useRef(null);
-      const isTransitioning = useRef(false);
-    
-      const categories = [
+    const [index, setIndex] = useState(0);
+    const [activeCategory, setActiveCategory] = useState(null);
+    const [currentTime, setCurrentTime] = useState(new Date());
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [followersCount, setFollowersCount] = useState(0);
+    const [followLoading, setFollowLoading] = useState(false);
+
+    const trackRef = useRef(null);
+    const isTransitioning = useRef(false);
+
+    const categories = [
         { name: "Namkeen", id: "namkeen" },
         { name: "Chips", id: "chips" },
         { name: "Peanuts", id: "peanuts" },
@@ -172,6 +171,72 @@ function ShopsMainPage() {
     
         return () => clearInterval(timer);
       }, []);
+
+      // Follow status sync
+      useEffect(() => {
+        const fetchFollowData = () => {
+          if (isAuthenticated && user?._id) {
+            axios
+              .get(`${API_URL}/follow/status/${user._id}`)
+              .then((res) => {
+                if (res.data.success) {
+                  setIsFollowing(res.data.following);
+                  setFollowersCount(res.data.followersCount);
+                }
+              })
+              .catch((err) => console.error("ShopsMainPage Follow Status Error:", err));
+          } else {
+            axios
+              .get(`${API_URL}/follow/count`)
+              .then((res) => {
+                if (res.data.success) {
+                  setFollowersCount(res.data.followersCount);
+                }
+              })
+              .catch((err) => console.error("ShopsMainPage Follow Count Error:", err));
+            setIsFollowing(false);
+          }
+        };
+
+        fetchFollowData();
+
+        const handleFollowChange = () => fetchFollowData();
+        window.addEventListener("follow-status-changed", handleFollowChange);
+        return () => window.removeEventListener("follow-status-changed", handleFollowChange);
+      }, [isAuthenticated, user]);
+
+      const handleFollowToggle = async () => {
+        if (!isAuthenticated) {
+          const currentPath = window.location.pathname + window.location.search;
+          navigate(`/login?redirectTo=${encodeURIComponent(currentPath)}&intent=follow`);
+          return;
+        }
+
+        if (followLoading) return;
+        setFollowLoading(true);
+
+        try {
+          if (isFollowing) {
+            const res = await axios.delete(`${API_URL}/follow/${user._id}`);
+            if (res.data.success) {
+              setIsFollowing(false);
+              setFollowersCount(res.data.followersCount);
+              window.dispatchEvent(new CustomEvent("follow-status-changed", { detail: { following: false } }));
+            }
+          } else {
+            const res = await axios.post(`${API_URL}/follow`, { userId: user._id });
+            if (res.data.success) {
+              setIsFollowing(true);
+              setFollowersCount(res.data.followersCount);
+              window.dispatchEvent(new CustomEvent("follow-status-changed", { detail: { following: true } }));
+            }
+          }
+        } catch (err) {
+          console.error("ShopsMainPage Follow Toggle Error:", err);
+        } finally {
+          setFollowLoading(false);
+        }
+      };
     return (
         <div className="restaurant-detail-page">
             {/* Navbar */}
@@ -255,12 +320,18 @@ function ShopsMainPage() {
                             <span className="stars">{renderStars(item.rating)}</span>
                         </div>
                         <div className="ratings">Ratings: {item.totalRatings}</div>
-                        <div className="followers">Followers: {item.followers}</div>
+                        <div className="followers">Followers: {followersCount || item.followers}</div>
                         <div className="products">Products: {item.products}</div>
 
 
                         <div className="follow-post-buttons1">
-                            <button className="follow-button1">Follow</button>
+                            <button
+                                className={`follow-button1 ${isFollowing ? "following" : ""}`}
+                                onClick={handleFollowToggle}
+                                disabled={followLoading}
+                            >
+                                {isFollowing ? "Following" : "Follow"}
+                            </button>
                             <button className="post-button1">Create Post</button>
                         </div>
                     </div>

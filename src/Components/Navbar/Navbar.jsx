@@ -150,27 +150,37 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated && user?._id) {
-      axios
-        .get(`${API_URL}/follow/status/${user._id}`)
-        .then((res) => {
-          if (res.data.success) {
-            setIsFollowing(res.data.following);
-            setFollowersCount(res.data.followersCount);
-          }
-        })
-        .catch((err) => console.error("Follow Status Error:", err));
-    } else {
-      axios
-        .get(`${API_URL}/follow/count`)
-        .then((res) => {
-          if (res.data.success) {
-            setFollowersCount(res.data.followersCount);
-          }
-        })
-        .catch((err) => console.error("Follow Count Error:", err));
-      setIsFollowing(false);
-    }
+    const fetchFollowData = () => {
+      if (isAuthenticated && user?._id) {
+        axios
+          .get(`${API_URL}/follow/status/${user._id}`)
+          .then((res) => {
+            if (res.data.success) {
+              setIsFollowing(res.data.following);
+              setFollowersCount(res.data.followersCount);
+            }
+          })
+          .catch((err) => console.error("Follow Status Error:", err));
+      } else {
+        axios
+          .get(`${API_URL}/follow/count`)
+          .then((res) => {
+            if (res.data.success) {
+              setFollowersCount(res.data.followersCount);
+            }
+          })
+          .catch((err) => console.error("Follow Count Error:", err));
+        setIsFollowing(false);
+      }
+    };
+
+    fetchFollowData();
+
+    const handleFollowChange = () => {
+      fetchFollowData();
+    };
+
+    window.addEventListener("follow-status-changed", handleFollowChange);
 
     axios
       .get(`${API_URL}/products/count`)
@@ -189,11 +199,16 @@ const Navbar = () => {
         setNavCategories(visibleCategories);
       })
       .catch((err) => console.error("Navbar Categories Error:", err));
+
+    return () => {
+      window.removeEventListener("follow-status-changed", handleFollowChange);
+    };
   }, [isAuthenticated, user]);
 
   const handleFollowToggle = async () => {
     if (!isAuthenticated) {
-      navigate("/login");
+      const currentPath = window.location.pathname + window.location.search;
+      navigate(`/login?redirectTo=${encodeURIComponent(currentPath)}&intent=follow`);
       return;
     }
 
@@ -206,12 +221,14 @@ const Navbar = () => {
         if (res.data.success) {
           setIsFollowing(false);
           setFollowersCount(res.data.followersCount);
+          window.dispatchEvent(new CustomEvent("follow-status-changed", { detail: { following: false } }));
         }
       } else {
         const res = await axios.post(`${API_URL}/follow`, { userId: user._id });
         if (res.data.success) {
           setIsFollowing(true);
           setFollowersCount(res.data.followersCount);
+          window.dispatchEvent(new CustomEvent("follow-status-changed", { detail: { following: true } }));
         }
       }
     } catch (err) {

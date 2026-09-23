@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../Context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { FiPhone, FiLock, FiArrowRight, FiRotateCw } from "react-icons/fi";
 import "./LoginPage.css";
@@ -13,6 +13,7 @@ const BASE_URL =
 const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [step, setStep] = useState(1);
   const [phone, setPhone] = useState("");
@@ -118,8 +119,11 @@ const LoginPage = () => {
       });
 
       if (res.data?.success && res.data?.token) {
-        login(res.data.user, res.data.token);
-        navigate("/profile", { replace: true });
+        await login(res.data.user, res.data.token);
+
+        const searchParams = new URLSearchParams(location.search);
+        const redirectTo = searchParams.get("redirectTo") || location.state?.from?.pathname || "/profile";
+        navigate(redirectTo, { replace: true });
       } else {
         setError(res.data?.message || "Invalid OTP.");
       }
