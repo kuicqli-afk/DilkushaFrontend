@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation, href } from "react-router-dom";
 import axios from "axios";
 import { useCart } from "../../Context/CartContext";
 import { useAuth } from "../../Context/AuthContext";
@@ -382,17 +382,13 @@ const Navbar = () => {
         {/* RIGHT : Vegetarian toggle + Products/Follow | Account | Cart */}
         <div className="nav-right">
 
-          <span
-            className="chat"
-            onClick={() => {
-              window.location.href = "http://localhost:5173/customer/support";
-            }}
-            style={{ cursor: "pointer" }}
-          >
-            <img
-              src={chatIcon}
-              alt="Chat"
-            />
+          <span className="chat" onClick={() => {
+            window.open("http://localhost:5173/customer/support",
+              "_blank",
+              "noopener,noreferrer"
+            );
+          }} style={{ cursor: "pointer" }}>
+            <img src={chatIcon} alt="Chat" />
           </span>
 
           <span className="veg-badge">
