@@ -20,7 +20,7 @@ import { FiGlobe, FiLock } from "react-icons/fi";
 import { VscEye } from "react-icons/vsc";
 import { LiaStopwatchSolid } from "react-icons/lia";
 
-const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
+const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
 function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true }) {
     const navigate = useNavigate();
@@ -260,7 +260,6 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
                                             )}
                                         </div>
                                     </div>
-
                                     <h2>
                                         {item.title} <span>{item.weight ? `${item.weight}${item.unit || ""}` : `(${item.portion || ""})`}</span>
                                     </h2>

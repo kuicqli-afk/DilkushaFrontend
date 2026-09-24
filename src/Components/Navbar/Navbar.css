@@ -777,6 +777,47 @@
   }
 }
 
+/* ===============================
+   CHAT ICON
+================================ */
+.chat {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-right: 6px;
+
+}
+
+.chat img {
+  width: clamp(30px, 7vw, 100px);
+  height: auto;
+  margin-top: 4px;
+  object-fit: contain;
+}
+
+@media (max-width: 900px) {
+  .chat img {
+    width: clamp(26px, 5vw, 34px);
+  }
+}
+
+@media (max-width: 600px) {
+  .chat img {
+    width: 26px;
+  }
+
+  .chat {
+    margin-right: 3px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat img {
+    width: 22px;
+  }
+}
+
 /* ---------- ≤360px (Very small phones) : tightest spacing ---------- */
 @media (max-width: 360px) {
   :root {

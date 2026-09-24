@@ -17,7 +17,7 @@ import StarIcon from "../../assets/StarIcon.png";
 
 import MaidaItems from "../Food/MaidaItems.jsx";
 
-const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
+const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
 const getGuestId = () => {
   let guestId = localStorage.getItem("shop_guest_id");

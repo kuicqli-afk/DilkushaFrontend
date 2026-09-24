@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import FeedbackModal from "./FeedbackModal";
 
-const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
+const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 const POLL_INTERVAL = 10000;
 
 function FeedbackWatcher() {

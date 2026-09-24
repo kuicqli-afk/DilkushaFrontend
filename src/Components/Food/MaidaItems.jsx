@@ -20,7 +20,7 @@ import { VscEye } from "react-icons/vsc";
 
 import { useWishlist } from "../../Context/WishlistContext";
 
-const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
+const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
 // Fisher-Yates shuffle — randomizes product order on every fresh page load/refresh
 const shuffleArray = (arr) => {

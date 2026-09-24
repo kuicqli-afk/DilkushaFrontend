@@ -21,7 +21,7 @@ import { FiArrowLeft, FiMinus, FiPlus, FiTrash2, FiShoppingBag } from "react-ico
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
   (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
-  "https://shyamfoodbackend.onrender.com/api";
+  "https://backend.shyamnamkeenandbakers.online/api";
 
 // Same key Cart.jsx writes to when the customer taps "Detect my location"
 // there — reading it here means they don't have to detect it twice.

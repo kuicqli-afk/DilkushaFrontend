@@ -32,7 +32,7 @@ const Category = ({ onSelectCategory }) => {
         setError(null);
 
         const res = await axios.get(
-          "https://shyamfoodbackend.onrender.com/api/category/categories"
+          "https://backend.shyamnamkeenandbakers.online/api/category/categories"
         );
 
         const categoryData = res.data.categories || res.data.data || res.data || [];

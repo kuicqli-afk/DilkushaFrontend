@@ -2,9 +2,9 @@ import React, { createContext, useContext, useState } from "react";
 import axios from "axios";
 
 const API_URL =
-  import.meta.env?.VITE_API_URL ||
-  (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
-  "https://shyamfoodbackend.onrender.com/api";
+    import.meta.env?.VITE_API_URL ||
+    (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
+    "https://backend.shyamnamkeenandbakers.online/api";
 
 const AuthContext = createContext();
 

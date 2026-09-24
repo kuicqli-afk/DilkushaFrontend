@@ -28,7 +28,7 @@ import {
 import { Link } from "react-router-dom";
 import { FiGift } from "react-icons/fi";
 
-const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
+const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
 const LATEST_CATEGORY_LIMIT = 5;
 

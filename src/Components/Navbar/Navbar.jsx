@@ -10,8 +10,9 @@ import { FaLocationDot } from "react-icons/fa6";
 import shyam from "../../assets/syam.png";
 import profile from "../../assets/profile.gif";
 import cart from "../../assets/cart.gif";
+import chatIcon from "../../assets/chat.png"
 
-const API_URL = "https://shyamfoodbackend.onrender.com/api";
+const API_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
 const PLACEHOLDERS = [
   "Search for Shyam Bakers & Namkeen, a cuisine, or a dish…",
@@ -380,6 +381,20 @@ const Navbar = () => {
 
         {/* RIGHT : Vegetarian toggle + Products/Follow | Account | Cart */}
         <div className="nav-right">
+
+          <span
+            className="chat"
+            onClick={() => {
+              window.location.href = "http://localhost:5173/customer/support";
+            }}
+            style={{ cursor: "pointer" }}
+          >
+            <img
+              src={chatIcon}
+              alt="Chat"
+            />
+          </span>
+
           <span className="veg-badge">
             <FaLeaf size={12} />
             <span className="veg-badge-text">Pure Veg</span>

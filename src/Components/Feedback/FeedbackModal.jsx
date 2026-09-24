@@ -3,7 +3,7 @@ import axios from "axios";
 import { AiOutlineStar, AiFillStar } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
 
-const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
+const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
 const QUICK_TAGS = [
     "Great taste",

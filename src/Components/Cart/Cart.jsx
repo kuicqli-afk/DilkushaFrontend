@@ -9,7 +9,7 @@ import "./Cart.css";
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
   (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
-  "https://shyamfoodbackend.onrender.com/api";
+  "https://backend.shyamnamkeenandbakers.online/api";
 
 // Key used to hand the detected location off to the Checkout page so the
 // customer doesn't have to detect it twice.

@@ -9,7 +9,7 @@ const OfferDetails = () => {
 
   useEffect(() => {
     axios
-      .get(`https://shyamfoodbackend.onrender.com/api/offers/${slug}`)
+      .get(`https://backend.shyamnamkeenandbakers.online/api/offers/${slug}`)
       .then((res) => setOffer(res.data.offer))
       .catch((err) => console.log(err));
   }, [slug]);

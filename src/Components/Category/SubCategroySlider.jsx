@@ -8,7 +8,7 @@ import { FreeMode, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "./Category.css";
 
-const BASE_URL = "https://shyamfoodbackend.onrender.com/api";
+const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
 // All possible subcategory API endpoints to try
 const SUB_ENDPOINTS = [

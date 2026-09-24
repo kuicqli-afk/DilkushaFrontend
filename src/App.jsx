@@ -71,7 +71,7 @@ import ItemsSectionProducts from "./Components/Food/ItemsSectionProducts.jsx";
 import FeedbackWatcher from "./Components/Feedback/FeedbackWatcher.jsx";
 import WishlistPage from "./Components/Wishlist/Wishlist.jsx";
 
-const BASE_URL = import.meta.env?.VITE_API_URL || "https://shyamfoodbackend.onrender.com/api";
+const BASE_URL = import.meta.env?.VITE_API_URL || "https://backend.shyamnamkeenandbakers.online/api";
 
 // 🆕 Fisher-Yates shuffle — randomizes category-section order on every fresh page load/refresh
 const shuffleArray = (arr) => {

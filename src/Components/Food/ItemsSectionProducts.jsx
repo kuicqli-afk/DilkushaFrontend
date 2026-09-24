@@ -19,7 +19,7 @@ import Category from "../Category/Category";
 import Button from "./Button";
 import { useCart } from "../../Context/CartContext";
 
-const API_URL = "https://shyamfoodbackend.onrender.com";
+const API_URL = "https://backend.shyamnamkeenandbakers.online";
 
 // ✅ Tag → display title mapping.
 const TAG_TITLES = {

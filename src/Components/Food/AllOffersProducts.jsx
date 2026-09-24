@@ -22,7 +22,7 @@ import "../Slider/Slider.css"; // 🆕 same CSS jo main homepage slider use kart
 import { useCart } from "../../Context/CartContext";
 
 
-const API_URL = "https://shyamfoodbackend.onrender.com";
+const API_URL = "https://backend.shyamnamkeenandbakers.online";
 
 function AllOffersProducts({ filter, sortBy, price, cuisine }) {
 

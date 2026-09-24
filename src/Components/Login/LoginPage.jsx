@@ -8,7 +8,7 @@ import "./LoginPage.css";
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
   (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
-  "https://shyamfoodbackend.onrender.com/api";
+  "https://backend.shyamnamkeenandbakers.online/api";
 
 const LoginPage = () => {
   const { login } = useAuth();
