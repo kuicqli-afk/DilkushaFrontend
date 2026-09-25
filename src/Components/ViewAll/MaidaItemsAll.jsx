@@ -263,14 +263,12 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
                         const isPublic = item.visibility !== "private";
                         const currentRating = Number(item.rating) || 0;
                         const ordersCount = item.orders ?? 0;
-
                         // Extract image array supporting item.images or fallback to single image
                         const images = getItemImages(item);
                         const currentImgIdx = activeImageIndices[item._id] || 0;
                         const activeVideo = item.video || item.video2;
                         const isYouTube = activeVideo && activeVideo.includes("youtube.com");
                         const isMp4 = activeVideo && activeVideo.endsWith(".mp4");
-
                         return (
                             <div key={item._id} className={`food-card${!inStock ? " out-of-stock" : ""}`}>
                                 {activeVideo && <div className="add-badge">Ads</div>}
