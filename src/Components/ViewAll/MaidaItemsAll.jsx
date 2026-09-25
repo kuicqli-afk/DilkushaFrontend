@@ -256,7 +256,7 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
         <>
             {bannerCategory && <ViewAllSlider category={bannerCategory} />}
             <div className="food-container">
-                <div className="food-card-grid">
+                <div className="food-card-grid" style={{ marginTop: "30px" }}>
                     {items.map((item) => {
                         const stock = getStock(item);
                         const inStock = isInStock(item);
