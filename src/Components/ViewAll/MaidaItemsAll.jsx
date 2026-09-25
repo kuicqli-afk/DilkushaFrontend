@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCart } from "../../Context/CartContext";
 import { useWishlist } from "../../Context/WishlistContext";
 import ViewAllSlider from "../Slider/ViewAllSlider";
+import "../Food/Food.css";
 
 import RedArrow from "../../assets/NON VEG.png";
 import GreenArrow from "../../assets/VEG.png";
@@ -14,29 +15,84 @@ import {
     FaBookmark,
     FaRegBookmark,
     FaStar,
+    FaHeart,
     FaRegHeart
 } from "react-icons/fa";
 import { FiGlobe, FiLock } from "react-icons/fi";
 import { VscEye } from "react-icons/vsc";
-import { LiaStopwatchSolid } from "react-icons/lia";
 
 const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
+
+// Fisher-Yates shuffle — randomizes product order on every fresh page load/refresh
+const shuffleArray = (arr) => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+};
+
+const getItemImages = (item) => {
+    if (Array.isArray(item.image) && item.image.length > 0) return item.image;
+    if (item.images && item.images.length > 0) return item.images;
+    if (typeof item.image === "string" && item.image) return [item.image];
+    return [];
+};
+
+const getGuestId = () => {
+    let guestId = localStorage.getItem("shop_guest_id");
+    if (!guestId) {
+        guestId = "guest_" + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem("shop_guest_id", guestId);
+    }
+    return guestId;
+};
 
 function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true }) {
     const navigate = useNavigate();
     const { cartItems, addToCart, updateQty, getCartKey } = useCart();
     const { toggleWishlist, isInWishlist } = useWishlist();
 
-    const [openCardId, setOpenCardId] = useState(null);
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    // State for continuous automatic image sliding & dot indicators
+    const [activeImageIndices, setActiveImageIndices] = useState({});
 
     const params = useParams();
 
     // Safely fallback across all potential route parameter names
     const category = categoryCode ?? params.categoryCode ?? params.categoryName ?? params.category;
     const subCategory = subCategoryCode ?? params.subCategoryCode ?? params.subCategoryName ?? params.subCategory;
+
+    const guestId = useMemo(() => getGuestId(), []);
+
+    const handleToggleLike = async (productId, e) => {
+        e.stopPropagation();
+        try {
+            // 1. UI ko turant update karo (Optimistic Update)
+            setItems((prev) =>
+                prev.map((item) => {
+                    if (item._id === productId) {
+                        const likedByList = item.likedBy || [];
+                        const isLiked = likedByList.includes(guestId);
+                        const updatedLikedBy = isLiked
+                            ? likedByList.filter((id) => id !== guestId)
+                            : [...likedByList, guestId];
+                        return { ...item, likedBy: updatedLikedBy };
+                    }
+                    return item;
+                })
+            );
+
+            // 2. Backend API call hit karo
+            await axios.put(`${BASE_URL}/products/${productId}/like`, { guestId });
+        } catch (err) {
+            console.error("Error toggling like:", err);
+        }
+    };
 
     useEffect(() => {
         setLoading(true);
@@ -57,16 +113,42 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
             .get(url)
             .then((res) => {
                 const fetched = res.data[responseKey] || [];
-                // Filter out drafts
+                // Filter out drafts & randomize
                 const activeItems = fetched.filter((item) => !item.isDraft && item.status !== "Draft");
-                setItems(activeItems);
+                setItems(shuffleArray(activeItems));
             })
             .catch((err) => {
-                console.log(err);
+                console.error("Error fetching products:", err);
                 setError("Could not load products.");
             })
             .finally(() => setLoading(false));
     }, [category, subCategory, isAll]);
+
+    // Continuous automatic background sliding effect for cards with multiple images
+    useEffect(() => {
+        if (!items || items.length === 0) return;
+
+        const interval = setInterval(() => {
+            setActiveImageIndices((prev) => {
+                const next = { ...prev };
+                items.forEach((item) => {
+                    const images = getItemImages(item);
+                    if (images.length > 1) {
+                        const current = prev[item._id] || 0;
+                        next[item._id] = (current + 1) % images.length;
+                    }
+                });
+                return next;
+            });
+        }, 2200);
+
+        return () => clearInterval(interval);
+    }, [items]);
+
+    const handleDotClick = (itemId, index, e) => {
+        e.stopPropagation();
+        setActiveImageIndices((prev) => ({ ...prev, [itemId]: index }));
+    };
 
     const getStock = (item) => {
         if (item.quantity === undefined || item.quantity === null || item.quantity === "") {
@@ -112,7 +194,21 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
 
     const placeOrder = (item) => {
         if (!isInStock(item)) return;
-        navigate("/order", {
+
+        // 🆕 Fire-and-forget view increment — don't block navigation on it
+        axios
+            .put(`${BASE_URL}/products/${item._id}/increment-view`)
+            .catch((err) => console.warn("View count update failed:", err.message));
+
+        // 🆕 Optimistically update the local list so the eye-count badge
+        // reflects the click immediately, without waiting for a refetch
+        setItems((prev) =>
+            prev.map((p) =>
+                p._id === item._id ? { ...p, view: (p.view || 0) + 1 } : p
+            )
+        );
+
+        navigate(`/order/${item._id}`, {
             state: {
                 item,
                 quantity: getQty(item),
@@ -167,6 +263,10 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
                         const isPublic = item.visibility !== "private";
                         const currentRating = Number(item.rating) || 0;
                         const ordersCount = item.orders ?? 0;
+
+                        // Extract image array supporting item.images or fallback to single image
+                        const images = getItemImages(item);
+                        const currentImgIdx = activeImageIndices[item._id] || 0;
                         const activeVideo = item.video || item.video2;
                         const isYouTube = activeVideo && activeVideo.includes("youtube.com");
                         const isMp4 = activeVideo && activeVideo.endsWith(".mp4");
@@ -196,11 +296,24 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
                                             title={item.title}
                                         />
                                     ) : (
-                                        <img
-                                            src={item.image}
-                                            alt={item.title}
-                                            className={`food-image${!inStock ? " blurred" : ""}`}
-                                        />
+                                        <>
+                                            <img
+                                                src={images[currentImgIdx] || images[0] || (typeof item.image === "string" ? item.image : "")}
+                                                alt={item.title}
+                                                className={`food-image slide-transition${!inStock ? " blurred" : ""}`}
+                                            />
+                                            {images.length > 1 && (
+                                                <div className="card-dots-container">
+                                                    {images.map((_, idx) => (
+                                                        <span
+                                                            key={idx}
+                                                            className={`card-dot ${idx === currentImgIdx ? 'active' : ''}`}
+                                                            onClick={(e) => handleDotClick(item._id, idx, e)}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </>
                                     )}
 
                                     <div className="view-eye">
@@ -241,27 +354,55 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
                                             {isPublic ? "Public" : "Private"}
                                         </span>
 
-                                        <div className="food-status-right-icon">
-                                            <FaRegHeart size={16} title="Like" style={{ cursor: "pointer" }} />
+                                        <div className="food-status-right-icon" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                            {/* Like Icon + Count */}
+                                            <div
+                                                style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
+                                                onClick={(e) => handleToggleLike(item._id, e)}
+                                            >
+                                                {item.likedBy?.includes(guestId) ? (
+                                                    <FaHeart
+                                                        size={16}
+                                                        title="Unlike"
+                                                        style={{ color: "#ff4757" }}
+                                                    />
+                                                ) : (
+                                                    <FaRegHeart
+                                                        size={16}
+                                                        title="Like"
+                                                    />
+                                                )}
+                                                <span style={{ fontSize: "13px", fontWeight: "600" }}>
+                                                    {item.likedBy?.length || 0}
+                                                </span>
+                                            </div>
+
+                                            {/* Existing Wishlist Bookmark */}
                                             {isInWishlist(item) ? (
                                                 <FaBookmark
                                                     size={16}
                                                     title="Saved to Wishlist"
                                                     style={{ cursor: "pointer", color: "#ff4757" }}
-                                                    onClick={() => toggleWishlist(item)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleWishlist(item);
+                                                    }}
                                                 />
                                             ) : (
                                                 <FaRegBookmark
                                                     size={16}
                                                     title="Save to Wishlist"
                                                     style={{ cursor: "pointer" }}
-                                                    onClick={() => toggleWishlist(item)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleWishlist(item);
+                                                    }}
                                                 />
                                             )}
                                         </div>
                                     </div>
                                     <h2>
-                                        {item.title} <span>{item.weight ? `${item.weight}${item.unit || ""}` : `(${item.portion || ""})`}</span>
+                                        {item.title} <span>{item.weight ? `${item.weight}${item.unit || ""}` : item.portion ? `(${item.portion})` : ""}</span>
                                     </h2>
 
                                     <p className="food-desc">

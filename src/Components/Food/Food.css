@@ -815,3 +815,33 @@ select:focus {
     grid-template-columns: repeat(5, 1fr);
   }
 }
+
+/* ================= CARD DOTS & IMAGE SLIDE ================= */
+.card-dots-container {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+  z-index: 4;
+}
+
+.card-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.card-dot.active {
+  background: #fff;
+  width: 16px;
+  border-radius: 4px;
+}
+
+.slide-transition {
+  transition: opacity 0.4s ease-in-out;
+}
