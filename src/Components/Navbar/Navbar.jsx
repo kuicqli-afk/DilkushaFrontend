@@ -383,7 +383,7 @@ const Navbar = () => {
         <div className="nav-right">
 
           <span className="chat" onClick={() => {
-            window.open("https://dtalkbusiness.designerbirds.com/",
+            window.open("https://dtalkbusiness.designerbirds.com/chat",
               "_blank",
               "noopener,noreferrer"
             );
