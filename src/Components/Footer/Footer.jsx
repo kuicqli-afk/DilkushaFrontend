@@ -252,7 +252,7 @@ const Footer = () => {
 
           <ul className={`footer-collapsible ${openSections.contact ? "open" : ""}`}>
             <li><FaPhoneAlt className="footer-inline-icon" /><span>+91 70805 12292</span></li>
-            <li><FaEnvelope className="footer-inline-icon" /><span>shyamfoods@gmail.com</span></li>
+            <li><FaEnvelope className="footer-inline-icon" /><span>shyamnamkeenandbakers@gmail.com</span></li>
             <li><FaMapMarkerAlt className="footer-inline-icon" /><span>Lucknow — Office | Store | Workshop</span></li>
           </ul>
         </div>
@@ -296,10 +296,10 @@ const Footer = () => {
 
       <div className="footer-bottom-bar">
         <p className="footer-copyright">
-          Copyright 2025 © Shyam Foods. All Rights Reserved.
+          Copyright 2025 © Shyam Namkeen & Bakers. All Rights Reserved.
         </p>
 
-        <p className="footer-copyright">Powered by Kuicqli.</p>
+        <p className="footer-copyright">Powered by Designer Birds.</p>
 
         <p className="footer-credit">
           Design and Developed by{" "}

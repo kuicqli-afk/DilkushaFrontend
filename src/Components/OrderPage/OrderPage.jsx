@@ -30,7 +30,7 @@ const getGuestId = () => {
 
 const getScaledWeight = (weight, unit, quantity) => {
   if (!weight || isNaN(weight)) return "";
-
+  
   const baseWeight = Number(weight) * quantity;
   const unitLower = (unit || "").toLowerCase().trim();
 
