@@ -234,8 +234,8 @@ const Footer = () => {
 
           <ul className={`footer-collapsible ${openSections.company ? "open" : ""}`}>
             <li><Link to="">Contact Us</Link></li>
-            <li><Link to="">Terms and Conditions</Link></li>
-            <li><Link to="">Privacy Policy</Link></li>
+            <li><Link to="/terms-and-conditions">Terms and Conditions</Link></li>
+            <li><Link to="/privacy-policy">Privacy Policy</Link></li>
             <li><Link to="">Shipping and Delivery</Link></li>
           </ul>
         </div>
@@ -252,6 +252,7 @@ const Footer = () => {
 
           <ul className={`footer-collapsible ${openSections.contact ? "open" : ""}`}>
             <li><FaPhoneAlt className="footer-inline-icon" /><span>+91 70805 12292</span></li>
+            <li><FaPhoneAlt className="footer-inline-icon" /><span>97602 48776 — For Support Contact</span></li>
             <li><FaEnvelope className="footer-inline-icon" /><span>shyamnamkeenandbakers@gmail.com</span></li>
             <li><FaMapMarkerAlt className="footer-inline-icon" /><span>Lucknow — Office | Store | Workshop</span></li>
           </ul>

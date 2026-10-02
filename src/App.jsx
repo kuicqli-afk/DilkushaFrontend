@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { BrowserRouter, Routes, Route, useLocation, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Outlet, Router } from "react-router-dom";
 import { AuthProvider, useAuth } from "./Context/AuthContext";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import LoginPage from "./Components/Login/LoginPage.jsx";
@@ -70,6 +70,8 @@ import ProfilePage from "./Components/Login/ProfilePage.jsx";
 import ItemsSectionProducts from "./Components/Food/ItemsSectionProducts.jsx";
 import FeedbackWatcher from "./Components/Feedback/FeedbackWatcher.jsx";
 import WishlistPage from "./Components/Wishlist/Wishlist.jsx";
+import TermsAndConditions from "./Components/Legal/TermsAndConditions.jsx";
+import PrivacyPolicy from "./Components/Legal/PrivacyPolicy.jsx";
 
 const BASE_URL = import.meta.env?.VITE_API_URL || "https://backend.shyamnamkeenandbakers.online/api";
 
@@ -252,7 +254,8 @@ function AppContent() {
         {/* Offers & Details */}
         <Route path="/offers/:slug" element={<AllOffersProducts />} />
         <Route path="/offer-details/:slug" element={<OfferDetails />} />
-
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route
           path="/discount"
           element={
