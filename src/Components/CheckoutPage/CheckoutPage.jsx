@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useCart } from "../../Context/CartContext";
@@ -13,18 +13,21 @@ import {
   AiOutlineCreditCard,
   AiOutlineCheckCircle,
   AiOutlineMobile,
-  AiOutlineWallet,
 } from "react-icons/ai";
 import "./CheckoutPage.css";
-import { FiArrowLeft, FiMinus, FiPlus, FiTrash2, FiShoppingBag } from "react-icons/fi";
+import {
+  FiArrowLeft,
+  FiMinus,
+  FiPlus,
+  FiTrash2,
+  FiShoppingBag,
+} from "react-icons/fi";
 
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
   (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
   "https://backend.shyamnamkeenandbakers.online/api";
 
-// Same key Cart.jsx writes to when the customer taps "Detect my location"
-// there — reading it here means they don't have to detect it twice.
 const DELIVERY_LOCATION_KEY = "cart_delivery_location";
 
 const STEP_DEFINITIONS = [
@@ -34,8 +37,6 @@ const STEP_DEFINITIONS = [
   { id: 4, label: "Confirm", icon: AiOutlineCheckCircle },
 ];
 
-// Returns a plain string image URL, no matter whether the source field is
-// a string or an array (Cloudinary sometimes hands back arrays).
 const toImageString = (val) => {
   if (Array.isArray(val)) return val[0] || "";
   return val || "";
@@ -49,95 +50,46 @@ const getItemImage = (item) =>
   toImageString(item.product?.image) ||
   "";
 
-// SINGLE source of truth for "what the customer actually pays per unit".
-// Same helper used on the Cart page — falls back to item.price only if no
-// offer price exists. Every price on this page (the Step-1 line items, the
-// subtotal, the coupon discount, and the order payload sent to the backend)
-// now runs through this one function instead of mixing .price and .offer.
 const getUnitPrice = (item) => {
   const offer = Number(item.offer);
   const price = Number(item.price);
+
   if (offer > 0) return offer;
   return price > 0 ? price : 0;
 };
 
-// Factorial helper — 1!=1, 2!=2, 3!=6, 4!=24, 5!=120, 6!=720 ...
 const factorial = (n) => {
   if (n <= 1) return 1;
+
   let result = 1;
-  for (let i = 2; i <= n; i++) result *= i;
+
+  for (let i = 2; i <= n; i++) {
+    result *= i;
+  }
+
   return result;
 };
 
-// Final delivery fee = distance-based baseFare (from the API below,
-// NOT a static number) divided by the factorial of the product count:
-// fee(n) = baseFare / n!  →  e.g. base=50 → 50, 25, 8.33, 2.08, 0.42, ~0 ...
-// Negligible amounts (<₹0.5) are shown as FREE.
 const getDynamicDeliveryFee = (baseFare, productCount) => {
   const count = Math.max(1, productCount);
-  const fee = baseFare / factorial(count);
+  const fee = Number(baseFare || 0) / factorial(count);
+
   return fee < 0.5 ? 0 : fee;
-};
-
-// 🆕 Try to reserve stock for every item with a valid productId.
-// Returns { ok: true } if all succeeded, or { ok: false, failed: [...] } if
-// any item didn't have enough stock — in which case whatever DID succeed
-// gets rolled back automatically, so nothing is left half-decremented.
-const reserveStockForOrder = async (items) => {
-  const reservable = items.filter((item) => item.productId);
-  const succeeded = [];
-  const failed = [];
-
-  for (const item of reservable) {
-    try {
-      await axios.put(`${BASE_URL}/products/${item.productId}/decrement-stock`, {
-        quantity: item.quantity,
-      });
-      succeeded.push(item);
-    } catch (err) {
-      const msg =
-        err.response?.data?.message ||
-        `${item.title} is out of stock.`;
-      failed.push({ ...item, message: msg });
-      break; // stop at the first failure — no point reserving the rest
-    }
-  }
-
-  if (failed.length > 0) {
-    // Roll back anything we already decremented for this order attempt
-    await Promise.allSettled(
-      succeeded.map((item) =>
-        axios.put(`${BASE_URL}/products/${item.productId}/increment-stock`, {
-          quantity: item.quantity,
-        })
-      )
-    );
-    return { ok: false, failed };
-  }
-
-  return { ok: true, reserved: succeeded };
-};
-
-// 🆕 Undo a successful reservation — used if order creation fails AFTER
-// stock was already decremented (e.g. Razorpay verify step throws).
-const rollbackReservedStock = async (items) => {
-  await Promise.allSettled(
-    items
-      .filter((item) => item.productId)
-      .map((item) =>
-        axios.put(`${BASE_URL}/products/${item.productId}/increment-stock`, {
-          quantity: item.quantity,
-        })
-      )
-  );
 };
 
 const getGuestId = () => {
   let guestId = localStorage.getItem("guest_id");
+
   if (!guestId) {
-    guestId = "guest_" + Date.now() + "_" + Math.random().toString(36).slice(2, 9);
+    guestId =
+      "guest_" +
+      Date.now() +
+      "_" +
+      Math.random().toString(36).slice(2, 9);
+
     localStorage.setItem("guest_id", guestId);
   }
+
   return guestId;
 };
 
@@ -147,33 +99,135 @@ const loadRazorpayScript = () => {
       resolve(true);
       return;
     }
+
+    const existingScript = document.querySelector(
+      'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+    );
+
+    if (existingScript) {
+      existingScript.addEventListener("load", () => resolve(true));
+      existingScript.addEventListener("error", () => resolve(false));
+      return;
+    }
+
     const script = document.createElement("script");
+
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+
     script.onload = () => resolve(true);
     script.onerror = () => resolve(false);
+
     document.body.appendChild(script);
   });
 };
 
+const isValidProductId = (rawId) => {
+  return (
+    typeof rawId === "string" &&
+    /^[0-9a-fA-F]{24}$/.test(rawId)
+  );
+};
+
+const getProductId = (item) => {
+  const rawId =
+    item.productId ||
+    item._id ||
+    item.id ||
+    item.product?._id ||
+    item.product;
+
+  return isValidProductId(rawId) ? rawId : null;
+};
+
+/*
+ * Decrease stock ONLY after the order/payment has successfully completed.
+ *
+ * This function is intentionally kept separate from Razorpay creation.
+ * Payment creation should never consume inventory.
+ */
+const decrementStockAfterSuccess = async (items) => {
+  const reservable = items.filter((item) => item.productId);
+  const succeeded = [];
+  const failed = [];
+
+  for (const item of reservable) {
+    try {
+      await axios.put(
+        `${BASE_URL}/products/${item.productId}/decrement-stock`,
+        {
+          quantity: item.quantity,
+        }
+      );
+
+      succeeded.push(item);
+    } catch (err) {
+      const message =
+        err.response?.data?.message ||
+        `${item.title || "Product"} is out of stock.`;
+
+      failed.push({
+        ...item,
+        message,
+      });
+
+      break;
+    }
+  }
+
+  /*
+   * If one product fails after previous products were already decremented,
+   * restore the previous successful decrements.
+   */
+  if (failed.length > 0 && succeeded.length > 0) {
+    await Promise.allSettled(
+      succeeded.map((item) =>
+        axios.put(
+          `${BASE_URL}/products/${item.productId}/increment-stock`,
+          {
+            quantity: item.quantity,
+          }
+        )
+      )
+    );
+  }
+
+  return {
+    ok: failed.length === 0,
+    failed,
+    succeeded,
+  };
+};
+
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  // 🆕 Pulling in updateQty / removeFromCart too, so Step 1 can offer the
-  // same +/- quantity controls and remove button as the Cart page, instead
-  // of just showing a read-only quantity.
-  const { cartItems, clearCart, updateQty, removeFromCart } = useCart();
+
+  const {
+    cartItems,
+    clearCart,
+    updateQty,
+    removeFromCart,
+  } = useCart();
+
   const { user } = useAuth();
 
   const [step, setStep] = useState(1);
   const [placing, setPlacing] = useState(false);
   const [orderError, setOrderError] = useState("");
 
-  // 🆕 Tracks any item thumbnails that fail to load, same as Cart.jsx, so we
-  // can fall back to a placeholder icon instead of a broken image.
   const [brokenImages, setBrokenImages] = useState({});
-  const markImageBroken = (key) =>
-    setBrokenImages((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
 
-  // Address State
+  const markImageBroken = (key) => {
+    setBrokenImages((prev) => {
+      if (prev[key]) return prev;
+
+      return {
+        ...prev,
+        [key]: true,
+      };
+    });
+  };
+
   const [address, setAddress] = useState({
     name: "",
     phone: "",
@@ -185,232 +239,356 @@ export default function CheckoutPage() {
     country: "India",
   });
 
-  // Payment Method State
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [orderDetails, setOrderDetails] = useState(null);
 
-  // Coupon States
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
 
-  // Available Coupons List State
   const [availableCoupons, setAvailableCoupons] = useState([]);
   const [showCouponList, setShowCouponList] = useState(false);
   const [, setFetchingCoupons] = useState(false);
 
-  // 🆕 Delivery Fee States — baseFare is the raw distance-based amount from
-  // the backend; deliveryFee is what actually gets charged, after the
-  // divide-by-factorial formula is applied on top of baseFare.
-  const [baseFare, setBaseFare] = useState(50); // distance-based, replaces the old static 49
+  const [baseFare, setBaseFare] = useState(50);
   const [deliveryFee, setDeliveryFee] = useState(50);
   const [distanceInfo, setDistanceInfo] = useState(null);
   const [deliveryLoading, setDeliveryLoading] = useState(false);
+
   const [detectingLocation, setDetectingLocation] = useState(false);
   const [userCoords, setUserCoords] = useState(null);
   const [detectedAreaName, setDetectedAreaName] = useState("");
-  // 🆕 Where the current delivery fee's location came from — mirrors the
-  // Cart page's deliverySource pattern so the customer always knows why the
-  // fee is what it is: "estimate" (nothing set yet), "saved-address"
-  // (picked from the dropdown / prefilled from account), "gps" (detected
-  // via geolocation, here or handed off from the Cart page), or "manual"
-  // (customer typed the address fields themselves).
-  const [deliverySource, setDeliverySource] = useState("estimate");
 
-  // Computed locally from cartItems using getUnitPrice, instead of trusting
-  // a separate CartContext `totals.subtotal` that could disagree with what's
-  // actually rendered per line item below (and with the order payload).
-  // Because this reads straight from cartItems, editing quantity or removing
-  // an item on Step 1 recalculates this automatically — no extra wiring.
-  const subtotal = useMemo(
-    () => (cartItems || []).reduce((sum, item) => sum + getUnitPrice(item) * item.quantity, 0),
-    [cartItems]
-  );
+  const subtotal = useMemo(() => {
+    return (cartItems || []).reduce((sum, item) => {
+      return (
+        sum +
+        getUnitPrice(item) *
+          Number(item.quantity || 1)
+      );
+    }, 0);
+  }, [cartItems]);
 
-  // 🆕 Total product count = sum of quantities — this is "n" in fee(n) = base/n!
-  const productCount = useMemo(
-    () => (cartItems || []).reduce((sum, item) => sum + (item.quantity || 0), 0),
-    [cartItems]
-  );
+  const productCount = useMemo(() => {
+    return (cartItems || []).reduce((sum, item) => {
+      return sum + Number(item.quantity || 0);
+    }, 0);
+  }, [cartItems]);
 
-  // 🆕 Recompute the final delivery fee whenever baseFare or productCount
-  // changes — this is what keeps the fee "distance-based, not static", and
-  // also what makes it react live to +/- quantity changes on Step 1.
   useEffect(() => {
-    setDeliveryFee(getDynamicDeliveryFee(baseFare, productCount));
+    setDeliveryFee(
+      getDynamicDeliveryFee(baseFare, productCount)
+    );
   }, [baseFare, productCount]);
 
-  // Fetch the distance-based BASE fare from backend (before the
-  // divide-by-factorial formula is applied on top of it here).
-  const fetchDeliveryFee = async (targetAddress, coords = null) => {
+  const fetchDeliveryFee = async (
+    targetAddress,
+    coords = null
+  ) => {
     const addr = targetAddress || address;
     const currentCoords = coords || userCoords;
 
-    const fullAddr = [addr.street, addr.apartment, addr.city, addr.state, addr.pincode]
+    const fullAddr = [
+      addr.street,
+      addr.apartment,
+      addr.city,
+      addr.state,
+      addr.pincode,
+    ]
       .filter(Boolean)
       .join(", ");
 
-    if (!fullAddr && !currentCoords) return;
+    if (!fullAddr && !currentCoords) {
+      return;
+    }
 
     setDeliveryLoading(true);
+
     try {
-      const res = await axios.post(`${BASE_URL}/orders/calculate-delivery-fee`, {
-        address: fullAddr,
-        lat: currentCoords?.lat || null,
-        lng: currentCoords?.lng || null,
-      });
+      const res = await axios.post(
+        `${BASE_URL}/orders/calculate-delivery-fee`,
+        {
+          address: fullAddr,
+          lat: currentCoords?.lat || null,
+          lng: currentCoords?.lng || null,
+        }
+      );
 
       if (res.data?.success) {
-        // 🆕 This is the raw distance-based fare — NOT the final charged
-        // amount. The divide-by-factorial formula runs on top of it via
-        // the useEffect above.
-        setBaseFare(Number(res.data.deliveryFee) || 50);
+        setBaseFare(
+          Number(res.data.deliveryFee) || 50
+        );
+
         setDistanceInfo({
           distanceKm: res.data.distanceKm,
-          duration: res.data.durationText || "25 mins",
+          duration:
+            res.data.durationText || "25 mins",
         });
       }
     } catch (err) {
-      console.warn("Delivery fee calculation fallback:", err.message);
+      console.warn(
+        "Delivery fee calculation fallback:",
+        err.message
+      );
     } finally {
       setDeliveryLoading(false);
     }
   };
 
-  // 🆕 If the customer already tapped "Detect my location" on the Cart page,
-  // pick that up here so they don't have to detect it a second time. Only
-  // used to prefill — the customer can still edit the address fields.
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(DELIVERY_LOCATION_KEY);
+      const raw = localStorage.getItem(
+        DELIVERY_LOCATION_KEY
+      );
+
       if (!raw) return;
+
       const saved = JSON.parse(raw);
 
-      // Ignore stale detections older than ~30 minutes.
-      if (!saved?.detectedAt || Date.now() - saved.detectedAt > 30 * 60 * 1000) return;
+      if (
+        !saved?.detectedAt ||
+        Date.now() - saved.detectedAt >
+          30 * 60 * 1000
+      ) {
+        return;
+      }
 
-      if (saved.coords) setUserCoords(saved.coords);
+      if (saved.coords) {
+        setUserCoords(saved.coords);
+      }
 
       if (saved.address) {
         setAddress((prev) => ({
           ...prev,
-          street: saved.address.street || prev.street,
-          city: saved.address.city || prev.city,
-          state: saved.address.state || prev.state,
-          pincode: saved.address.pincode || prev.pincode,
+          street:
+            saved.address.street || prev.street,
+          city:
+            saved.address.city || prev.city,
+          state:
+            saved.address.state || prev.state,
+          pincode:
+            saved.address.pincode ||
+            prev.pincode,
         }));
-        if (saved.address.street || saved.address.city) {
+
+        if (
+          saved.address.street ||
+          saved.address.city
+        ) {
           setDetectedAreaName(
-            [saved.address.street, saved.address.city].filter(Boolean).join(", ")
+            [
+              saved.address.street,
+              saved.address.city,
+            ]
+              .filter(Boolean)
+              .join(", ")
           );
         }
       }
 
       if (saved.coords) {
-        fetchDeliveryFee(address, saved.coords);
+        fetchDeliveryFee(
+          {
+            ...address,
+            ...(saved.address || {}),
+          },
+          saved.coords
+        );
       }
     } catch (err) {
-      console.warn("Could not read handed-off location:", err.message);
+      console.warn(
+        "Could not read handed-off location:",
+        err.message
+      );
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto calculate when step is 2/3 or address / coordinates change
   useEffect(() => {
     const hasAddress =
-      (address.street && address.street.trim().length >= 3) ||
-      (address.city && address.city.trim().length >= 3) ||
-      (address.pincode && address.pincode.trim().length >= 4) ||
+      (address.street &&
+        address.street.trim().length >= 3) ||
+      (address.city &&
+        address.city.trim().length >= 3) ||
+      (address.pincode &&
+        address.pincode.trim().length >= 4) ||
       userCoords;
 
-    if (hasAddress) {
-      const debounceTimer = setTimeout(() => {
-        fetchDeliveryFee(address, userCoords);
-      }, 500);
-      return () => clearTimeout(debounceTimer);
-    }
-  }, [address.street, address.city, address.pincode, userCoords]);
+    if (!hasAddress) return;
 
-  // Request user current GPS location, reverse-geocode and auto-fill address form
+    const debounceTimer = setTimeout(() => {
+      fetchDeliveryFee(
+        address,
+        userCoords
+      );
+    }, 500);
+
+    return () => clearTimeout(debounceTimer);
+  }, [
+    address.street,
+    address.city,
+    address.pincode,
+    userCoords,
+  ]);
+
   const detectLocation = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+      alert(
+        "Geolocation is not supported by your browser"
+      );
       return;
     }
+
     setDetectingLocation(true);
+
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const coords = {
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
         };
+
         setUserCoords(coords);
 
-        // Reverse-geocode to auto-populate form fields
         try {
           const revRes = await axios.get(
             `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json`,
-            { timeout: 4000 }
+            {
+              timeout: 4000,
+            }
           );
-          if (revRes.data && revRes.data.address) {
-            const rawAddr = revRes.data.address;
-            const area = rawAddr.suburb || rawAddr.neighbourhood || rawAddr.road || rawAddr.residential || "";
-            const city = rawAddr.city || rawAddr.town || rawAddr.county || "Lucknow";
-            const state = rawAddr.state || "Uttar Pradesh";
-            const pincode = rawAddr.postcode || "";
+
+          if (
+            revRes.data &&
+            revRes.data.address
+          ) {
+            const rawAddr =
+              revRes.data.address;
+
+            const area =
+              rawAddr.suburb ||
+              rawAddr.neighbourhood ||
+              rawAddr.road ||
+              rawAddr.residential ||
+              "";
+
+            const city =
+              rawAddr.city ||
+              rawAddr.town ||
+              rawAddr.county ||
+              "Lucknow";
+
+            const state =
+              rawAddr.state ||
+              "Uttar Pradesh";
+
+            const pincode =
+              rawAddr.postcode || "";
 
             setAddress((prev) => ({
               ...prev,
-              street: area || prev.street,
-              city: city || prev.city,
-              state: state || prev.state,
-              pincode: pincode || prev.pincode,
+              street:
+                area || prev.street,
+              city:
+                city || prev.city,
+              state:
+                state || prev.state,
+              pincode:
+                pincode || prev.pincode,
             }));
 
             if (area) {
-              setDetectedAreaName(`${area}, ${city}`);
+              setDetectedAreaName(
+                `${area}, ${city}`
+              );
             }
           }
         } catch (revErr) {
-          console.warn("Reverse geocode fallback:", revErr.message);
+          console.warn(
+            "Reverse geocode fallback:",
+            revErr.message
+          );
         } finally {
           setDetectingLocation(false);
         }
 
-        fetchDeliveryFee(address, coords);
+        fetchDeliveryFee(
+          address,
+          coords
+        );
       },
       (err) => {
-        console.warn("Geolocation permission denied or error:", err.message);
+        console.warn(
+          "Geolocation permission denied or error:",
+          err.message
+        );
+
         setDetectingLocation(false);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+      }
     );
   };
 
-  // 1. Fetch available active coupons on mount
   useEffect(() => {
     const fetchActiveCoupons = async () => {
       setFetchingCoupons(true);
+
       try {
-        const res = await axios.get(`${BASE_URL}/coupons`);
+        const res = await axios.get(
+          `${BASE_URL}/coupons`
+        );
+
         const data = res.data;
+
         let list = [];
-        if (Array.isArray(data)) list = data;
-        else if (Array.isArray(data?.coupons)) list = data.coupons;
-        else if (Array.isArray(data?.data)) list = data.data;
 
-        // Filter active & non-expired coupons
-        const now = new Date().setHours(0, 0, 0, 0);
-        const validCoupons = list.filter((c) => {
-          if (!c.isActive) return false;
-          if (c.expiryDate && new Date(c.expiryDate) < now) return false;
-          return true;
-        });
+        if (Array.isArray(data)) {
+          list = data;
+        } else if (
+          Array.isArray(data?.coupons)
+        ) {
+          list = data.coupons;
+        } else if (
+          Array.isArray(data?.data)
+        ) {
+          list = data.data;
+        }
 
-        setAvailableCoupons(validCoupons);
+        const now = new Date().setHours(
+          0,
+          0,
+          0,
+          0
+        );
+
+        const validCoupons = list.filter(
+          (c) => {
+            if (!c.isActive) return false;
+
+            if (
+              c.expiryDate &&
+              new Date(c.expiryDate) < now
+            ) {
+              return false;
+            }
+
+            return true;
+          }
+        );
+
+        setAvailableCoupons(
+          validCoupons
+        );
       } catch (err) {
-        console.error("Error fetching coupons for checkout:", err);
+        console.error(
+          "Error fetching coupons for checkout:",
+          err
+        );
       } finally {
         setFetchingCoupons(false);
       }
@@ -419,89 +597,168 @@ export default function CheckoutPage() {
     fetchActiveCoupons();
   }, []);
 
-  // 2. Pre-fill default user address
   useEffect(() => {
-    if (user) {
-      const userAddresses = user.addresses || [];
-      const defaultAddr = userAddresses.find((a) => a.isDefault) || userAddresses[0] || {};
+    if (!user) return;
 
-      setAddress((prev) => ({
-        ...prev,
-        name: user.name || prev.name,
-        phone: user.phone || prev.phone,
-        street: defaultAddr.street || prev.street,
-        city: defaultAddr.city || prev.city,
-        state: defaultAddr.state || prev.state,
-        pincode: defaultAddr.pincode || prev.pincode,
-      }));
-    }
+    const userAddresses =
+      user.addresses || [];
+
+    const defaultAddr =
+      userAddresses.find(
+        (a) => a.isDefault
+      ) ||
+      userAddresses[0] ||
+      {};
+
+    setAddress((prev) => ({
+      ...prev,
+      name:
+        user.name || prev.name,
+      phone:
+        user.phone || prev.phone,
+      street:
+        defaultAddr.street ||
+        prev.street,
+      city:
+        defaultAddr.city ||
+        prev.city,
+      state:
+        defaultAddr.state ||
+        prev.state,
+      pincode:
+        defaultAddr.pincode ||
+        prev.pincode,
+    }));
   }, [user]);
 
-  // Calculate discount based on applied coupon
   const calculateDiscount = () => {
-    if (!appliedCoupon) return 0;
+    if (!appliedCoupon) {
+      return 0;
+    }
 
     let discount = 0;
-    if (appliedCoupon.discountType === "percentage") {
-      discount = (subtotal * appliedCoupon.discountValue) / 100;
-      if (appliedCoupon.maxDiscountAmount && discount > appliedCoupon.maxDiscountAmount) {
-        discount = appliedCoupon.maxDiscountAmount;
+
+    if (
+      appliedCoupon.discountType ===
+      "percentage"
+    ) {
+      discount =
+        (subtotal *
+          Number(
+            appliedCoupon.discountValue ||
+              0
+          )) /
+        100;
+
+      if (
+        appliedCoupon.maxDiscountAmount &&
+        discount >
+          Number(
+            appliedCoupon.maxDiscountAmount
+          )
+      ) {
+        discount = Number(
+          appliedCoupon.maxDiscountAmount
+        );
       }
     } else {
-      discount = appliedCoupon.discountValue || 0;
+      discount =
+        Number(
+          appliedCoupon.discountValue
+        ) || 0;
     }
 
-    return Math.min(discount, subtotal);
+    return Math.min(
+      discount,
+      subtotal
+    );
   };
 
-  const discount = calculateDiscount();
-  const foodTotal = Math.max(0, subtotal - discount);
-  // Grand Total = food + delivery (what the customer pays, always in full)
-  const grandTotal = foodTotal + deliveryFee;
-  // 🆕 One payment, no split: card/UPI now charge the FULL grand total
-  // (food + dynamic delivery fee) online, in one go. Nothing is collected
-  // separately by the delivery partner anymore.
-  const onlinePayable = grandTotal;
-  // COD: everything is paid to the driver on delivery (unchanged — this is
-  // still a single payment, just made in person instead of online).
-  const payableTotal = paymentMethod === "cod" ? grandTotal : onlinePayable;
+  const discount =
+    calculateDiscount();
 
-  // Apply Coupon (by Code string or Coupon Object)
-  const applyCouponHandler = async (codeToApply) => {
-    const targetCode = codeToApply || couponCode;
-    if (!targetCode.trim()) {
-      setCouponError("Please enter a coupon code");
-      return;
-    }
+  const foodTotal = Math.max(
+    0,
+    subtotal - discount
+  );
 
-    setCouponLoading(true);
-    setCouponError("");
+  const grandTotal =
+    foodTotal + deliveryFee;
 
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.post(
-        `${BASE_URL}/coupons/validate`,
-        { code: targetCode, cartTotal: subtotal },
-        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
-      );
+  const onlinePayable =
+    grandTotal;
 
-      if (res.data?.success || res.data?.coupon) {
-        setAppliedCoupon(res.data.coupon || res.data);
-        setCouponCode(targetCode);
-        setCouponError("");
-        setShowCouponList(false); // close dropdown after selection
-      } else {
-        setCouponError(res.data?.message || "Invalid coupon code");
+  const applyCouponHandler =
+    async (codeToApply) => {
+      const targetCode =
+        codeToApply || couponCode;
+
+      if (!targetCode.trim()) {
+        setCouponError(
+          "Please enter a coupon code"
+        );
+        return;
       }
-    } catch (err) {
-      console.error("Coupon validation error:", err);
-      setCouponError(
-        err.response?.data?.message || "Failed to apply coupon. Code may be invalid or expired."
-      );
-    } finally {
-      setCouponLoading(false);
-    }
-  };
+
+      setCouponLoading(true);
+      setCouponError("");
+
+      try {
+        const token =
+          localStorage.getItem(
+            "token"
+          );
+
+        const res = await axios.post(
+          `${BASE_URL}/coupons/validate`,
+          {
+            code: targetCode,
+            cartTotal: subtotal,
+          },
+          {
+            headers: token
+              ? {
+                  Authorization: `Bearer ${token}`,
+                }
+              : {},
+          }
+        );
+
+        if (
+          res.data?.success ||
+          res.data?.coupon
+        ) {
+          setAppliedCoupon(
+            res.data.coupon ||
+              res.data
+          );
+
+          setCouponCode(
+            targetCode
+          );
+
+          setCouponError("");
+          setShowCouponList(false);
+        } else {
+          setCouponError(
+            res.data?.message ||
+              "Invalid coupon code"
+          );
+        }
+      } catch (err) {
+        console.error(
+          "Coupon validation error:",
+          err
+        );
+
+        setCouponError(
+          err.response?.data?.message ||
+            "Failed to apply coupon. Code may be invalid or expired."
+        );
+      } finally {
+        setCouponLoading(false);
+      }
+    };
 
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
@@ -509,351 +766,1018 @@ export default function CheckoutPage() {
     setCouponError("");
   };
 
-  const handleStepClick = (clickedStep) => {
+  const handleStepClick = (
+    clickedStep
+  ) => {
     if (step === 4) return;
-    if (clickedStep <= step) setStep(clickedStep);
+
+    if (clickedStep <= step) {
+      setStep(clickedStep);
+    }
   };
 
   const isAddressValid = () => {
     return Boolean(
-      address.name && address.phone && address.street && address.city && address.pincode
+      address.name?.trim() &&
+        address.phone?.trim() &&
+        address.street?.trim() &&
+        address.city?.trim() &&
+        address.pincode?.trim()
     );
   };
 
-  const buildOrderPayload = (guestId) => ({
+  const buildOrderPayload = (
+    guestId
+  ) => ({
     guestId,
-    items: cartItems.map((item) => {
-      const rawId =
-        item.productId ||
-        item._id ||
-        item.id ||
-        item.product?._id ||
-        item.product;
 
-      const isValidMongoId =
-        typeof rawId === "string" && /^[0-9a-fA-F]{24}$/.test(rawId);
+    items: cartItems.map(
+      (item) => ({
+        productId:
+          getProductId(item),
 
-      return {
-        productId: isValidMongoId ? rawId : null,
-        title: item.title || item.name,
-        image: getItemImage(item), // ✅ always a string now
-        price: getUnitPrice(item),
-        quantity: Number(item.quantity || 1),
-      };
-    }),
+        title:
+          item.title ||
+          item.name ||
+          "Product",
+
+        image:
+          getItemImage(item),
+
+        price:
+          getUnitPrice(item),
+
+        quantity:
+          Number(
+            item.quantity || 1
+          ),
+      })
+    ),
+
     address,
+
     dropLocation: {
-      address: [address.street, address.apartment, address.city, address.pincode].filter(Boolean).join(", "),
-      lat: userCoords?.lat || null,
-      lng: userCoords?.lng || null,
+      address: [
+        address.street,
+        address.apartment,
+        address.city,
+        address.pincode,
+      ]
+        .filter(Boolean)
+        .join(", "),
+
+      lat:
+        userCoords?.lat ||
+        null,
+
+      lng:
+        userCoords?.lng ||
+        null,
     },
+
     paymentMethod,
-    subtotal: subtotal,
-    delivery: deliveryFee,
-    discount: discount,
-    // Send grand total = food + delivery to backend
-    total: grandTotal,
-    couponCode: appliedCoupon?.code || null,
+
+    subtotal:
+      Number(subtotal.toFixed(2)),
+
+    delivery:
+      Number(deliveryFee.toFixed(2)),
+
+    discount:
+      Number(discount.toFixed(2)),
+
+    total:
+      Number(grandTotal.toFixed(2)),
+
+    couponCode:
+      appliedCoupon?.code ||
+      null,
   });
 
-  const handleCodOrder = async (token, guestId) => {
-    const res = await axios.post(
-      `${BASE_URL}/orders/place`,
-      buildOrderPayload(guestId),
-      { headers: token ? { Authorization: `Bearer ${token}` } : {} }
-    );
+  const handleCodOrder = async (
+    token,
+    guestId
+  ) => {
+    const res =
+      await axios.post(
+        `${BASE_URL}/orders/place`,
+        buildOrderPayload(
+          guestId
+        ),
+        {
+          headers: token
+            ? {
+                Authorization: `Bearer ${token}`,
+              }
+            : {},
+        }
+      );
+
     return res.data;
   };
 
-  const handleRazorpayOrder = async (token, guestId) => {
-    const scriptLoaded = await loadRazorpayScript();
+  const handleRazorpayOrder = async (
+    token,
+    guestId
+  ) => {
+    const scriptLoaded =
+      await loadRazorpayScript();
+
     if (!scriptLoaded) {
-      throw new Error("Razorpay SDK failed to load. Check your internet connection.");
+      throw new Error(
+        "Razorpay SDK failed to load. Check your internet connection."
+      );
     }
 
-    const payload = buildOrderPayload(guestId);
+    if (
+      !window.Razorpay
+    ) {
+      throw new Error(
+        "Razorpay Checkout is not available."
+      );
+    }
 
-    // 🆕 Charge the full grand total (food + delivery) online in one shot.
-    const createRes = await axios.post(
-      `${BASE_URL}/orders/create-razorpay-order`,
-      {
-        amount: onlinePayable,
-        guestId,
-        paymentMethod,
-        items: payload.items,
-      },
-      { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+    const payload =
+      buildOrderPayload(
+        guestId
+      );
+
+    /*
+     * IMPORTANT:
+     * The backend expects amount in rupees and converts it to paise.
+     */
+    const amount = Number(
+      onlinePayable.toFixed(2)
     );
 
-    if (!createRes.data.success) {
-      throw new Error(createRes.data.message || "Could not initialize payment.");
-    }
-
-    const { order: razorpayOrder, keyId } = createRes.data;
-
-    return new Promise((resolve, reject) => {
-      const options = {
-        key: keyId,
-        amount: razorpayOrder.amount,
-        currency: razorpayOrder.currency,
-        name: "ShyamBakers",
-        description: "Order Payment",
-        order_id: razorpayOrder.id,
-        prefill: {
-          name: address.name,
-          contact: address.phone,
-        },
-        theme: { color: "#880559" },
-
-        handler: async (response) => {
-          try {
-            const verifyRes = await axios.post(
-              `${BASE_URL}/orders/verify-and-place`,
-              {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                ...buildOrderPayload(guestId),
-              },
-              { headers: token ? { Authorization: `Bearer ${token}` } : {} }
-            );
-            resolve(verifyRes.data);
-          } catch (err) {
-            reject(err);
-          }
-        },
-
-        modal: {
-          ondismiss: () => {
-            reject(new Error("Payment cancelled by user."));
-          },
-        },
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.on("payment.failed", (response) => {
-        reject(new Error(response.error?.description || "Payment failed."));
-      });
-      rzp.open();
-    });
-  };
-
-  const handlePlaceOrder = async () => {
-    if (!cartItems.length) return;
-
-    setPlacing(true);
-    setOrderError("");
-
-    // 🆕 Build the same items shape used in buildOrderPayload, so productId
-    // matches exactly what will be sent to the order API.
-    const orderItems = cartItems.map((item) => {
-      const rawId =
-        item.productId || item._id || item.id || item.product?._id || item.product;
-      const isValidMongoId = typeof rawId === "string" && /^[0-9a-fA-F]{24}$/.test(rawId);
-      return {
-        productId: isValidMongoId ? rawId : null,
-        title: item.title || item.name,
-        quantity: Number(item.quantity || 1),
-      };
-    });
-
-    // 🆕 STEP 1 — reserve stock before touching payment/order APIs at all.
-    const reservation = await reserveStockForOrder(orderItems);
-    if (!reservation.ok) {
-      setPlacing(false);
-      const names = reservation.failed.map((f) => f.message).join("\n");
-      alert(`Some items are no longer available:\n\n${names}\n\nPlease update your cart.`);
-      setOrderError("One or more items went out of stock. Please review your cart.");
-      return;
-    }
-
-    try {
-      const guestId = getGuestId();
-      const token = localStorage.getItem("token");
-
-      let result;
-
-      if (paymentMethod === "cod") {
-        result = await handleCodOrder(token, guestId);
-      } else {
-        result = await handleRazorpayOrder(token, guestId);
-      }
-
-      if (result.success) {
-        setOrderDetails(result.data);
-        clearCart();
-        try {
-          localStorage.removeItem(DELIVERY_LOCATION_KEY);
-        } catch (err) {
-          // non-fatal
-        }
-        setStep(4);
-      } else {
-        // 🆕 Order API itself said no — give the stock back
-        await rollbackReservedStock(orderItems);
-        setOrderError(result.message || "Failed to place order.");
-      }
-    } catch (err) {
-      // 🆕 Any thrown error (network, Razorpay cancel, verify failure) —
-      // give the stock back so it isn't stuck decremented.
-      await rollbackReservedStock(orderItems);
-      console.error("Place Order Error:", err);
-      setOrderError(
-        err.response?.data?.message || err.message || "Failed to place order. Please try again."
+    if (
+      !Number.isFinite(amount) ||
+      amount <= 0
+    ) {
+      throw new Error(
+        "Invalid payment amount."
       );
-    } finally {
-      setPlacing(false);
     }
+
+    console.log(
+      "[RAZORPAY] Creating order:",
+      {
+        amount,
+        currency: "INR",
+        paymentMethod,
+      }
+    );
+
+    const createRes =
+      await axios.post(
+        `${BASE_URL}/orders/create-razorpay-order`,
+        {
+          amount,
+          currency: "INR",
+          guestId,
+          paymentMethod,
+          items: payload.items,
+        },
+        {
+          headers: token
+            ? {
+                Authorization: `Bearer ${token}`,
+              }
+            : {},
+        }
+      );
+
+    if (
+      !createRes.data?.success
+    ) {
+      throw new Error(
+        createRes.data?.message ||
+          "Could not initialize payment."
+      );
+    }
+
+    const razorpayOrder =
+      createRes.data?.order;
+
+    const keyId =
+      createRes.data?.keyId;
+
+    /*
+     * FIX:
+     * paymentDocId was previously not being passed
+     * to verify-and-place.
+     */
+    const paymentDocId =
+      createRes.data?.paymentDocId;
+
+    if (
+      !razorpayOrder?.id
+    ) {
+      throw new Error(
+        "Razorpay order ID was not returned by server."
+      );
+    }
+
+    if (!keyId) {
+      throw new Error(
+        "Razorpay Key ID was not returned by server."
+      );
+    }
+
+    console.log(
+      "[RAZORPAY] Order created:",
+      razorpayOrder.id
+    );
+
+    console.log(
+      "[RAZORPAY] Payment document:",
+      paymentDocId || "not returned"
+    );
+
+    return new Promise(
+      (resolve, reject) => {
+        let settled = false;
+
+        const finishResolve =
+          (value) => {
+            if (settled) return;
+
+            settled = true;
+            resolve(value);
+          };
+
+        const finishReject =
+          (error) => {
+            if (settled) return;
+
+            settled = true;
+            reject(error);
+          };
+
+        const options = {
+          key: keyId,
+
+          amount:
+            razorpayOrder.amount,
+
+          currency:
+            razorpayOrder.currency ||
+            "INR",
+
+          name:
+            "ShyamBakers",
+
+          description:
+            "Order Payment",
+
+          order_id:
+            razorpayOrder.id,
+
+          prefill: {
+            name:
+              address.name || "",
+
+            contact:
+              address.phone || "",
+          },
+
+          theme: {
+            color:
+              "#880559",
+          },
+
+          /*
+           * Keep the Checkout configuration simple.
+           * Razorpay Dashboard controls enabled payment methods.
+           */
+          notes: {
+            guestId:
+              String(
+                guestId || ""
+              ),
+          },
+
+          handler:
+            async (
+              response
+            ) => {
+              try {
+                console.log(
+                  "[RAZORPAY] Payment success:",
+                  {
+                    orderId:
+                      response?.razorpay_order_id,
+
+                    paymentId:
+                      response?.razorpay_payment_id,
+                  }
+                );
+
+                if (
+                  !response?.razorpay_order_id ||
+                  !response?.razorpay_payment_id ||
+                  !response?.razorpay_signature
+                ) {
+                  throw new Error(
+                    "Razorpay returned an incomplete payment response."
+                  );
+                }
+
+                /*
+                 * IMPORTANT:
+                 * Verify payment on backend.
+                 * paymentDocId is now included.
+                 */
+                const verifyRes =
+                  await axios.post(
+                    `${BASE_URL}/orders/verify-and-place`,
+                    {
+                      razorpay_order_id:
+                        response.razorpay_order_id,
+
+                      razorpay_payment_id:
+                        response.razorpay_payment_id,
+
+                      razorpay_signature:
+                        response.razorpay_signature,
+
+                      paymentDocId:
+                        paymentDocId ||
+                        undefined,
+
+                      ...buildOrderPayload(
+                        guestId
+                      ),
+                    },
+                    {
+                      headers:
+                        token
+                          ? {
+                              Authorization: `Bearer ${token}`,
+                            }
+                          : {},
+                    }
+                  );
+
+                console.log(
+                  "[RAZORPAY] Verification response:",
+                  verifyRes.data
+                );
+
+                if (
+                  !verifyRes.data?.success
+                ) {
+                  throw new Error(
+                    verifyRes.data?.message ||
+                      "Payment verification failed."
+                  );
+                }
+
+                finishResolve(
+                  verifyRes.data
+                );
+              } catch (err) {
+                console.error(
+                  "[RAZORPAY] Verify / place error:",
+                  err.response?.data ||
+                    err
+                );
+
+                finishReject(err);
+              }
+            },
+
+          modal: {
+            ondismiss:
+              () => {
+                console.warn(
+                  "[RAZORPAY] Checkout dismissed by customer."
+                );
+
+                finishReject(
+                  new Error(
+                    "Payment cancelled by user."
+                  )
+                );
+              },
+          },
+        };
+
+        let rzp;
+
+        try {
+          rzp =
+            new window.Razorpay(
+              options
+            );
+
+          rzp.on(
+            "payment.failed",
+            (response) => {
+              console.error(
+                "===== RAZORPAY PAYMENT FAILED ====="
+              );
+
+              console.error(
+                "CODE:",
+                response?.error?.code
+              );
+
+              console.error(
+                "DESCRIPTION:",
+                response?.error?.description
+              );
+
+              console.error(
+                "SOURCE:",
+                response?.error?.source
+              );
+
+              console.error(
+                "STEP:",
+                response?.error?.step
+              );
+
+              console.error(
+                "REASON:",
+                response?.error?.reason
+              );
+
+              console.error(
+                "METADATA:",
+                response?.error?.metadata
+              );
+
+              const description =
+                response?.error
+                  ?.description ||
+                response?.error
+                  ?.reason ||
+                "Payment failed. Please try another payment method.";
+
+              finishReject(
+                new Error(
+                  description
+                )
+              );
+            }
+          );
+
+          rzp.open();
+        } catch (err) {
+          console.error(
+            "[RAZORPAY] Checkout open error:",
+            err
+          );
+
+          finishReject(
+            err
+          );
+        }
+      }
+    );
   };
 
-  const ProgressBar = () => (
-    <div className="progress-bar">
-      {STEP_DEFINITIONS.map((s, idx) => {
-        const isComplete = step > s.id;
-        const isActive = step === s.id;
-        const Icon = s.icon;
-        return (
-          <React.Fragment key={s.id}>
-            <button
-              type="button"
-              className={`progress-bar__step ${isActive ? "is-active" : ""} ${isComplete ? "is-complete" : ""}`}
-              onClick={() => handleStepClick(s.id)}
-            >
-              <span className="progress-bar__icon">
-                {isComplete ? <AiOutlineCheck /> : <Icon />}
-              </span>
-              <span className="progress-bar__label">{s.label}</span>
-            </button>
-            {idx < STEP_DEFINITIONS.length - 1 && (
-              <span className={`progress-bar__connector ${step > s.id ? "is-complete" : ""}`} />
-            )}
-          </React.Fragment>
+  const handlePlaceOrder =
+    async () => {
+      if (
+        !cartItems?.length
+      ) {
+        return;
+      }
+
+      if (placing) {
+        return;
+      }
+
+      if (
+        !isAddressValid()
+      ) {
+        setOrderError(
+          "Please complete your delivery address."
         );
-      })}
-    </div>
-  );
+        return;
+      }
+
+      if (
+        paymentMethod !==
+          "cod" &&
+        grandTotal <= 0
+      ) {
+        setOrderError(
+          "Invalid payment amount."
+        );
+        return;
+      }
+
+      setPlacing(true);
+      setOrderError("");
+
+      const orderItems =
+        cartItems.map(
+          (item) => ({
+            productId:
+              getProductId(item),
+
+            title:
+              item.title ||
+              item.name ||
+              "Product",
+
+            quantity:
+              Number(
+                item.quantity || 1
+              ),
+          })
+        );
+
+      /*
+       * IMPORTANT FIX:
+       *
+       * We DO NOT decrement stock here anymore.
+       *
+       * Old flow:
+       * stock decrement
+       * -> Razorpay
+       *
+       * New flow:
+       * Razorpay
+       * -> verify/place
+       * -> stock decrement
+       *
+       * For COD:
+       * place order
+       * -> stock decrement
+       */
+
+      try {
+        const guestId =
+          getGuestId();
+
+        const token =
+          localStorage.getItem(
+            "token"
+          );
+
+        let result;
+
+        if (
+          paymentMethod ===
+          "cod"
+        ) {
+          /*
+           * COD:
+           * Create order first.
+           */
+          result =
+            await handleCodOrder(
+              token,
+              guestId
+            );
+
+          if (
+            !result?.success
+          ) {
+            setOrderError(
+              result?.message ||
+                "Failed to place order."
+            );
+
+            return;
+          }
+
+          /*
+           * Only after successful COD order
+           * do we decrease stock.
+           */
+          const stockResult =
+            await decrementStockAfterSuccess(
+              orderItems
+            );
+
+          if (
+            !stockResult.ok
+          ) {
+            console.error(
+              "[STOCK] COD order created but stock update failed:",
+              stockResult.failed
+            );
+
+            /*
+             * Do not pretend that the stock update succeeded.
+             * The order already exists, so we show a clear warning.
+             */
+            setOrderError(
+              "Order was created, but stock synchronization needs attention. Please contact support."
+            );
+
+            setOrderDetails(
+              result.data
+            );
+
+            clearCart();
+
+            try {
+              localStorage.removeItem(
+                DELIVERY_LOCATION_KEY
+              );
+            } catch (err) {}
+
+            setStep(4);
+
+            return;
+          }
+        } else {
+          /*
+           * ONLINE PAYMENT:
+           *
+           * Razorpay payment + backend verification
+           * must succeed before stock is decremented.
+           */
+          result =
+            await handleRazorpayOrder(
+              token,
+              guestId
+            );
+
+          if (
+            !result?.success
+          ) {
+            setOrderError(
+              result?.message ||
+                "Payment verification failed."
+            );
+
+            return;
+          }
+
+          /*
+           * Payment and order are now confirmed.
+           * Decrease stock only now.
+           */
+          const stockResult =
+            await decrementStockAfterSuccess(
+              orderItems
+            );
+
+          if (
+            !stockResult.ok
+          ) {
+            console.error(
+              "[STOCK] Online payment succeeded but stock update failed:",
+              stockResult.failed
+            );
+
+            /*
+             * IMPORTANT:
+             * Do NOT create another order here.
+             * Payment/order already succeeded.
+             *
+             * Show order success while flagging stock sync.
+             */
+            setOrderDetails(
+              result.data
+            );
+
+            clearCart();
+
+            try {
+              localStorage.removeItem(
+                DELIVERY_LOCATION_KEY
+              );
+            } catch (err) {}
+
+            setOrderError(
+              "Payment and order were successful, but stock synchronization needs attention. Please contact support."
+            );
+
+            setStep(4);
+
+            return;
+          }
+        }
+
+        /*
+         * Normal successful flow.
+         */
+        setOrderDetails(
+          result.data
+        );
+
+        clearCart();
+
+        try {
+          localStorage.removeItem(
+            DELIVERY_LOCATION_KEY
+          );
+        } catch (err) {}
+
+        setStep(4);
+      } catch (err) {
+        console.error(
+          "Place Order Error:",
+          err.response?.data ||
+            err
+        );
+
+        setOrderError(
+          err.response?.data?.message ||
+            err.message ||
+            "Failed to place order. Please try again."
+        );
+      } finally {
+        setPlacing(false);
+      }
+    };
+
+  const ProgressBar =
+    () => (
+      <div className="progress-bar">
+        {STEP_DEFINITIONS.map(
+          (s, idx) => {
+            const isComplete =
+              step > s.id;
+
+            const isActive =
+              step === s.id;
+
+            const Icon =
+              s.icon;
+
+            return (
+              <React.Fragment
+                key={s.id}
+              >
+                <button
+                  type="button"
+                  className={`progress-bar__step ${
+                    isActive
+                      ? "is-active"
+                      : ""
+                  } ${
+                    isComplete
+                      ? "is-complete"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    handleStepClick(
+                      s.id
+                    )
+                  }
+                >
+                  <span className="progress-bar__icon">
+                    {isComplete ? (
+                      <AiOutlineCheck />
+                    ) : (
+                      <Icon />
+                    )}
+                  </span>
+
+                  <span className="progress-bar__label">
+                    {s.label}
+                  </span>
+                </button>
+
+                {idx <
+                  STEP_DEFINITIONS.length -
+                    1 && (
+                  <span
+                    className={`progress-bar__connector ${
+                      step > s.id
+                        ? "is-complete"
+                        : ""
+                    }`}
+                  />
+                )}
+              </React.Fragment>
+            );
+          }
+        )}
+      </div>
+    );
 
   return (
     <div className="checkout-container">
       <ProgressBar />
+
       {step === 1 && (
         <div className="checkout-left">
-
           <button
             type="button"
             className="back-btn"
-            onClick={() => navigate(-1)}
+            onClick={() =>
+              navigate(-1)
+            }
           >
             <FiArrowLeft />
           </button>
 
           <div className="panel-header">
+            <h2 className="panel-title">
+              Your cart
+            </h2>
 
-            <h2 className="panel-title">Your cart</h2>
             <span className="panel-count">
-              {cartItems.length} item{cartItems.length !== 1 ? "s" : ""}
+              {cartItems.length} item
+              {cartItems.length !==
+              1
+                ? "s"
+                : ""}
             </span>
           </div>
 
-          {cartItems.length === 0 ? (
-            <div className="cart-item" style={{ justifyContent: "center", padding: "24px 0" }}>
-              <p style={{ margin: 0, color: "#6b7280" }}>Your cart is empty.</p>
+          {cartItems.length ===
+          0 ? (
+            <div
+              className="cart-item"
+              style={{
+                justifyContent:
+                  "center",
+                padding:
+                  "24px 0",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  color:
+                    "#6b7280",
+                }}
+              >
+                Your cart is
+                empty.
+              </p>
             </div>
           ) : (
             <div className="cart-list">
-              {cartItems.map((item) => {
-                const unitPrice = getUnitPrice(item);
-                const itemKey = item.key || item._id;
-                const imgSrc = getItemImage(item);
-                const showImage = imgSrc && !brokenImages[itemKey];
-                return (
-                  <div key={itemKey} className="cart-item">
-                    {showImage ? (
-                      <img
-                        src={imgSrc}
-                        alt={item.title}
-                        className="cart-item__thumb"
-                        onError={() => markImageBroken(itemKey)}
-                      />
-                    ) : (
-                      <div
-                        className="cart-item__thumb"
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          background: "#f3f4f6",
-                          color: "#9ca3af",
-                        }}
-                      >
-                        <FiShoppingBag />
-                      </div>
-                    )}
+              {cartItems.map(
+                (item) => {
+                  const unitPrice =
+                    getUnitPrice(
+                      item
+                    );
 
-                    <div className="cart-item__info">
-                      <p className="cart-item__title">{item.title}</p>
+                  const itemKey =
+                    item.key ||
+                    item._id ||
+                    item.productId ||
+                    item.id;
 
-                      {/* 🆕 Editable quantity control — same +/- pattern as
-                          Cart.jsx. Any change here flows straight into
-                          subtotal → delivery fee → grand total below since
-                          they're all derived from cartItems. */}
-                      <div
-                        className="quantity-control"
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "8px",
-                          marginTop: "6px",
-                        }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => updateQty(itemKey, item.quantity - 1)}
-                          disabled={item.quantity <= 1}
-                          aria-label="Decrease quantity"
-                        >
-                          <FiMinus />
-                        </button>
-                        <span>{item.quantity}</span>
-                        <button
-                          type="button"
-                          onClick={() => updateQty(itemKey, item.quantity + 1)}
-                          aria-label="Increase quantity"
-                        >
-                          <FiPlus />
-                        </button>
-                      </div>
-                    </div>
+                  const imgSrc =
+                    getItemImage(
+                      item
+                    );
 
+                  const showImage =
+                    imgSrc &&
+                    !brokenImages[
+                      itemKey
+                    ];
+
+                  return (
                     <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                      }}
+                      key={itemKey}
+                      className="cart-item"
                     >
-                      <div className="cart-item__price">₹ {(unitPrice * item.quantity).toFixed(2)}</div>
+                      {showImage ? (
+                        <img
+                          src={imgSrc}
+                          alt={
+                            item.title
+                          }
+                          className="cart-item__thumb"
+                          onError={() =>
+                            markImageBroken(
+                              itemKey
+                            )
+                          }
+                        />
+                      ) : (
+                        <div
+                          className="cart-item__thumb"
+                          style={{
+                            display:
+                              "flex",
+                            alignItems:
+                              "center",
+                            justifyContent:
+                              "center",
+                            background:
+                              "#f3f4f6",
+                            color:
+                              "#9ca3af",
+                          }}
+                        >
+                          <FiShoppingBag />
+                        </div>
+                      )}
 
-                      {/* 🆕 Remove item — same as Cart.jsx's remove button */}
-                      <button
-                        type="button"
-                        className="remove-btn"
-                        onClick={() => removeFromCart(itemKey)}
-                        title="Remove item"
-                        aria-label="Remove item"
+                      <div className="cart-item__info">
+                        <p className="cart-item__title">
+                          {item.title}
+                        </p>
+
+                        <div
+                          className="quantity-control"
+                          style={{
+                            display:
+                              "inline-flex",
+                            alignItems:
+                              "center",
+                            gap: "8px",
+                            marginTop:
+                              "6px",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateQty(
+                                itemKey,
+                                item.quantity -
+                                  1
+                              )
+                            }
+                            disabled={
+                              item.quantity <=
+                              1
+                            }
+                            aria-label="Decrease quantity"
+                          >
+                            <FiMinus />
+                          </button>
+
+                          <span>
+                            {
+                              item.quantity
+                            }
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateQty(
+                                itemKey,
+                                item.quantity +
+                                  1
+                              )
+                            }
+                            aria-label="Increase quantity"
+                          >
+                            <FiPlus />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          display:
+                            "flex",
+                          alignItems:
+                            "center",
+                          gap: "12px",
+                        }}
                       >
-                        <FiTrash2 />
-                      </button>
+                        <div className="cart-item__price">
+                          ₹{" "}
+                          {(
+                            unitPrice *
+                            item.quantity
+                          ).toFixed(2)}
+                        </div>
+
+                        <button
+                          type="button"
+                          className="remove-btn"
+                          onClick={() =>
+                            removeFromCart(
+                              itemKey
+                            )
+                          }
+                          title="Remove item"
+                          aria-label="Remove item"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                }
+              )}
             </div>
           )}
 
           <div className="cart-subtotal">
-            <span>Total</span>
-            <span>₹ {subtotal.toFixed(2)}</span>
+            <span>
+              Total
+            </span>
+
+            <span>
+              ₹{" "}
+              {subtotal.toFixed(
+                2
+              )}
+            </span>
           </div>
         </div>
       )}
@@ -862,135 +1786,302 @@ export default function CheckoutPage() {
         <div className="checkout-left">
           <div className="panel-header">
             <div>
-              <h2 className="panel-title">Shipping address</h2>
+              <h2 className="panel-title">
+                Shipping address
+              </h2>
+
               {detectedAreaName && (
                 <p className="panel-subtitle panel-subtitle--success">
-                  <AiOutlineCheck /> Auto-filled: {detectedAreaName}
+                  <AiOutlineCheck />{" "}
+                  Auto-filled:{" "}
+                  {detectedAreaName}
                 </p>
               )}
             </div>
+
             <button
               type="button"
-              onClick={detectLocation}
-              disabled={detectingLocation}
-              className={`gps-button ${detectingLocation ? "is-loading" : ""}`}
+              onClick={
+                detectLocation
+              }
+              disabled={
+                detectingLocation
+              }
+              className={`gps-button ${
+                detectingLocation
+                  ? "is-loading"
+                  : ""
+              }`}
             >
               <AiOutlineEnvironment />
+
               {detectingLocation
                 ? "Detecting GPS…"
                 : userCoords
-                  ? "Location auto-filled"
-                  : "Auto-detect location"}
+                ? "Location auto-filled"
+                : "Auto-detect location"}
             </button>
           </div>
 
-          {user?.addresses && user.addresses.length > 1 && (
-            <div className="form-group">
-              <label>Select saved address</label>
-              <select
-                className="saved-address-select"
-                onChange={(e) => {
-                  const selected = user.addresses[e.target.value];
-                  if (selected) {
-                    setAddress((prev) => ({
-                      ...prev,
-                      street: selected.street || "",
-                      city: selected.city || "",
-                      state: selected.state || "",
-                      pincode: selected.pincode || "",
-                    }));
-                  }
-                }}
-              >
-                {user.addresses.map((addr, idx) => (
-                  <option key={addr._id || idx} value={idx}>
-                    {addr.isDefault ? "[Default] " : ""}
-                    {addr.street ? `${addr.street}, ${addr.city}` : `Address #${idx + 1}`}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          {user?.addresses &&
+            user.addresses.length >
+              1 && (
+              <div className="form-group">
+                <label>
+                  Select saved
+                  address
+                </label>
+
+                <select
+                  className="saved-address-select"
+                  onChange={(
+                    e
+                  ) => {
+                    const selected =
+                      user.addresses[
+                        e.target.value
+                      ];
+
+                    if (
+                      selected
+                    ) {
+                      setAddress(
+                        (
+                          prev
+                        ) => ({
+                          ...prev,
+                          street:
+                            selected.street ||
+                            "",
+                          city:
+                            selected.city ||
+                            "",
+                          state:
+                            selected.state ||
+                            "",
+                          pincode:
+                            selected.pincode ||
+                            "",
+                        })
+                      );
+                    }
+                  }}
+                >
+                  {user.addresses.map(
+                    (
+                      addr,
+                      idx
+                    ) => (
+                      <option
+                        key={
+                          addr._id ||
+                          idx
+                        }
+                        value={idx}
+                      >
+                        {addr.isDefault
+                          ? "[Default] "
+                          : ""}
+                        {addr.street
+                          ? `${addr.street}, ${addr.city}`
+                          : `Address #${
+                              idx +
+                              1
+                            }`}
+                      </option>
+                    )
+                  )}
+                </select>
+              </div>
+            )}
 
           <div className="form-group">
-            <label>Full Name</label>
+            <label>
+              Full Name
+            </label>
+
             <input
               type="text"
               placeholder="Recipient's Full Name"
-              value={address.name}
-              onChange={(e) => setAddress({ ...address, name: e.target.value })}
+              value={
+                address.name
+              }
+              onChange={(e) =>
+                setAddress({
+                  ...address,
+                  name: e.target
+                    .value,
+                })
+              }
             />
           </div>
 
           <div className="form-group">
-            <label>Phone Number</label>
+            <label>
+              Phone Number
+            </label>
+
             <input
               type="tel"
               placeholder="10-digit mobile number"
               maxLength={10}
-              value={address.phone}
-              onChange={(e) => setAddress({ ...address, phone: e.target.value })}
+              value={
+                address.phone
+              }
+              onChange={(e) =>
+                setAddress({
+                  ...address,
+                  phone: e.target
+                    .value,
+                })
+              }
             />
           </div>
 
           <div className="form-group">
-            <label>Street Address</label>
+            <label>
+              Street Address
+            </label>
+
             <input
               type="text"
               placeholder="House number and street name"
-              value={address.street}
-              onChange={(e) => setAddress({ ...address, street: e.target.value })}
+              value={
+                address.street
+              }
+              onChange={(e) =>
+                setAddress({
+                  ...address,
+                  street:
+                    e.target
+                      .value,
+                })
+              }
             />
           </div>
 
           <div className="form-group">
-            <label>Apartment, Suite, Unit (Optional)</label>
+            <label>
+              Apartment,
+              Suite, Unit
+              (Optional)
+            </label>
+
             <input
               type="text"
               placeholder="Apartment, suite, unit, building, floor, etc."
-              value={address.apartment || ""}
-              onChange={(e) => setAddress({ ...address, apartment: e.target.value })}
+              value={
+                address.apartment ||
+                ""
+              }
+              onChange={(e) =>
+                setAddress({
+                  ...address,
+                  apartment:
+                    e.target
+                      .value,
+                })
+              }
             />
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label>City</label>
+              <label>
+                City
+              </label>
+
               <input
                 type="text"
                 placeholder="City"
-                value={address.city}
-                onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                value={
+                  address.city
+                }
+                onChange={(
+                  e
+                ) =>
+                  setAddress({
+                    ...address,
+                    city: e.target
+                      .value,
+                  })
+                }
               />
             </div>
+
             <div className="form-group">
-              <label>State</label>
+              <label>
+                State
+              </label>
+
               <input
                 type="text"
                 placeholder="State"
-                value={address.state || ""}
-                onChange={(e) => setAddress({ ...address, state: e.target.value })}
+                value={
+                  address.state ||
+                  ""
+                }
+                onChange={(
+                  e
+                ) =>
+                  setAddress({
+                    ...address,
+                    state:
+                      e.target
+                        .value,
+                  })
+                }
               />
             </div>
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label>Postal Code</label>
+              <label>
+                Postal Code
+              </label>
+
               <input
                 type="text"
                 placeholder="Postal Code"
-                value={address.pincode}
-                onChange={(e) => setAddress({ ...address, pincode: e.target.value })}
+                value={
+                  address.pincode
+                }
+                onChange={(
+                  e
+                ) =>
+                  setAddress({
+                    ...address,
+                    pincode:
+                      e.target
+                        .value,
+                  })
+                }
               />
             </div>
+
             <div className="form-group">
-              <label>Country</label>
+              <label>
+                Country
+              </label>
+
               <input
                 type="text"
                 placeholder="Country"
-                value={address.country || ""}
-                onChange={(e) => setAddress({ ...address, country: e.target.value })}
+                value={
+                  address.country ||
+                  ""
+                }
+                onChange={(
+                  e
+                ) =>
+                  setAddress({
+                    ...address,
+                    country:
+                      e.target
+                        .value,
+                  })
+                }
               />
             </div>
           </div>
@@ -999,59 +2090,168 @@ export default function CheckoutPage() {
 
       {step === 3 && (
         <div className="checkout-left">
-          <h2 className="panel-title" style={{ paddingBottom: "22px" }}>
-            Select payment method
+          <h2
+            className="panel-title"
+            style={{
+              paddingBottom:
+                "22px",
+            }}
+          >
+            Select payment
+            method
           </h2>
 
-          {orderError && <div className="alert alert--error">{orderError}</div>}
+          {orderError && (
+            <div className="alert alert--error">
+              {orderError}
+            </div>
+          )}
 
           <div className="payment-methods">
             <div
-              className={`payment-option ${paymentMethod === "card" ? "active" : ""}`}
-              onClick={() => setPaymentMethod("card")}
+              className={`payment-option ${
+                paymentMethod ===
+                "card"
+                  ? "active"
+                  : ""
+              }`}
+              onClick={() =>
+                !placing &&
+                setPaymentMethod(
+                  "card"
+                )
+              }
             >
-              <input type="radio" checked={paymentMethod === "card"} readOnly />
+              <input
+                type="radio"
+                checked={
+                  paymentMethod ===
+                  "card"
+                }
+                readOnly
+              />
+
               <span className="payment-option__icon">
                 <AiOutlineCreditCard />
               </span>
+
               <div className="payment-option__body">
-                <span className="payment-option__title">Credit / Debit Card</span>
-                <span className="payment-option__meta">via Razorpay</span>
+                <span className="payment-option__title">
+                  Credit /
+                  Debit Card
+                </span>
+
+                <span className="payment-option__meta">
+                  via Razorpay
+                </span>
               </div>
+
               <span className="payment-option__radio" />
             </div>
 
             <div
-              className={`payment-option ${paymentMethod === "upi" ? "active" : ""}`}
-              onClick={() => setPaymentMethod("upi")}
+              className={`payment-option ${
+                paymentMethod ===
+                "upi"
+                  ? "active"
+                  : ""
+              }`}
+              onClick={() =>
+                !placing &&
+                setPaymentMethod(
+                  "upi"
+                )
+              }
             >
-              <input type="radio" checked={paymentMethod === "upi"} readOnly />
+              <input
+                type="radio"
+                checked={
+                  paymentMethod ===
+                  "upi"
+                }
+                readOnly
+              />
+
               <span className="payment-option__icon">
                 <AiOutlineMobile />
               </span>
+
               <div className="payment-option__body">
-                <span className="payment-option__title">UPI</span>
-                <span className="payment-option__meta">via Razorpay</span>
+                <span className="payment-option__title">
+                  UPI
+                </span>
+
+                <span className="payment-option__meta">
+                  via Razorpay
+                </span>
               </div>
+
               <span className="payment-option__radio" />
             </div>
 
-            {paymentMethod === "cod" && (
+            {paymentMethod ===
+              "cod" && (
               <div className="payment-note payment-note--warning">
-                <p>💵 Cash on Delivery (Pay on Arrival)</p>
                 <p>
-                  Pay Grand Total (₹{grandTotal.toFixed(2)}) directly to the delivery partner —
-                  that includes Food ₹{foodTotal.toFixed(2)} + Delivery ₹{deliveryFee.toFixed(2)}.
+                  💵 Cash on
+                  Delivery
+                  (Pay on
+                  Arrival)
+                </p>
+
+                <p>
+                  Pay Grand
+                  Total (₹
+                  {grandTotal.toFixed(
+                    2
+                  )}
+                  ) directly
+                  to the
+                  delivery
+                  partner —
+                  that includes
+                  Food ₹
+                  {foodTotal.toFixed(
+                    2
+                  )}{" "}
+                  + Delivery ₹
+                  {deliveryFee.toFixed(
+                    2
+                  )}
+                  .
                 </p>
               </div>
             )}
 
-            {(paymentMethod === "card" || paymentMethod === "upi") && (
+            {(paymentMethod ===
+              "card" ||
+              paymentMethod ===
+                "upi") && (
               <div className="payment-note payment-note--success">
-                <p>💳 Pay Online Now: ₹{onlinePayable.toFixed(2)}</p>
                 <p>
-                  One single payment — Food ₹{foodTotal.toFixed(2)} + Delivery ₹{deliveryFee.toFixed(2)}
-                  {" "}are both included. Nothing more to pay on arrival.
+                  💳 Pay Online
+                  Now: ₹
+                  {onlinePayable.toFixed(
+                    2
+                  )}
+                </p>
+
+                <p>
+                  One single
+                  payment —
+                  Food ₹
+                  {foodTotal.toFixed(
+                    2
+                  )}{" "}
+                  + Delivery ₹
+                  {deliveryFee.toFixed(
+                    2
+                  )}{" "}
+                  are both
+                  included.
+                  Nothing more
+                  to pay on
+                  arrival.
                 </p>
               </div>
             )}
@@ -1067,58 +2267,175 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <h2>Order Placed Successfully!</h2>
+          <h2>
+            Order Placed
+            Successfully!
+          </h2>
+
           <p className="success-subtitle">
-            Thank you for shopping with us. We've received your order and are processing it.
+            Thank you for
+            shopping with us.
+            We've received
+            your order and
+            are processing it.
           </p>
+
+          {orderError && (
+            <div className="alert alert--error">
+              {orderError}
+            </div>
+          )}
 
           <div className="order-details-card">
             <div className="order-detail-row">
-              <span>Order Reference</span>
-              <strong>#{orderDetails?.orderId || orderDetails?._id || "N/A"}</strong>
-            </div>
-            <div className="order-detail-row">
-              <span>Payment Method</span>
-              <strong style={{ textTransform: "uppercase" }}>
-                {orderDetails?.paymentMethod || paymentMethod}
+              <span>
+                Order Reference
+              </span>
+
+              <strong>
+                #
+                {orderDetails?.orderId ||
+                  orderDetails?._id ||
+                  "N/A"}
               </strong>
             </div>
+
             <div className="order-detail-row">
-              <span>🛵 Delivery Fee</span>
-              <strong>₹{Number(orderDetails?.delivery ?? deliveryFee).toFixed(2)}</strong>
-            </div>
-            <div className="order-detail-row">
-              <span>📦 Food Total</span>
-              <strong>₹{Number(orderDetails?.subtotal ?? subtotal).toFixed(2)}</strong>
-            </div>
-            <div className="order-detail-row" style={{ borderTop: '2px solid #e5e7eb', paddingTop: '10px', marginTop: '4px' }}>
-              <span style={{ fontWeight: 700 }}>
-                {(orderDetails?.paymentMethod || paymentMethod) === "cod"
-                  ? "💰 Grand Total (COD - Pay to Driver)"
-                  : "💰 Grand Total"}
+              <span>
+                Payment Method
               </span>
+
+              <strong
+                style={{
+                  textTransform:
+                    "uppercase",
+                }}
+              >
+                {orderDetails?.paymentMethod ||
+                  paymentMethod}
+              </strong>
+            </div>
+
+            <div className="order-detail-row">
+              <span>
+                🛵 Delivery
+                Fee
+              </span>
+
+              <strong>
+                ₹
+                {Number(
+                  orderDetails?.delivery ??
+                    deliveryFee
+                ).toFixed(2)}
+              </strong>
+            </div>
+
+            <div className="order-detail-row">
+              <span>
+                📦 Food Total
+              </span>
+
+              <strong>
+                ₹
+                {Number(
+                  orderDetails?.subtotal ??
+                    subtotal
+                ).toFixed(2)}
+              </strong>
+            </div>
+
+            <div
+              className="order-detail-row"
+              style={{
+                borderTop:
+                  "2px solid #e5e7eb",
+                paddingTop:
+                  "10px",
+                marginTop:
+                  "4px",
+              }}
+            >
+              <span
+                style={{
+                  fontWeight: 700,
+                }}
+              >
+                💰 Grand Total
+              </span>
+
               <strong className="amount-highlight">
-                ₹{Number(
+                ₹
+                {Number(
                   orderDetails
-                    ? Number(orderDetails.subtotal || 0) + Number(orderDetails.delivery || 0) - Number(orderDetails.discount || 0)
+                    ? Number(
+                        orderDetails.subtotal ||
+                          0
+                      ) +
+                          Number(
+                            orderDetails.delivery ||
+                              0
+                          ) -
+                          Number(
+                            orderDetails.discount ||
+                              0
+                          )
                     : grandTotal
                 ).toFixed(2)}
               </strong>
             </div>
-            {(orderDetails?.paymentMethod || paymentMethod) !== "cod" && (
-              <div className="order-detail-row" style={{ color: '#6b7280', fontSize: '12px' }}>
-                <span>✅ Paid Online (Food + Delivery)</span>
-                <span>₹{Number(orderDetails?.total ?? onlinePayable).toFixed(2)}</span>
+
+            {(orderDetails?.paymentMethod ||
+              paymentMethod) !==
+              "cod" && (
+              <div
+                className="order-detail-row"
+                style={{
+                  color:
+                    "#6b7280",
+                  fontSize:
+                    "12px",
+                }}
+              >
+                <span>
+                  ✅ Paid Online
+                  (Food +
+                  Delivery)
+                </span>
+
+                <span>
+                  ₹
+                  {Number(
+                    orderDetails?.total ??
+                      onlinePayable
+                  ).toFixed(
+                    2
+                  )}
+                </span>
               </div>
             )}
           </div>
 
           <div className="success-actions">
-            <button className="primary-btn" onClick={() => navigate("/orders")}>
+            <button
+              className="primary-btn"
+              onClick={() =>
+                navigate(
+                  "/orders"
+                )
+              }
+            >
               View My Orders
             </button>
-            <button className="secondary-btns" onClick={() => navigate("/")}>
-              Continue Shopping
+
+            <button
+              className="secondary-btns"
+              onClick={() =>
+                navigate("/")
+              }
+            >
+              Continue
+              Shopping
             </button>
           </div>
         </div>
@@ -1126,17 +2443,36 @@ export default function CheckoutPage() {
 
       {step !== 4 && (
         <div className="checkout-right">
-          <h3>Your Order</h3>
+          <h3>
+            Your Order
+          </h3>
 
           <div className="price-row">
-            <span>Food Items Subtotal</span>
-            <span>₹ {subtotal.toFixed(2)}</span>
+            <span>
+              Food Items
+              Subtotal
+            </span>
+
+            <span>
+              ₹{" "}
+              {subtotal.toFixed(
+                2
+              )}
+            </span>
           </div>
 
           {discount > 0 && (
             <div className="price-row discount-row">
-              <span>Coupon Discount</span>
-              <span>- ₹ {discount.toFixed(2)}</span>
+              <span>
+                Coupon Discount
+              </span>
+
+              <span>
+                - ₹{" "}
+                {discount.toFixed(
+                  2
+                )}
+              </span>
             </div>
           )}
 
@@ -1144,20 +2480,38 @@ export default function CheckoutPage() {
             <div className="delivery-card">
               <div className="delivery-card__row">
                 <span className="delivery-card__label">
-                  🛵 Delivery Fee {distanceInfo ? `(${distanceInfo.distanceKm} km)` : ""}
+                  🛵 Delivery Fee{" "}
+                  {distanceInfo
+                    ? `(${distanceInfo.distanceKm} km)`
+                    : ""}
                 </span>
-                {deliveryFee > 0 ? (
+
+                {deliveryFee >
+                0 ? (
                   <span className="delivery-card__amount">
-                    {deliveryLoading ? "..." : `₹ ${deliveryFee.toFixed(2)}`}
+                    {deliveryLoading
+                      ? "..."
+                      : `₹ ${deliveryFee.toFixed(
+                          2
+                        )}`}
                   </span>
                 ) : (
-                  <span className="delivery-card__amount free-delivery-badge">FREE</span>
+                  <span className="delivery-card__amount free-delivery-badge">
+                    FREE
+                  </span>
                 )}
               </div>
-              <p className="delivery-card__eta">
-                ⏱️ Est. {distanceInfo?.duration || "25 mins"} · <strong>Included in your total</strong>
-              </p>
 
+              <p className="delivery-card__eta">
+                ⏱️ Est.{" "}
+                {distanceInfo?.duration ||
+                  "25 mins"}{" "}
+                ·{" "}
+                <strong>
+                  Included in your
+                  total
+                </strong>
+              </p>
             </div>
           )}
 
@@ -1166,11 +2520,25 @@ export default function CheckoutPage() {
               <div className="coupon-applied">
                 <div>
                   <span className="coupon-applied__code">
-                    <AiOutlineTag /> {appliedCoupon.code}
+                    <AiOutlineTag />{" "}
+                    {
+                      appliedCoupon.code
+                    }
                   </span>
-                  <p className="coupon-applied__note">Coupon applied successfully!</p>
+
+                  <p className="coupon-applied__note">
+                    Coupon applied
+                    successfully!
+                  </p>
                 </div>
-                <button onClick={handleRemoveCoupon} className="coupon-remove">
+
+                <button
+                  onClick={
+                    handleRemoveCoupon
+                  }
+                  className="coupon-remove"
+                  disabled={placing}
+                >
                   Remove
                 </button>
               </div>
@@ -1181,56 +2549,125 @@ export default function CheckoutPage() {
                     type="text"
                     placeholder="Enter Coupon Code"
                     className="coupon-input"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                    disabled={couponLoading}
+                    value={
+                      couponCode
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      setCouponCode(
+                        e.target.value.toUpperCase()
+                      )
+                    }
+                    disabled={
+                      couponLoading ||
+                      placing
+                    }
                   />
+
                   <button
                     className="apply-coupon-btn"
-                    onClick={() => applyCouponHandler()}
-                    disabled={couponLoading || !couponCode.trim()}
+                    onClick={() =>
+                      applyCouponHandler()
+                    }
+                    disabled={
+                      couponLoading ||
+                      placing ||
+                      !couponCode.trim()
+                    }
                   >
-                    {couponLoading ? "..." : "Apply"}
+                    {couponLoading
+                      ? "..."
+                      : "Apply"}
                   </button>
                 </div>
 
-                {availableCoupons.length > 0 && (
+                {availableCoupons.length >
+                  0 && (
                   <div className="coupon-toggle-wrapper">
                     <button
                       type="button"
-                      onClick={() => setShowCouponList((prev) => !prev)}
+                      onClick={() =>
+                        !placing &&
+                        setShowCouponList(
+                          (
+                            prev
+                          ) =>
+                            !prev
+                        )
+                      }
                       className="coupon-toggle"
                     >
                       <span>
-                        <AiOutlineTag /> View Available Coupons ({availableCoupons.length})
+                        <AiOutlineTag />{" "}
+                        View
+                        Available
+                        Coupons (
+                        {
+                          availableCoupons.length
+                        }
+                        )
                       </span>
-                      {showCouponList ? <AiOutlineUp /> : <AiOutlineDown />}
+
+                      {showCouponList ? (
+                        <AiOutlineUp />
+                      ) : (
+                        <AiOutlineDown />
+                      )}
                     </button>
 
                     {showCouponList && (
                       <div className="coupon-list">
-                        {availableCoupons.map((c) => (
-                          <div key={c._id || c.code} className="coupon-item">
-                            <div>
-                              <span className="coupon-item__code">{c.code}</span>
-                              <p className="coupon-item__desc">
-                                {c.discountType === "percentage"
-                                  ? `${c.discountValue}% OFF ${c.maxDiscountAmount ? `(Up to ₹${c.maxDiscountAmount})` : ""
-                                  }`
-                                  : `₹${c.discountValue} OFF`}
-                                {c.minOrderAmount ? ` on orders above ₹${c.minOrderAmount}` : ""}
-                              </p>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => applyCouponHandler(c.code)}
-                              disabled={couponLoading}
-                              className="coupon-item__apply"
+                        {availableCoupons.map(
+                          (c) => (
+                            <div
+                              key={
+                                c._id ||
+                                c.code
+                              }
+                              className="coupon-item"
                             >
-                              Apply
-                            </button>
-                          </div>
-                        ))}
+                              <div>
+                                <span className="coupon-item__code">
+                                  {
+                                    c.code
+                                  }
+                                </span>
+
+                                <p className="coupon-item__desc">
+                                  {c.discountType ===
+                                  "percentage"
+                                    ? `${c.discountValue}% OFF ${
+                                        c.maxDiscountAmount
+                                          ? `(Up to ₹${c.maxDiscountAmount})`
+                                          : ""
+                                      }`
+                                    : `₹${c.discountValue} OFF`}
+
+                                  {c.minOrderAmount
+                                    ? ` on orders above ₹${c.minOrderAmount}`
+                                    : ""}
+                                </p>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  applyCouponHandler(
+                                    c.code
+                                  )
+                                }
+                                disabled={
+                                  couponLoading ||
+                                  placing
+                                }
+                                className="coupon-item__apply"
+                              >
+                                Apply
+                              </button>
+                            </div>
+                          )
+                        )}
                       </div>
                     )}
                   </div>
@@ -1238,50 +2675,101 @@ export default function CheckoutPage() {
               </>
             )}
 
-            {couponError && <p className="coupon-error">{couponError}</p>}
+            {couponError && (
+              <p className="coupon-error">
+                {
+                  couponError
+                }
+              </p>
+            )}
           </div>
 
           <hr />
 
           <div className="price-total">
             <div>
-              <span className="price-total__label">GRAND TOTAL</span>
+              <span className="price-total__label">
+                GRAND TOTAL
+              </span>
+
               <p className="price-total__sub">
-                Food ₹{foodTotal.toFixed(2)} + Delivery ₹{deliveryFee.toFixed(2)}
-                {paymentMethod !== "cod" ? " · Paid together online" : " · Paid together on delivery"}
+                Food ₹
+                {foodTotal.toFixed(
+                  2
+                )}{" "}
+                + Delivery ₹
+                {deliveryFee.toFixed(
+                  2
+                )}
+                {paymentMethod !==
+                "cod"
+                  ? " · Paid together online"
+                  : " · Paid together on delivery"}
               </p>
             </div>
-            <span className="price-total__amount">₹{grandTotal.toFixed(2)}</span>
+
+            <span className="price-total__amount">
+              ₹
+              {grandTotal.toFixed(
+                2
+              )}
+            </span>
           </div>
 
           <div className="summary-action">
             {step === 1 && (
               <button
                 className="confirm-order-btn"
-                disabled={cartItems.length === 0}
-                onClick={() => setStep(2)}
+                disabled={
+                  cartItems.length ===
+                  0
+                }
+                onClick={() =>
+                  setStep(2)
+                }
               >
-                Continue to Address
+                Continue to
+                Address
               </button>
             )}
 
             {step === 2 && (
               <button
                 className="confirm-order-btn"
-                disabled={!isAddressValid()}
-                onClick={() => setStep(3)}
+                disabled={
+                  !isAddressValid()
+                }
+                onClick={() =>
+                  setStep(3)
+                }
               >
-                Continue to Payment
+                Continue to
+                Payment
               </button>
             )}
 
             {step === 3 && (
-              <button className="confirm-order-btn" onClick={handlePlaceOrder} disabled={placing}>
+              <button
+                className="confirm-order-btn"
+                onClick={
+                  handlePlaceOrder
+                }
+                disabled={
+                  placing ||
+                  cartItems.length ===
+                    0
+                }
+              >
                 {placing
                   ? "Processing..."
-                  : paymentMethod === "cod"
-                    ? `Place Order — Pay ₹${grandTotal.toFixed(2)} on Delivery`
-                    : `Pay ₹${onlinePayable.toFixed(2)} Online`}
+                  : paymentMethod ===
+                    "cod"
+                  ? `Place Order — Pay ₹${grandTotal.toFixed(
+                      2
+                    )} on Delivery`
+                  : `Pay ₹${onlinePayable.toFixed(
+                      2
+                    )} Online`}
               </button>
             )}
           </div>
