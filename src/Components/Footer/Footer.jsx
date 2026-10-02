@@ -252,7 +252,6 @@ const Footer = () => {
 
           <ul className={`footer-collapsible ${openSections.contact ? "open" : ""}`}>
             <li><FaPhoneAlt className="footer-inline-icon" /><span>+91 70805 12292</span></li>
-            <li><FaPhoneAlt className="footer-inline-icon" /><span>97602 48776 — For Support Contact</span></li>
             <li><FaEnvelope className="footer-inline-icon" /><span>shyamnamkeenandbakers@gmail.com</span></li>
             <li><FaMapMarkerAlt className="footer-inline-icon" /><span>Lucknow — Office | Store | Workshop</span></li>
           </ul>
@@ -300,7 +299,7 @@ const Footer = () => {
           Copyright 2025 © Shyam Namkeen & Bakers. All Rights Reserved.
         </p>
 
-        <p className="footer-copyright">Powered by Designer Birds.</p>
+        <p className="footer-copyright">Powered by DesignerBirds.</p><p className="footer-copyright">For Support Contact 97602 48776</p>
 
         <p className="footer-credit">
           Design and Developed by{" "}
