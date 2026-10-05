@@ -387,7 +387,7 @@ const Navbar = () => {
             onClick={() => {
               const chatUrl = isAuthenticated
                 ? "https://dtalkbusiness.designerbirds.com/chat"
-                : "https://dtalkbusiness.designerbirds.com";
+                : "https://dtalkbusiness.designerbirds.com/";
               window.open(chatUrl, "_blank", "noopener,noreferrer");
             }}
             style={{ cursor: "pointer" }}
