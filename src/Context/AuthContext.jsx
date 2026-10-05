@@ -52,20 +52,10 @@ export const AuthProvider = ({ children }) => {
                     logout();
                 }
             } catch (err) {
-                // If user was deleted from DB (401, 404, 403, or user-not-found error message)
-                const status = err.response?.status;
-                const msg = (err.response?.data?.message || "").toLowerCase();
-
-                if (
-                    status === 401 ||
-                    status === 404 ||
-                    status === 403 ||
-                    msg.includes("user not found") ||
-                    msg.includes("not found") ||
-                    msg.includes("invalid") ||
-                    msg.includes("unauthorized")
-                ) {
-                    console.warn("User deleted from DB or session invalid. Logging out...");
+                // If backend responded with ANY HTTP error (401, 404, 403, 500, etc.)
+                // meaning user is deleted from DB or token is invalid
+                if (err.response) {
+                    console.warn("User verification failed from server (Status:", err.response.status, "). Logging out...");
                     logout();
                 }
             } finally {

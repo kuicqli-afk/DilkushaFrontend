@@ -97,11 +97,16 @@ axios.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Global Axios response interceptor to clear auth on 401 Unauthorized
+// Global Axios response interceptor to clear auth on 401 Unauthorized or auth failure
 axios.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error?.response?.status === 401) {
+    if (
+      error?.response?.status === 401 ||
+      error?.response?.status === 403 ||
+      (error?.response?.status === 404 && error?.config?.url?.includes("/user/profile")) ||
+      (error?.response?.status === 500 && error?.config?.url?.includes("/user/profile"))
+    ) {
       localStorage.removeItem("user");
       localStorage.removeItem("token");
       window.dispatchEvent(new Event("auth-logout"));
