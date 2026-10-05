@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("token");
         setUserState(null);
         setTokenState(null);
+        window.dispatchEvent(new CustomEvent("follow-status-changed", { detail: { following: false } }));
     };
 
     // Auto verify user against DB on initial mount
@@ -33,6 +34,8 @@ export const AuthProvider = ({ children }) => {
         const verifyUser = async () => {
             const savedToken = localStorage.getItem("token");
             if (!savedToken) {
+                setUserState(null);
+                setTokenState(null);
                 setLoading(false);
                 return;
             }
@@ -52,12 +55,9 @@ export const AuthProvider = ({ children }) => {
                     logout();
                 }
             } catch (err) {
-                // If backend responded with ANY HTTP error (401, 404, 403, 500, etc.)
-                // meaning user is deleted from DB or token is invalid
-                if (err.response) {
-                    console.warn("User verification failed from server (Status:", err.response.status, "). Logging out...");
-                    logout();
-                }
+                // If ANY error occurs (user deleted in DB, 500, 401, 404, CORS, invalid token)
+                console.warn("User verification failed from server. Logging out stale user...");
+                logout();
             } finally {
                 setLoading(false);
             }
@@ -66,8 +66,7 @@ export const AuthProvider = ({ children }) => {
         verifyUser();
 
         const handleAuthLogout = () => {
-            setUserState(null);
-            setTokenState(null);
+            logout();
         };
         window.addEventListener("auth-logout", handleAuthLogout);
         return () => window.removeEventListener("auth-logout", handleAuthLogout);
