@@ -23,8 +23,6 @@ const BASE_URL =
   (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
   "https://backend.shyamnamkeenandbakers.online/api";
 
-// Same key Cart.jsx writes to when the customer taps "Detect my location"
-// there — reading it here means they don't have to detect it twice.
 const DELIVERY_LOCATION_KEY = "cart_delivery_location";
 
 const STEP_DEFINITIONS = [
@@ -34,8 +32,6 @@ const STEP_DEFINITIONS = [
   { id: 4, label: "Confirm", icon: AiOutlineCheckCircle },
 ];
 
-// Returns a plain string image URL, no matter whether the source field is
-// a string or an array (Cloudinary sometimes hands back arrays).
 const toImageString = (val) => {
   if (Array.isArray(val)) return val[0] || "";
   return val || "";
@@ -49,11 +45,7 @@ const getItemImage = (item) =>
   toImageString(item.product?.image) ||
   "";
 
-// SINGLE source of truth for "what the customer actually pays per unit".
-// Same helper used on the Cart page — falls back to item.price only if no
-// offer price exists. Every price on this page (the Step-1 line items, the
-// subtotal, the coupon discount, and the order payload sent to the backend)
-// now runs through this one function instead of mixing .price and .offer.
+
 const getUnitPrice = (item) => {
   const offer = Number(item.offer);
   const price = Number(item.price);
@@ -69,20 +61,12 @@ const factorial = (n) => {
   return result;
 };
 
-// Final delivery fee = distance-based baseFare (from the API below,
-// NOT a static number) divided by the factorial of the product count:
-// fee(n) = baseFare / n!  →  e.g. base=50 → 50, 25, 8.33, 2.08, 0.42, ~0 ...
-// Negligible amounts (<₹0.5) are shown as FREE.
 const getDynamicDeliveryFee = (baseFare, productCount) => {
   const count = Math.max(1, productCount);
   const fee = baseFare / factorial(count);
   return fee < 0.5 ? 0 : fee;
 };
 
-// 🆕 Try to reserve stock for every item with a valid productId.
-// Returns { ok: true } if all succeeded, or { ok: false, failed: [...] } if
-// any item didn't have enough stock — in which case whatever DID succeed
-// gets rolled back automatically, so nothing is left half-decremented.
 const reserveStockForOrder = async (items) => {
   const reservable = items.filter((item) => item.productId);
   const succeeded = [];

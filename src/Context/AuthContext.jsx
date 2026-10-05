@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
 const API_URL =
@@ -19,7 +19,55 @@ export const AuthProvider = ({ children }) => {
     });
 
     const [token, setTokenState] = useState(() => localStorage.getItem("token") || null);
-    const [loading] = useState(false);
+    const [loading, setLoading] = useState(() => Boolean(localStorage.getItem("token")));
+
+    const logout = () => {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        setUserState(null);
+        setTokenState(null);
+    };
+
+    // Auto verify user against DB on initial mount
+    useEffect(() => {
+        const verifyUser = async () => {
+            const savedToken = localStorage.getItem("token");
+            if (!savedToken) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const res = await axios.get(`${API_URL}/user/profile`, {
+                    headers: { Authorization: `Bearer ${savedToken}` },
+                });
+
+                if (res.data?.success && res.data?.user) {
+                    setUserState(res.data.user);
+                    localStorage.setItem("user", JSON.stringify(res.data.user));
+                } else if (res.data && !res.data.success && !res.data.user) {
+                    logout();
+                }
+            } catch (err) {
+                // If user was deleted from DB (401 Unauthorized or 404 Not Found)
+                if (err.response?.status === 401 || err.response?.status === 404) {
+                    console.warn("User account deleted or token invalid. Logging out...");
+                    logout();
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        verifyUser();
+
+        const handleAuthLogout = () => {
+            setUserState(null);
+            setTokenState(null);
+        };
+        window.addEventListener("auth-logout", handleAuthLogout);
+        return () => window.removeEventListener("auth-logout", handleAuthLogout);
+    }, []);
 
     // Dynamic boolean check: True when both token and user exist
     const isAuthenticated = Boolean(token && user);
@@ -39,13 +87,6 @@ export const AuthProvider = ({ children }) => {
                 console.warn("Auto-follow on login error:", err);
             }
         }
-    };
-
-    const logout = () => {
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
-        setUserState(null);
-        setTokenState(null);
     };
 
     // Safe Profile/User updater

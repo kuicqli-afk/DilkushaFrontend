@@ -97,6 +97,19 @@ axios.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Global Axios response interceptor to clear auth on 401 Unauthorized
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      window.dispatchEvent(new Event("auth-logout"));
+    }
+    return Promise.reject(error);
+  }
+);
+
 function App() {
   return (
     <AuthProvider>
