@@ -157,7 +157,7 @@ function AppContent() {
         // Fix top category 
         const pinnedCategories = categoryData.filter((cat) => cat.isPinned);
         const unpinnedCategories = categoryData.filter((cat) => !cat.isPinned);
-
+        
         const orderedCategories = [...pinnedCategories, ...shuffleArray(unpinnedCategories)];
         const names = orderedCategories.map((cat) => cat.name || cat.title);
         setCategories(names); // 🆕 random category-section order every page load

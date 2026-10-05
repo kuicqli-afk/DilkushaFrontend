@@ -382,12 +382,17 @@ const Navbar = () => {
         {/* RIGHT : Vegetarian toggle + Products/Follow | Account | Cart */}
         <div className="nav-right">
 
-          <span className="chat" onClick={() => {
-            window.open("https://dtalkbusiness.designerbirds.com/chat",
-              "_blank",
-              "noopener,noreferrer"
-            );
-          }} style={{ cursor: "pointer" }}>
+          <span
+            className="chat"
+            onClick={() => {
+              const chatUrl = isAuthenticated
+                ? "https://dtalkbusiness.designerbirds.com/chat"
+                : "https://dtalkbusiness.designerbirds.com";
+              window.open(chatUrl, "_blank", "noopener,noreferrer");
+            }}
+            style={{ cursor: "pointer" }}
+            title={isAuthenticated ? "Open Chat" : "Login to Chat"}
+          >
             <img src={chatIcon} alt="Chat" />
           </span>
 
