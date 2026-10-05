@@ -432,7 +432,7 @@ const Navbar = () => {
                 <div className="user-profile-badge">
                   <FaUser className="user-icon" />
                   <span className="user-name">
-                    {user?.name.slice(0, 15) || user?.phone || "Account"}
+                    {(user?.name || user?.phone || "Account").slice(0, 15)}
                   </span>
                   <FaChevronDown className="dropdown-arrow" />
                 </div>

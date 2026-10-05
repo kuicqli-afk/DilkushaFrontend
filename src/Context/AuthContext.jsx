@@ -42,16 +42,30 @@ export const AuthProvider = ({ children }) => {
                     headers: { Authorization: `Bearer ${savedToken}` },
                 });
 
-                if (res.data?.success && res.data?.user) {
-                    setUserState(res.data.user);
-                    localStorage.setItem("user", JSON.stringify(res.data.user));
-                } else if (res.data && !res.data.success && !res.data.user) {
+                const fetchedUser = res.data?.user || res.data?.data || (res.data?._id ? res.data : null);
+
+                if (fetchedUser && (fetchedUser._id || fetchedUser.phone)) {
+                    setUserState(fetchedUser);
+                    localStorage.setItem("user", JSON.stringify(fetchedUser));
+                } else {
+                    console.warn("User data not found in response. Logging out...");
                     logout();
                 }
             } catch (err) {
-                // If user was deleted from DB (401 Unauthorized or 404 Not Found)
-                if (err.response?.status === 401 || err.response?.status === 404) {
-                    console.warn("User account deleted or token invalid. Logging out...");
+                // If user was deleted from DB (401, 404, 403, or user-not-found error message)
+                const status = err.response?.status;
+                const msg = (err.response?.data?.message || "").toLowerCase();
+
+                if (
+                    status === 401 ||
+                    status === 404 ||
+                    status === 403 ||
+                    msg.includes("user not found") ||
+                    msg.includes("not found") ||
+                    msg.includes("invalid") ||
+                    msg.includes("unauthorized")
+                ) {
+                    console.warn("User deleted from DB or session invalid. Logging out...");
                     logout();
                 }
             } finally {
