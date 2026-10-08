@@ -5,12 +5,16 @@ import {
   AiOutlineCheckCircle,
   AiOutlineClockCircle,
   AiOutlineShoppingCart,
-  AiOutlineCar,
   AiOutlineHome,
   AiOutlineCloseCircle,
   AiOutlineReload,
+  AiFillStar,
+  AiOutlinePhone,
+  AiOutlineInbox,
+  AiOutlineTag,
+  AiOutlineWallet,
 } from "react-icons/ai";
-
+import { FaMotorcycle } from "react-icons/fa";
 const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 const POLL_INTERVAL = 10000;
 
@@ -27,7 +31,7 @@ const TRACKING_STEPS = [
   { key: "Pending", label: "Order Placed", icon: AiOutlineShoppingCart },
   { key: "Confirmed", label: "Confirmed", icon: AiOutlineCheckCircle },
   { key: "Preparing", label: "Preparing", icon: AiOutlineClockCircle },
-  { key: "Out for Delivery", label: "Out for Delivery", icon: AiOutlineCar },
+  { key: "Out for Delivery", label: "Out for Delivery", icon: FaMotorcycle },
   { key: "Delivered", label: "Delivered", icon: AiOutlineHome },
 ];
 
@@ -134,10 +138,38 @@ function OrderTracker({ status }) {
   );
 }
 
+const getDriverInitials = (name = "Driver") => {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join("");
+};
+
+const formatDriverRating = (rating) => {
+  const value = Number(rating);
+  return Number.isFinite(value) ? value.toFixed(1) : "New";
+};
+
+const formatDriverAcceptedAt = (date) => {
+  if (!date) return "Just now";
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) {
+    return "Just now";
+  }
+  return parsed.toLocaleString("en-IN", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 function OrderCard({ order, onOpenCancel, cancelling }) {
   const [expanded, setExpanded] = useState(false);
   const statusStyle = STATUS_COLORS[order.status] || STATUS_COLORS.Pending;
-  const canCancel = !["Delivered", "Cancelled"].includes(order.status);
+  const canCancel = ["Pending", "Confirmed"].includes(order.status);
 
   return (
     <div
@@ -181,6 +213,241 @@ function OrderCard({ order, onOpenCancel, cancelling }) {
         <OrderTracker status={order.status} />
       </div>
 
+      {/* DRIVER INFORMATION */}
+      {order.driverAssigned && order.driver?.driverId ? (
+        <div
+          style={{
+            margin: "0 20px 16px",
+            padding: "14px",
+            borderRadius: "14px",
+            background: "linear-gradient(135deg, #f8fbff, #f1f7ff)",
+            border: "1px solid #dcecff",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "12px",
+            }}
+          >
+            {/* DRIVER PROFILE */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "11px",
+                minWidth: 0,
+              }}
+            >
+              {order.driver.profilePhoto ? (
+                <img
+                  src={order.driver.profilePhoto}
+                  alt={order.driver.name || "Driver"}
+                  style={{
+                    width: "52px",
+                    height: "52px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "2px solid #fff",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+                    flexShrink: 0,
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "52px",
+                    height: "52px",
+                    borderRadius: "50%",
+                    background: "#e6f0ff",
+                    color: "#2563eb",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "16px",
+                    fontWeight: 800,
+                    flexShrink: 0,
+                  }}
+                >
+                  {getDriverInitials(order.driver.name)}
+                </div>
+              )}
+
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "7px",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "14px",
+                      fontWeight: 800,
+                      color: "#1f2937",
+                    }}
+                  >
+                    {order.driver.name || "Delivery Partner"}
+                  </p>
+
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "3px",
+                      padding: "3px 7px",
+                      borderRadius: "20px",
+                      background: "#fff7df",
+                      color: "#b77900",
+                      fontSize: "10px",
+                      fontWeight: 800,
+                    }}
+                  >
+                    <AiFillStar size={11} /> {formatDriverRating(order.driver.rating)}
+                  </span>
+                </div>
+
+                <p
+                  style={{
+                    margin: "4px 0 0",
+                    fontSize: "11px",
+                    color: "#6b7280",
+                  }}
+                >
+                  Your delivery partner
+                </p>
+
+                <p
+                  style={{
+                    margin: "4px 0 0",
+                    fontSize: "11px",
+                    color: "#6b7280",
+                  }}
+                >
+                  {order.driver.vehicle || "Bike"}
+                  {order.driver.vehicleMake ? ` · ${order.driver.vehicleMake}` : ""}
+                  {order.driver.vehicleModel ? ` ${order.driver.vehicleModel}` : ""}
+                </p>
+              </div>
+            </div>
+
+            {/* CALL BUTTON */}
+            {order.driver.phone && (
+              <a
+                href={`tel:${order.driver.phone}`}
+                style={{
+                  width: "38px",
+                  height: "38px",
+                  borderRadius: "50%",
+                  background: "#0CA678",
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  textDecoration: "none",
+                  fontSize: "17px",
+                  flexShrink: 0,
+                }}
+                title="Call driver"
+              >
+                <AiOutlinePhone size={18} />
+              </a>
+            )}
+          </div>
+
+          {/* DRIVER DETAILS */}
+          <div
+            style={{
+              marginTop: "13px",
+              paddingTop: "12px",
+              borderTop: "1px solid #dcecff",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "10px",
+            }}
+          >
+            <div>
+              <p style={{ margin: 0, fontSize: "9px", color: "#9ca3af", textTransform: "uppercase", fontWeight: 700 }}>
+                Vehicle
+              </p>
+              <p style={{ margin: "3px 0 0", fontSize: "11px", color: "#374151", fontWeight: 700 }}>
+                {order.driver.vehicle || "Bike"}
+              </p>
+            </div>
+
+            <div>
+              <p style={{ margin: 0, fontSize: "9px", color: "#9ca3af", textTransform: "uppercase", fontWeight: 700 }}>
+                Number Plate
+              </p>
+              <p style={{ margin: "3px 0 0", fontSize: "11px", color: "#374151", fontWeight: 800, letterSpacing: "0.4px" }}>
+                {order.driver.numberPlate || "Not available"}
+              </p>
+            </div>
+
+            <div>
+              <p style={{ margin: 0, fontSize: "9px", color: "#9ca3af", textTransform: "uppercase", fontWeight: 700 }}>
+                Phone
+              </p>
+              <p style={{ margin: "3px 0 0", fontSize: "11px", color: "#374151", fontWeight: 700 }}>
+                {order.driver.phone || "Not available"}
+              </p>
+            </div>
+
+            <div>
+              <p style={{ margin: 0, fontSize: "9px", color: "#9ca3af", textTransform: "uppercase", fontWeight: 700 }}>
+                Assigned
+              </p>
+              <p style={{ margin: "3px 0 0", fontSize: "11px", color: "#374151", fontWeight: 700 }}>
+                {formatDriverAcceptedAt(order.driver.acceptedAt)}
+              </p>
+            </div>
+          </div>
+
+          {/* DELIVERY STATUS */}
+          <div
+            style={{
+              marginTop: "12px",
+              padding: "8px 10px",
+              borderRadius: "9px",
+              background: "#e8f8f1",
+              color: "#0f7a4f",
+              fontSize: "11px",
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            <FaMotorcycle size={15} /> {order.deliveryStatus || "Driver assigned"}
+          </div>
+        </div>
+      ) : (
+        !["Delivered", "Cancelled"].includes(order.status) && (
+          <div
+            style={{
+              margin: "0 20px 16px",
+              padding: "12px 14px",
+              borderRadius: "12px",
+              background: "#fff9ed",
+              border: "1px solid #f5dfb0",
+              color: "#8a6500",
+              fontSize: "11.5px",
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            <FaMotorcycle size={15} /> We're finding a delivery partner for your order.
+          </div>
+        )
+      )}
+
       {/* ITEMS SUMMARY (collapsed) */}
       <div
         onClick={() => setExpanded((e) => !e)}
@@ -218,18 +485,29 @@ function OrderCard({ order, onOpenCancel, cancelling }) {
 
           <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px dashed #e5d3de", fontSize: "12px", color: "#888" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
-              <span>📦 Food Subtotal</span><span style={{ fontWeight: 600, color: '#444' }}>₹ {Number(order.subtotal || 0).toFixed(2)}</span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                <AiOutlineInbox size={14} color="#666" /> Food Subtotal
+              </span>
+              <span style={{ fontWeight: 600, color: '#444' }}>₹ {Number(order.subtotal || 0).toFixed(2)}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
-              <span>🛵 Delivery Fee</span><span style={{ fontWeight: 600, color: '#444' }}>₹ {Number(order.delivery || 0).toFixed(2)}</span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                <FaMotorcycle size={14} color="#666" /> Delivery Fee
+              </span>
+              <span style={{ fontWeight: 600, color: '#444' }}>₹ {Number(order.delivery || 0).toFixed(2)}</span>
             </div>
             {order.discount > 0 && (
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
-                <span>🎟️ Coupon Discount</span><span style={{ fontWeight: 600, color: '#16a34a' }}>- ₹ {Number(order.discount || 0).toFixed(2)}</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                  <AiOutlineTag size={14} color="#16a34a" /> Coupon Discount
+                </span>
+                <span style={{ fontWeight: 600, color: '#16a34a' }}>- ₹ {Number(order.discount || 0).toFixed(2)}</span>
               </div>
             )}
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px", paddingTop: "6px", borderTop: "1.5px solid #e5d3de" }}>
-              <span style={{ fontWeight: 700, color: '#1a1a1a', fontSize: '13px' }}>💰 Grand Total</span>
+              <span style={{ fontWeight: 700, color: '#1a1a1a', fontSize: '13px', display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                <AiOutlineWallet size={15} color="#d81324" /> Grand Total
+              </span>
               <span style={{ fontWeight: 700, color: '#d81324', fontSize: '14px' }}>₹ {(Number(order.subtotal || 0) + Number(order.delivery || 0) - Number(order.discount || 0)).toFixed(2)}</span>
             </div>
           </div>
@@ -241,7 +519,7 @@ function OrderCard({ order, onOpenCancel, cancelling }) {
             </p>
           </div>
 
-          {/* ✅ Naya — cancel reason dikhaana (agar cancelled ho) */}
+          {/* Cancel Reason Display */}
           {order.status === "Cancelled" && order.cancelReason && (
             <div style={{
               marginTop: "10px",
@@ -309,13 +587,11 @@ export default function OrderHistory() {
   const [error, setError] = useState("");
   const [cancellingId, setCancellingId] = useState(null);
 
-  // ✅ Naya — cancel reason modal state
   const [cancelModalOrderId, setCancelModalOrderId] = useState(null);
   const [cancelReasonInput, setCancelReasonInput] = useState("");
 
   const fetchOrders = useCallback((silent = false) => {
     const guestId = getGuestId();
-
     if (!silent) setLoading(true);
 
     axios
@@ -335,7 +611,6 @@ export default function OrderHistory() {
 
   useEffect(() => {
     fetchOrders();
-
     const interval = setInterval(() => {
       fetchOrders(true);
     }, POLL_INTERVAL);
@@ -349,13 +624,11 @@ export default function OrderHistory() {
     setTimeout(() => setRefreshing(false), 500);
   };
 
-  // ✅ Naya — modal khoolo, reset reason
   const openCancelModal = (orderId) => {
     setCancelModalOrderId(orderId);
     setCancelReasonInput("");
   };
 
-  // ✅ Naya — confirm cancel, reason ke saath API call
   const confirmCancel = async () => {
     if (!cancelReasonInput.trim()) {
       alert("Please select or enter a reason.");
@@ -458,7 +731,6 @@ export default function OrderHistory() {
           cancelling={cancellingId === order.orderId}
         />
       ))}
-
 
       {cancelModalOrderId && (
         <div
