@@ -545,7 +545,7 @@ const CSS = `
 
 /* ---------- success ---------- */
 .rc-success { padding: 10px 0 2px; text-align: center; }
-.rc-success__icon { font-size: 54px; color: var(--rc-ok); }
+.rc-success__icon { font-size: 54px; color: var(--rc-ok); margin: auto; }
 .rc-success h3 { margin: 12px 0 6px; font-size: 20px; }
 .rc-success p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--rc-muted); }
 
