@@ -72,8 +72,12 @@ import FeedbackWatcher from "./Components/Feedback/FeedbackWatcher.jsx";
 import WishlistPage from "./Components/Wishlist/Wishlist.jsx";
 import TermsAndConditions from "./Components/Legal/TermsAndConditions.jsx";
 import PrivacyPolicy from "./Components/Legal/PrivacyPolicy.jsx";
-
+import { lazy, Suspense } from 'react'
 const BASE_URL = import.meta.env?.VITE_API_URL || "https://backend.shyamnamkeenandbakers.online/api";
+
+const BecomeRider = lazy(() =>
+  import('./Components/Footer/RiderConnect').then((m) => ({ default: m.BecomeRiderPage }))
+)
 
 // 🆕 Fisher-Yates shuffle — randomizes category-section order on every fresh page load/refresh
 const shuffleArray = (arr) => {
@@ -157,7 +161,7 @@ function AppContent() {
         // Fix top category 
         const pinnedCategories = categoryData.filter((cat) => cat.isPinned);
         const unpinnedCategories = categoryData.filter((cat) => !cat.isPinned);
-        
+
         const orderedCategories = [...pinnedCategories, ...shuffleArray(unpinnedCategories)];
         const names = orderedCategories.map((cat) => cat.name || cat.title);
         setCategories(names); // 🆕 random category-section order every page load
@@ -177,6 +181,10 @@ function AppContent() {
 
   return (
     <Routes>
+      <Route
+        path="/become-a-rider"
+        element={<Suspense fallback={null}><BecomeRider /></Suspense>}
+      />
       <Route element={<MainLayout />}>
         {/* Auth & User Account Routes */}
         <Route path="/login" element={<LoginPage />} />
@@ -274,6 +282,12 @@ function AppContent() {
         <Route path="/offer-details/:slug" element={<OfferDetails />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+
+        <Route
+          path="/become-a-rider"
+          element={<Suspense fallback={null}><BecomeRider /></Suspense>}
+        />
+
         <Route
           path="/discount"
           element={

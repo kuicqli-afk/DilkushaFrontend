@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import axios from "axios";
 import "./Footer.css";
 import logo from "../../assets/syam.png";
@@ -28,7 +28,24 @@ import {
 import { Link } from "react-router-dom";
 import { FiGift } from "react-icons/fi";
 
+// Rider popups live in their own chunk; it loads on first hover/focus/click, not with the page
+const loadRiderConnect = () => import("./RiderConnect");
+const RiderModal = lazy(() => loadRiderConnect().then((m) => ({ default: m.RiderModal })));
+const RiderQrModal = lazy(() => loadRiderConnect().then((m) => ({ default: m.RiderQrModal })));
+
 const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
+
+// Makes a <button> look like the other footer links
+const linkButtonStyle = {
+  background: "none",
+  border: 0,
+  padding: 0,
+  margin: 0,
+  font: "inherit",
+  color: "inherit",
+  cursor: "pointer",
+  textAlign: "left",
+};
 
 const LATEST_CATEGORY_LIMIT = 5;
 
@@ -67,6 +84,7 @@ const describeCoupon = (coupon) => {
 const Footer = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [popupType, setPopupType] = useState("");
+  const [riderPopup, setRiderPopup] = useState(null); // null | "form" | "qr"
 
   const [latestCategories, setLatestCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
@@ -237,6 +255,18 @@ const Footer = () => {
             <li><Link to="/terms-and-conditions">Terms and Conditions</Link></li>
             <li><Link to="/privacy-policy">Privacy Policy</Link></li>
             <li><Link to="">Shipping and Delivery</Link></li>
+            <li>
+              <button
+                type="button"
+                style={linkButtonStyle}
+                onClick={() => setRiderPopup("qr")}
+                onMouseEnter={loadRiderConnect}
+                onFocus={loadRiderConnect}
+                onTouchStart={loadRiderConnect}
+              >
+                Connect with Riders
+              </button>
+            </li>
           </ul>
         </div>
 
@@ -310,6 +340,10 @@ const Footer = () => {
       </div>
 
       {showPopup && <PopupForm type={popupType} onClose={() => setShowPopup(false)} />}
+      <Suspense fallback={null}>
+        {riderPopup === "form" && <RiderModal onClose={() => setRiderPopup(null)} />}
+        {riderPopup === "qr" && <RiderQrModal onClose={() => setRiderPopup(null)} />}
+      </Suspense>
     </div>
   );
 };
