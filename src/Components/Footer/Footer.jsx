@@ -52,22 +52,6 @@ const LATEST_CATEGORY_LIMIT = 5;
 
 const FALLBACK_OFFER_MESSAGE = "Freshly baked daily & delivered with care — order now!";
 
-// Content for the "Coming soon" app modal
-const APP_STORES = {
-  play: {
-    label: "Google Play",
-    heading: "Coming soon on Google Play",
-    image: PlayStore,
-    alt: "Get it on Google Play",
-  },
-  apple: {
-    label: "the App Store",
-    heading: "Coming soon on the App Store",
-    image: AppStore,
-    alt: "Download on the App Store",
-  },
-};
-
 const getCategoryTimestamp = (cat) => {
   if (cat.createdAt) {
     const t = new Date(cat.createdAt).getTime();
@@ -102,8 +86,8 @@ const Footer = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [popupType, setPopupType] = useState("");
   const [riderPopup, setRiderPopup] = useState(null); // null | "form" | "qr"
-  const [appModal, setAppModal] = useState(null); // null | "play" | "apple"
-  const appTriggerRef = useRef(null); // remembers which icon opened the modal, to return focus on close
+  const [appModal, setAppModal] = useState(false); // one popup for both app icons
+  const appTriggerRef = useRef(null); // remembers which icon opened the popup, to return focus on close
 
   const [latestCategories, setLatestCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
@@ -127,14 +111,15 @@ const Footer = () => {
     setShowPopup(true);
   };
 
-  const openAppModal = (e, store) => {
+  // Play Store and App Store icons both open the same popup
+  const openAppModal = (e) => {
     e.preventDefault();
     appTriggerRef.current = e.currentTarget;
-    setAppModal(store);
+    setAppModal(true);
   };
 
   const closeAppModal = useCallback(() => {
-    setAppModal(null);
+    setAppModal(false);
     appTriggerRef.current?.focus?.();
   }, []);
 
@@ -294,7 +279,7 @@ const Footer = () => {
                 onFocus={loadRiderConnect}
                 onTouchStart={loadRiderConnect}
               >
-                Become a riders partner
+                Become a Riders Partner
               </button>
             </li>
           </ul>
@@ -349,7 +334,7 @@ const Footer = () => {
               aria-label="Google Play (coming soon)"
               aria-haspopup="dialog"
               className="icon-facebook"
-              onClick={(e) => openAppModal(e, "play")}
+              onClick={openAppModal}
             >
               <img src={PlayStore} alt="PlayStore" />
             </a>
@@ -358,7 +343,7 @@ const Footer = () => {
               aria-label="App Store (coming soon)"
               aria-haspopup="dialog"
               className="icon-instagram"
-              onClick={(e) => openAppModal(e, "apple")}
+              onClick={openAppModal}
             >
               <img src={AppStore} alt="AppStore" />
             </a>
@@ -382,7 +367,7 @@ const Footer = () => {
       </div>
 
       {showPopup && <PopupForm type={popupType} onClose={() => setShowPopup(false)} />}
-      {appModal && <AppComingSoonModal store={appModal} onClose={closeAppModal} />}
+      {appModal && <AppComingSoonModal onClose={closeAppModal} />}
       <Suspense fallback={null}>
         {riderPopup === "form" && <RiderModal onClose={() => setRiderPopup(null)} />}
         {riderPopup === "qr" && <RiderQrModal onClose={() => setRiderPopup(null)} />}
@@ -392,7 +377,7 @@ const Footer = () => {
 };
 
 /* ────────────────────────────────────────────────────────────────────────
-   "Coming soon" modal for the Play Store / App Store icons
+   "Coming soon" popup for the Play Store / App Store icons (same popup for both)
    Tip: change --cs-accent / --cs-accent-soft below to match your brand colour.
    ──────────────────────────────────────────────────────────────────────── */
 const APP_MODAL_CSS = `
@@ -406,7 +391,7 @@ const APP_MODAL_CSS = `
   .cs-modal {
     --cs-accent: #e8590c;
     --cs-accent-soft: #fff1e8;
-    position: relative; width: 100%; max-width: 420px;
+    position: relative; width: 100%; max-width: 380px;
     background: #fff; color: #1f2937; text-align: center;
     border-radius: 20px; padding: 38px 28px 26px;
     box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.45);
@@ -431,13 +416,7 @@ const APP_MODAL_CSS = `
     color: var(--cs-accent); background: var(--cs-accent-soft);
   }
   .cs-title { margin: 0 0 8px; font-size: 22px; line-height: 1.25; font-weight: 700; color: #111827; }
-  .cs-text { margin: 0; font-size: 14.5px; line-height: 1.6; color: #6b7280; }
-  .cs-store {
-    display: inline-flex; align-items: center; justify-content: center;
-    margin: 20px 0 22px; padding: 12px 18px;
-    border: 1px dashed #d9dde3; border-radius: 12px; background: #fafafa;
-  }
-  .cs-store img { display: block; height: 44px; width: auto; max-width: 100%; opacity: .85; }
+  .cs-text { margin: 0 0 22px; font-size: 15px; line-height: 1.6; color: #6b7280; }
   .cs-btn {
     width: 100%; padding: 12px 16px; border: none; border-radius: 12px; cursor: pointer;
     font: inherit; font-size: 15px; font-weight: 600; color: #fff; background: var(--cs-accent);
@@ -452,8 +431,7 @@ const APP_MODAL_CSS = `
   @media (prefers-reduced-motion: reduce) { .cs-overlay, .cs-modal { animation: none; } }
 `;
 
-const AppComingSoonModal = ({ store, onClose }) => {
-  const info = APP_STORES[store];
+const AppComingSoonModal = ({ onClose }) => {
   const dialogRef = useRef(null);
   const closeRef = useRef(null);
 
@@ -490,8 +468,6 @@ const AppComingSoonModal = ({ store, onClose }) => {
     };
   }, [onClose]);
 
-  if (!info) return null;
-
   return (
     <div className="cs-overlay" onClick={onClose}>
       <style>{APP_MODAL_CSS}</style>
@@ -513,15 +489,10 @@ const AppComingSoonModal = ({ store, onClose }) => {
         </div>
 
         <span className="cs-pill">Coming soon</span>
-        <h2 className="cs-title" id="cs-title">{info.heading}</h2>
+        <h2 className="cs-title" id="cs-title">Our app is coming soon</h2>
         <p className="cs-text" id="cs-desc">
-          Our app is almost ready. We're adding the finishing touches and will launch on {info.label} very soon.
-          Until then, you can order anytime on our website. Follow us to be the first to know.
+          We are launching on Google Play and the App Store very soon. Till then, you can order on our website.
         </p>
-
-        <div className="cs-store">
-          <img src={info.image} alt={info.alt} />
-        </div>
 
         <button type="button" className="cs-btn" ref={closeRef} onClick={onClose}>
           Got it

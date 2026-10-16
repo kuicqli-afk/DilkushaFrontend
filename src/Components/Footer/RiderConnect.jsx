@@ -252,7 +252,7 @@ function RiderForm({ onFinish, finishLabel = "Close" }) {
 
     return (
         <form className="rc-form" onSubmit={handleSubmit} noValidate>
-            <BrandNameField label="Request from website" />
+            <BrandNameField label="Riders Partner with" />
 
             <div className="rc-grid">
                 {FIELDS.map(({ key, label, type, placeholder, autoComplete, icon: Icon }) => {
@@ -356,12 +356,12 @@ export function RiderQrModal({ onClose }) {
 
     return (
         <Modal
-            title="Become a riders partner"
-            subtitle="Riders scan this QR to open the application form."
+            title="Become a Riders Partner"
+            subtitle="Ride with Us, Earn with Us!"
             onClose={onClose}
         >
             <div className="rc-qr">
-                <BrandNameField label="Request from website" />
+                <BrandNameField label="Riders Partner with" />
 
                 <div className="rc-qr__frame" ref={qrWrapRef}>
                     <Suspense fallback={<div className="rc-qr__skeleton" />}>
@@ -370,12 +370,11 @@ export function RiderQrModal({ onClose }) {
                 </div>
 
                 <ol className="rc-steps">
-                    <li>Scan the QR with the phone camera</li>
-                    <li>Fill in the rider form</li>
-                    <li>Our team calls you back</li>
+                    <li>Scan the QR code and submit your details.</li>
+                    <li style={{ fontWeight: 600 }}>Our team will contact you soon</li>
                 </ol>
 
-                <div className="rc-qr__actions">
+                {/* <div className="rc-qr__actions">
                     <button type="button" className="rc-outline" onClick={handleDownload}>
                         <FaDownload aria-hidden="true" /> Download QR
                     </button>
@@ -383,9 +382,12 @@ export function RiderQrModal({ onClose }) {
                         {copied ? <FaCheck aria-hidden="true" /> : <FaRegCopy aria-hidden="true" />}
                         {copied ? "Link copied" : "Copy link"}
                     </button>
+                </div> */}
+                <div style={{ textAlign: "center", marginTop: "1rem", marginBottom: "0rem", fontSize: "0.8rem" }}>
+                    <span className="powered-steps"> <strong><a href="https://delivour.com" target="_blank" rel="noopener noreferrer">Delivour</a></strong> - Powered by <span><a href="https://designerbirds.com" target="_blank" rel="noopener noreferrer">Designerbirds</a></span></span>
                 </div>
             </div>
-        </Modal>
+        </Modal >
     );
 }
 
@@ -400,7 +402,7 @@ export function BecomeRiderPage() {
         <div className="rc-page">
             <Styles />
             <div className="rc-card">
-                <Header title="Become a Rider" subtitle="Fill in your details and our team will contact you." />
+                <Header title="Become a Riders Partner" subtitle="Ride with Us, Earn with Us!" />
                 <div className="rc-body">
                     <RiderForm onFinish={() => navigate("/")} finishLabel="Back to website" />
                 </div>
@@ -562,7 +564,7 @@ const CSS = `
 
 .rc-steps {
   margin: 18px auto 16px; padding: 0 0 0 20px; max-width: 320px;
-  text-align: left; font-size: 14px; line-height: 1.9; color: var(--rc-muted);
+  text-align: center; font-size: 14px; line-height: 1.9; color: var(--rc-muted);
 }
 .rc-qr__actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
 .rc-outline {
