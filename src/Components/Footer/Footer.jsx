@@ -264,7 +264,7 @@ const Footer = () => {
                 onFocus={loadRiderConnect}
                 onTouchStart={loadRiderConnect}
               >
-                Connect with Riders
+                Become a riders partner
               </button>
             </li>
           </ul>

@@ -1,5 +1,5 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     FaTimes,
     FaRegCopy,
@@ -11,7 +11,7 @@ import {
     FaPhoneAlt,
     FaMapMarkerAlt,
     FaHome,
-    FaPen,
+    FaLock,
     FaCheckCircle,
 } from "react-icons/fa";
 
@@ -32,8 +32,8 @@ const SITE_URL = import.meta.env?.VITE_SITE_URL || "https://shyamnamkeenandbaker
 // Kuicqli admin -> Application Requests -> Drivers.
 const JOIN_API_URL = "https://backend.kuicqli.com/join-applications";
 
-const DEFAULT_BRAND_NAME = "Shyam Namkeen & Bakers";
-const MAX_BRAND_LENGTH = 80;
+// Fixed name of this website. It is sent with every application and cannot be changed by the user.
+const SOURCE_WEBSITE = "Shyam Namkeen & Bakers";
 const REQUEST_TIMEOUT_MS = 15000;
 
 const FIELDS = [
@@ -74,8 +74,8 @@ async function submitRiderApplication(values) {
     FIELDS.forEach(({ key }) => {
         payload[key] = (values[key] || "").trim();
     });
-    // Website the request came from (extra field; your current controller simply ignores it)
-    payload.sourceWebsite = (values.sourceWebsite || "").trim().slice(0, MAX_BRAND_LENGTH);
+    // Which website the request came from (fixed value, see SOURCE_WEBSITE)
+    payload.sourceWebsite = SOURCE_WEBSITE;
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -174,57 +174,15 @@ function Modal({ title, subtitle, onClose, children }) {
     );
 }
 
-// Website name row: locked by default, one click on "Change" to edit
-function BrandNameField({ label, value, onChange }) {
-    const [editing, setEditing] = useState(false);
-    const [draft, setDraft] = useState(value);
-
-    const apply = () => {
-        const clean = draft.trim().slice(0, MAX_BRAND_LENGTH);
-        if (clean) onChange(clean);
-        else setDraft(value);
-        setEditing(false);
-    };
-
-    const reset = () => {
-        onChange(DEFAULT_BRAND_NAME);
-        setDraft(DEFAULT_BRAND_NAME);
-        setEditing(false);
-    };
-
+// Website name row: fixed, cannot be edited
+function BrandNameField({ label }) {
     return (
         <div className="rc-brand">
             <span className="rc-brand__label">{label}</span>
-
-            {editing ? (
-                <div className="rc-brand__edit">
-                    <input
-                        type="text"
-                        value={draft}
-                        maxLength={MAX_BRAND_LENGTH}
-                        onChange={(e) => setDraft(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), apply())}
-                        aria-label={label}
-                        autoFocus
-                    />
-                    <button type="button" className="rc-link" onClick={apply}>Save</button>
-                    <button type="button" className="rc-link rc-link--muted" onClick={reset}>Reset</button>
-                </div>
-            ) : (
-                <div className="rc-brand__view">
-                    <strong>{value}</strong>
-                    <button
-                        type="button"
-                        className="rc-link"
-                        onClick={() => {
-                            setDraft(value);
-                            setEditing(true);
-                        }}
-                    >
-                        <FaPen aria-hidden="true" /> Change
-                    </button>
-                </div>
-            )}
+            <div className="rc-brand__view">
+                <strong>{SOURCE_WEBSITE}</strong>
+                <FaLock className="rc-brand__lock" aria-label="Fixed" />
+            </div>
         </div>
     );
 }
@@ -233,8 +191,7 @@ function BrandNameField({ label, value, onChange }) {
    RIDER FORM (used by popup and by the QR page)
 ================================ */
 
-function RiderForm({ initialBrandName = DEFAULT_BRAND_NAME, onFinish, finishLabel = "Close" }) {
-    const [brandName, setBrandName] = useState(initialBrandName);
+function RiderForm({ onFinish, finishLabel = "Close" }) {
     const [values, setValues] = useState({});
     const [errors, setErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
@@ -262,7 +219,7 @@ function RiderForm({ initialBrandName = DEFAULT_BRAND_NAME, onFinish, finishLabe
         setSubmitting(true);
 
         try {
-            const result = await submitRiderApplication({ ...values, sourceWebsite: brandName });
+            const result = await submitRiderApplication(values);
             setSuccessMessage(result?.message || "Application submitted. Our team will call you soon.");
         } catch (err) {
             if (err.fieldErrors) {
@@ -295,7 +252,7 @@ function RiderForm({ initialBrandName = DEFAULT_BRAND_NAME, onFinish, finishLabe
 
     return (
         <form className="rc-form" onSubmit={handleSubmit} noValidate>
-            <BrandNameField label="Request from website" value={brandName} onChange={setBrandName} />
+            <BrandNameField label="Request from website" />
 
             <div className="rc-grid">
                 {FIELDS.map(({ key, label, type, placeholder, autoComplete, icon: Icon }) => {
@@ -373,15 +330,10 @@ export function RiderModal({ onClose }) {
 ================================ */
 
 export function RiderQrModal({ onClose }) {
-    const [brandName, setBrandName] = useState(DEFAULT_BRAND_NAME);
     const [copied, setCopied] = useState(false);
     const qrWrapRef = useRef(null);
 
-    // The name travels inside the QR link, so the form page shows the same name
-    const formUrl = useMemo(
-        () => `${SITE_URL}/become-a-rider?shop=${encodeURIComponent(brandName)}`,
-        [brandName]
-    );
+    const formUrl = `${SITE_URL}/become-a-rider`;
 
     const handleDownload = () => {
         const canvas = qrWrapRef.current?.querySelector("canvas");
@@ -404,12 +356,12 @@ export function RiderQrModal({ onClose }) {
 
     return (
         <Modal
-            title="Connect with Riders"
+            title="Become a riders partner"
             subtitle="Riders scan this QR to open the application form."
             onClose={onClose}
         >
             <div className="rc-qr">
-                <BrandNameField label="Name on the form" value={brandName} onChange={setBrandName} />
+                <BrandNameField label="Request from website" />
 
                 <div className="rc-qr__frame" ref={qrWrapRef}>
                     <Suspense fallback={<div className="rc-qr__skeleton" />}>
@@ -442,11 +394,7 @@ export function RiderQrModal({ onClose }) {
 ================================ */
 
 export function BecomeRiderPage() {
-    const [params] = useSearchParams();
     const navigate = useNavigate();
-
-    const initialBrand =
-        (params.get("shop") || "").trim().slice(0, MAX_BRAND_LENGTH) || DEFAULT_BRAND_NAME;
 
     return (
         <div className="rc-page">
@@ -454,11 +402,7 @@ export function BecomeRiderPage() {
             <div className="rc-card">
                 <Header title="Become a Rider" subtitle="Fill in your details and our team will contact you." />
                 <div className="rc-body">
-                    <RiderForm
-                        initialBrandName={initialBrand}
-                        onFinish={() => navigate("/")}
-                        finishLabel="Back to website"
-                    />
+                    <RiderForm onFinish={() => navigate("/")} finishLabel="Back to website" />
                 </div>
             </div>
         </div>
@@ -541,11 +485,7 @@ const CSS = `
 .rc-brand__label { display: block; margin-bottom: 4px; font-size: 12.5px; color: var(--rc-muted); }
 .rc-brand__view { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .rc-brand__view strong { font-size: 15.5px; font-weight: 650; overflow-wrap: anywhere; }
-.rc-brand__edit { display: flex; align-items: center; gap: 10px; }
-.rc-brand__edit input {
-  flex: 1; min-width: 0; padding: 9px 11px; font: inherit; font-size: 15px;
-  border: 1px solid var(--rc-line); border-radius: 8px; background: #fff; color: var(--rc-ink);
-}
+.rc-brand__lock { flex: none; font-size: 13px; color: var(--rc-muted); }
 .rc-link {
   display: inline-flex; align-items: center; gap: 6px; flex: none;
   border: 0; background: none; padding: 4px 2px; cursor: pointer;
