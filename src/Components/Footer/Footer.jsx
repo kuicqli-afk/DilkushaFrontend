@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import axios from "axios";
 import "./Footer.css";
 import logo from "../../assets/syam.png";
@@ -23,6 +23,7 @@ import {
   FaInstagram,
   FaPinterestP,
   FaWhatsapp,
+  FaMobileAlt,
 } from "react-icons/fa";
 
 import { Link } from "react-router-dom";
@@ -50,6 +51,22 @@ const linkButtonStyle = {
 const LATEST_CATEGORY_LIMIT = 5;
 
 const FALLBACK_OFFER_MESSAGE = "Freshly baked daily & delivered with care — order now!";
+
+// Content for the "Coming soon" app modal
+const APP_STORES = {
+  play: {
+    label: "Google Play",
+    heading: "Coming soon on Google Play",
+    image: PlayStore,
+    alt: "Get it on Google Play",
+  },
+  apple: {
+    label: "the App Store",
+    heading: "Coming soon on the App Store",
+    image: AppStore,
+    alt: "Download on the App Store",
+  },
+};
 
 const getCategoryTimestamp = (cat) => {
   if (cat.createdAt) {
@@ -85,6 +102,8 @@ const Footer = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [popupType, setPopupType] = useState("");
   const [riderPopup, setRiderPopup] = useState(null); // null | "form" | "qr"
+  const [appModal, setAppModal] = useState(null); // null | "play" | "apple"
+  const appTriggerRef = useRef(null); // remembers which icon opened the modal, to return focus on close
 
   const [latestCategories, setLatestCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
@@ -107,6 +126,17 @@ const Footer = () => {
     setPopupType(type);
     setShowPopup(true);
   };
+
+  const openAppModal = (e, store) => {
+    e.preventDefault();
+    appTriggerRef.current = e.currentTarget;
+    setAppModal(store);
+  };
+
+  const closeAppModal = useCallback(() => {
+    setAppModal(null);
+    appTriggerRef.current?.focus?.();
+  }, []);
 
   useEffect(() => {
     axios
@@ -314,10 +344,22 @@ const Footer = () => {
 
           <div className="apps">
             <span className="payment-label">Get Our App</span>
-            <a href="" target="_self" rel="self" aria-label="PlayStore" className="icon-facebook">
+            <a
+              href="#"
+              aria-label="Google Play (coming soon)"
+              aria-haspopup="dialog"
+              className="icon-facebook"
+              onClick={(e) => openAppModal(e, "play")}
+            >
               <img src={PlayStore} alt="PlayStore" />
             </a>
-            <a href="" target="_self" rel="self" aria-label="AppStore" className="icon-instagram">
+            <a
+              href="#"
+              aria-label="App Store (coming soon)"
+              aria-haspopup="dialog"
+              className="icon-instagram"
+              onClick={(e) => openAppModal(e, "apple")}
+            >
               <img src={AppStore} alt="AppStore" />
             </a>
           </div>
@@ -340,10 +382,151 @@ const Footer = () => {
       </div>
 
       {showPopup && <PopupForm type={popupType} onClose={() => setShowPopup(false)} />}
+      {appModal && <AppComingSoonModal store={appModal} onClose={closeAppModal} />}
       <Suspense fallback={null}>
         {riderPopup === "form" && <RiderModal onClose={() => setRiderPopup(null)} />}
         {riderPopup === "qr" && <RiderQrModal onClose={() => setRiderPopup(null)} />}
       </Suspense>
+    </div>
+  );
+};
+
+/* ────────────────────────────────────────────────────────────────────────
+   "Coming soon" modal for the Play Store / App Store icons
+   Tip: change --cs-accent / --cs-accent-soft below to match your brand colour.
+   ──────────────────────────────────────────────────────────────────────── */
+const APP_MODAL_CSS = `
+  .cs-overlay {
+    position: fixed; inset: 0; z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px; background: rgba(17, 24, 39, 0.62);
+    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+    animation: csFade .2s ease both;
+  }
+  .cs-modal {
+    --cs-accent: #e8590c;
+    --cs-accent-soft: #fff1e8;
+    position: relative; width: 100%; max-width: 420px;
+    background: #fff; color: #1f2937; text-align: center;
+    border-radius: 20px; padding: 38px 28px 26px;
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.45);
+    animation: csPop .26s cubic-bezier(.2, .8, .2, 1) both;
+    font-family: inherit;
+  }
+  .cs-close {
+    position: absolute; top: 12px; right: 12px; width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; border-radius: 50%; background: #f3f4f6; color: #6b7280; cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .cs-close:hover { background: #e5e7eb; color: #111827; }
+  .cs-icon {
+    width: 68px; height: 68px; margin: 0 auto 16px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; color: var(--cs-accent); background: var(--cs-accent-soft);
+  }
+  .cs-pill {
+    display: inline-block; margin-bottom: 12px; padding: 4px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+    color: var(--cs-accent); background: var(--cs-accent-soft);
+  }
+  .cs-title { margin: 0 0 8px; font-size: 22px; line-height: 1.25; font-weight: 700; color: #111827; }
+  .cs-text { margin: 0; font-size: 14.5px; line-height: 1.6; color: #6b7280; }
+  .cs-store {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin: 20px 0 22px; padding: 12px 18px;
+    border: 1px dashed #d9dde3; border-radius: 12px; background: #fafafa;
+  }
+  .cs-store img { display: block; height: 44px; width: auto; max-width: 100%; opacity: .85; }
+  .cs-btn {
+    width: 100%; padding: 12px 16px; border: none; border-radius: 12px; cursor: pointer;
+    font: inherit; font-size: 15px; font-weight: 600; color: #fff; background: var(--cs-accent);
+    transition: filter .15s ease, transform .15s ease;
+  }
+  .cs-btn:hover { filter: brightness(.94); }
+  .cs-btn:active { transform: scale(.99); }
+  .cs-btn:focus-visible, .cs-close:focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 2px; }
+  @keyframes csFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes csPop { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
+  @media (max-width: 480px) { .cs-modal { padding: 34px 20px 22px; border-radius: 18px; } .cs-title { font-size: 20px; } }
+  @media (prefers-reduced-motion: reduce) { .cs-overlay, .cs-modal { animation: none; } }
+`;
+
+const AppComingSoonModal = ({ store, onClose }) => {
+  const info = APP_STORES[store];
+  const dialogRef = useRef(null);
+  const closeRef = useRef(null);
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      // Keep keyboard focus inside the dialog
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll("button, [href], [tabindex]:not([tabindex='-1'])");
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeRef.current?.focus();
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [onClose]);
+
+  if (!info) return null;
+
+  return (
+    <div className="cs-overlay" onClick={onClose}>
+      <style>{APP_MODAL_CSS}</style>
+      <div
+        className="cs-modal"
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cs-title"
+        aria-describedby="cs-desc"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button type="button" className="cs-close" onClick={onClose} aria-label="Close">
+          <FaTimes />
+        </button>
+
+        <div className="cs-icon" aria-hidden="true">
+          <FaMobileAlt />
+        </div>
+
+        <span className="cs-pill">Coming soon</span>
+        <h2 className="cs-title" id="cs-title">{info.heading}</h2>
+        <p className="cs-text" id="cs-desc">
+          Our app is almost ready. We're adding the finishing touches and will launch on {info.label} very soon.
+          Until then, you can order anytime on our website. Follow us to be the first to know.
+        </p>
+
+        <div className="cs-store">
+          <img src={info.image} alt={info.alt} />
+        </div>
+
+        <button type="button" className="cs-btn" ref={closeRef} onClick={onClose}>
+          Got it
+        </button>
+      </div>
     </div>
   );
 };
