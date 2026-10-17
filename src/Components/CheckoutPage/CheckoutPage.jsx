@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+﻿import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useCart } from "../../Context/CartContext";
@@ -580,7 +580,7 @@ export default function CheckoutPage() {
         key: keyId,
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
-        name: "ShyamBakers",
+        name: "Shyam Namkeen & Bakers",
         description: "Order Payment",
         order_id: razorpayOrder.id,
         prefill: {
