@@ -42,9 +42,6 @@ const PLACEHOLDERS = [
   "Search for sev",
 ];
 
-// How many categories the drawer shows before "View all"
-const DRAWER_CATEGORY_PREVIEW = 5;
-
 const getProductStock = (product) => {
   if (product.quantity === undefined || product.quantity === null || product.quantity === "") {
     return Infinity;
@@ -74,12 +71,11 @@ const Navbar = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
 
-  // Categories state for bottom navbar strip
+  // Categories state for bottom navbar strip + full-screen menu
   const [navCategories, setNavCategories] = useState([]);
 
-  // Mobile hamburger drawer
+  // Mobile full-screen menu
   const [menuOpen, setMenuOpen] = useState(false);
-  const [showAllCategories, setShowAllCategories] = useState(false);
 
   const dropdownRef = useRef(null);
 
@@ -100,15 +96,14 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close drawer whenever the route changes
+  // Close menu whenever the route changes
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
 
-  // Drawer: lock page scroll, close on Esc, close if screen grows to desktop
+  // Menu: lock page scroll, close on Esc, close if screen grows to desktop
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
-    if (!menuOpen) setShowAllCategories(false);
 
     const handleKey = (e) => {
       if (e.key === "Escape") setMenuOpen(false);
@@ -332,7 +327,7 @@ const Navbar = () => {
     setMenuOpen(false);
   };
 
-  // Drawer helpers
+  // Menu helpers
   const goTo = (path) => {
     setMenuOpen(false);
     navigate(path);
@@ -345,12 +340,16 @@ const Navbar = () => {
   return (
     <>
       <div className={`nav-container ${isScrolled ? "nav-scrolled" : ""}`}>
-        {/* ================= MAIN NAVBAR ROW ================= */}
+        {/* ================= MAIN NAVBAR ROW =================
+            Desktop : [Logo | Location | Search] ............ [Chat | Veg | Stats | Account | Cart]
+            Mobile  : Row 1 -> [Logo] ............ [Cart | Menu]
+                      Row 2 -> [ ----------- full-width Search ----------- ]
+        */}
         <div className="nav-main-row">
           {/* LEFT : Logo + Location + Search */}
           <div className="nav-left">
-            <Link to="/" style={{ textDecoration: "none" }}>
-              <img className="logo-text" src={shyam} alt="Logo" />
+            <Link to="/" className="nav-logo-link" style={{ textDecoration: "none" }}>
+              <img className="logo-text" src={shyam} alt="Shyam Bakers & Namkeen" />
             </Link>
 
             <ul>
@@ -371,6 +370,7 @@ const Navbar = () => {
                 <input
                   type="text"
                   value={searchValue}
+                  aria-label="Search products"
                   onFocus={() => {
                     setIsInputActive(true);
                     if (searchValue.trim()) setShowSearchDropdown(true);
@@ -574,13 +574,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* ================= MOBILE DRAWER (outside .nav-container on purpose) ================= */}
-      <div
-        className={`mobile-overlay ${menuOpen ? "open" : ""}`}
-        onClick={() => setMenuOpen(false)}
-        aria-hidden="true"
-      />
-
+      {/* ================= FULL-SCREEN MOBILE MENU (outside .nav-container on purpose) ================= */}
       <aside
         id="mobile-drawer"
         className={`mobile-drawer ${menuOpen ? "open" : ""}`}
@@ -687,15 +681,12 @@ const Navbar = () => {
             </button>
           </nav>
 
-          {/* Categories */}
+          {/* Categories — all of them, in a 2-column grid */}
           {navCategories.length > 0 && (
             <div className="drawer-section">
               <p className="drawer-section-title">Shop by category</p>
               <div className="drawer-category-list">
-                {(showAllCategories
-                  ? navCategories
-                  : navCategories.slice(0, DRAWER_CATEGORY_PREVIEW)
-                ).map((item) => (
+                {navCategories.map((item) => (
                   <button
                     type="button"
                     key={item._id}
@@ -706,20 +697,6 @@ const Navbar = () => {
                     <FaChevronRight />
                   </button>
                 ))}
-
-                {navCategories.length > DRAWER_CATEGORY_PREVIEW && (
-                  <button
-                    type="button"
-                    className="drawer-category-toggle"
-                    onClick={() => setShowAllCategories((prev) => !prev)}
-                    aria-expanded={showAllCategories}
-                  >
-                    {showAllCategories
-                      ? "Show less"
-                      : `View all ${navCategories.length} categories`}
-                    <FaChevronDown className={showAllCategories ? "flip" : ""} />
-                  </button>
-                )}
               </div>
             </div>
           )}

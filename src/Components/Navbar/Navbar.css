@@ -42,12 +42,20 @@
   --logo-w: clamp(110px, 16vw, 180px);
 }
 
-.nav-left img {
+.nav-logo-link {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Only the logo — scoped so it never touches the search-result images */
+.nav-left .logo-text {
   width: var(--logo-w);
   height: auto;
   object-fit: contain;
   flex-shrink: 0;
   margin-left: -15px;
+  display: block;
 }
 
 .nav-left ul {
@@ -661,32 +669,14 @@
 }
 
 /* ======================================================================
-   MOBILE DRAWER  (rendered outside .nav-container so position:fixed works)
+   FULL-SCREEN MOBILE MENU  (rendered outside .nav-container so position:fixed works)
    ====================================================================== */
-.mobile-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
-  z-index: 1100;
-}
-
-.mobile-overlay.open {
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.3s ease, visibility 0s;
-}
-
 .mobile-drawer {
   position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: min(86vw, 340px);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
   background: #ffffff;
   display: flex;
   flex-direction: column;
@@ -694,8 +684,6 @@
   visibility: hidden;
   transition: transform 0.32s cubic-bezier(0.22, 0.8, 0.24, 1), visibility 0s linear 0.32s;
   z-index: 1101;
-  box-shadow: -20px 0 50px rgba(15, 23, 42, 0.18);
-  border-radius: 20px 0 0 20px;
   overflow: hidden;
 }
 
@@ -709,7 +697,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px 12px 18px;
+  /* keeps content centred and readable on tablets */
+  padding: calc(12px + env(safe-area-inset-top, 0px)) max(16px, calc((100% - 560px) / 2)) 12px;
   border-bottom: 1px solid #f1f5f9;
   flex-shrink: 0;
 }
@@ -720,23 +709,23 @@
 }
 
 .drawer-logo {
-  width: 120px;
+  width: 130px;
   height: auto;
   object-fit: contain;
   display: block;
 }
 
 .drawer-close {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
   color: #475569;
-  border-radius: 10px;
-  font-size: 15px;
+  border-radius: 12px;
+  font-size: 16px;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
 }
@@ -754,10 +743,10 @@
   flex: 1;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 16px 14px 18px;
+  padding: 18px max(16px, calc((100% - 560px) / 2)) 22px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
   scrollbar-width: none;
 }
 
@@ -873,8 +862,8 @@
 }
 
 .drawer-section-title {
-  margin: 0 0 6px;
-  padding: 0 8px;
+  margin: 0 0 8px;
+  padding: 0 4px;
   font-size: 13px;
   font-weight: 700;
   color: #94a3b8;
@@ -890,7 +879,7 @@
   background: transparent;
   border-radius: 12px;
   font-family: inherit;
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 600;
   color: #334155;
   text-align: left;
@@ -909,8 +898,8 @@
 }
 
 .drawer-link-icon {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
   background: #f1f5f9;
   color: #64748b;
@@ -945,39 +934,41 @@
   justify-content: center;
 }
 
-/* ---- Category list ---- */
+/* ---- Category grid (all categories, 2 columns) ---- */
 .drawer-category-list {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #f1f5f9;
-  border-radius: 14px;
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .drawer-category-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 12px 14px;
-  border: none;
-  border-bottom: 1px solid #f1f5f9;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px 12px;
+  border: 1px solid #eef1f5;
+  border-radius: 12px;
   background: #fff;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
   color: #475569;
   text-align: left;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.drawer-category-item:last-child {
-  border-bottom: none;
+.drawer-category-item span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .drawer-category-item svg {
-  font-size: 11px;
+  font-size: 10px;
   color: #cbd5e1;
   flex-shrink: 0;
 }
@@ -985,38 +976,8 @@
 .drawer-category-item:hover,
 .drawer-category-item:active {
   background: #fff8f8;
+  border-color: #fecaca;
   color: #A90409;
-}
-
-.drawer-category-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 14px;
-  border: none;
-  border-top: 1px solid #f1f5f9;
-  background: #fff8f8;
-  font-family: inherit;
-  font-size: 13.5px;
-  font-weight: 700;
-  color: #A90409;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.drawer-category-toggle:hover,
-.drawer-category-toggle:active {
-  background: #fee2e2;
-}
-
-.drawer-category-toggle svg {
-  font-size: 11px;
-  transition: transform 0.25s ease;
-}
-
-.drawer-category-toggle svg.flip {
-  transform: rotate(180deg);
 }
 
 /* ---- Store card ---- */
@@ -1126,7 +1087,7 @@
 
 /* ---- Footer ---- */
 .drawer-footer {
-  padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+  padding: 12px max(16px, calc((100% - 560px) / 2)) calc(12px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid #f1f5f9;
   background: #fff;
   flex-shrink: 0;
@@ -1138,7 +1099,7 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 11px;
+  padding: 12px;
   border: 1px solid #fecaca;
   background: #fef2f2;
   color: #dc2626;
@@ -1154,10 +1115,8 @@
   background: #fee2e2;
 }
 
-/* Drawer + overlay never show on desktop */
+/* Menu never shows on desktop */
 @media (min-width: 901px) {
-
-  .mobile-overlay,
   .mobile-drawer {
     display: none;
   }
@@ -1194,9 +1153,14 @@
 }
 
 /* ======================================================================
-   ≤900px : TABLET PORTRAIT + MOBILE  →  hamburger layout
-   ONE row:  Logo | ---------- search ---------- | cart  [☰]
-   Drawer opens from the RIGHT. Category strip stays as plain text.
+   ≤900px  MOBILE / TABLET
+
+   Row 1 :  [ Logo ] ................ [ Cart ] [ Menu ]
+   Row 2 :  [ ------------- full-width Search ------------- ]
+   Row 3 :  category strip (scrolls sideways)
+
+   .nav-left uses display:contents so the logo and the search box become
+   direct children of .nav-main-row and can be re-ordered with `order`.
    ====================================================================== */
 @media (max-width: 900px) {
   .nav-container {
@@ -1206,22 +1170,36 @@
 
   .nav-main-row {
     position: relative;
-    /* search dropdown anchors to the whole row */
-    flex-wrap: nowrap;
-    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 10px;
+    column-gap: 8px;
   }
 
   .nav-left {
+    display: contents;
+  }
+
+  /* Row 1 left : logo */
+  .nav-logo-link {
+    order: 1;
     flex: 1 1 auto;
-    gap: 10px;
+    min-width: 0;
   }
 
   .nav-left .logo-text {
-    width: clamp(88px, 22vw, 130px);
-    margin-left: 0;
+    width: clamp(112px, 34vw, 156px);
+    margin-left: 10;
   }
 
-  /* Moved into the drawer */
+  /* Row 1 right : cart + menu */
+  .nav-right {
+    order: 2;
+    flex: 0 0 auto;
+    gap: 6px;
+  }
+
+  /* Moved into the full-screen menu */
   .nav-left>ul,
   .veg-badge,
   .store-stats,
@@ -1230,19 +1208,20 @@
     display: none;
   }
 
-  /* Search sits in the middle of the row */
+  /* Row 2 : search takes the whole line */
   .search-box {
-    position: static;
-    flex: 1 1 auto;
-    width: auto;
+    order: 3;
+    flex: 0 0 100%;
+    width: 100%;
     max-width: none;
-    padding: 9px 12px;
-    gap: 8px;
+    position: relative;
+    padding: 11px 14px;
+    gap: 10px;
     border-radius: 12px;
   }
 
   .search-icon {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .search-dropdown {
@@ -1250,12 +1229,6 @@
     right: 0;
     top: calc(100% + 8px);
     max-height: 60vh;
-  }
-
-  /* Right group: cart + hamburger */
-  .nav-right {
-    gap: 6px;
-    flex-shrink: 0;
   }
 
   .nav-list {
@@ -1354,16 +1327,8 @@
 
 /* ---------- ≤480px (Small phones) ---------- */
 @media (max-width: 480px) {
-  .nav-main-row {
-    gap: 8px;
-  }
-
-  .nav-left {
-    gap: 8px;
-  }
-
   .nav-left .logo-text {
-    width: clamp(78px, 22vw, 96px);
+    width: clamp(104px, 33vw, 130px);
   }
 
   .nav-hamburger {
@@ -1373,7 +1338,7 @@
   }
 
   .search-box {
-    padding: 8px 10px;
+    padding: 10px 12px;
   }
 
   .typing-erase {
@@ -1396,7 +1361,7 @@
   }
 
   .nav-left .logo-text {
-    width: 72px;
+    width: 98px;
   }
 
   .nav-hamburger {
@@ -1413,15 +1378,18 @@
   }
 
   .drawer-logo {
-    width: 104px;
+    width: 110px;
+  }
+
+  .drawer-category-item {
+    font-size: 13px;
+    padding: 11px 10px;
   }
 }
 
 /* ---------- Respect reduced-motion preference ---------- */
 @media (prefers-reduced-motion: reduce) {
-
-  .mobile-drawer,
-  .mobile-overlay {
+  .mobile-drawer {
     transition: none;
   }
 }
