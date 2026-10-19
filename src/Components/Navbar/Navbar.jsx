@@ -42,6 +42,9 @@ const PLACEHOLDERS = [
   "Search for sev",
 ];
 
+// How many categories the drawer shows before "View all"
+const DRAWER_CATEGORY_PREVIEW = 5;
+
 const getProductStock = (product) => {
   if (product.quantity === undefined || product.quantity === null || product.quantity === "") {
     return Infinity;
@@ -76,6 +79,7 @@ const Navbar = () => {
 
   // Mobile hamburger drawer
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   const dropdownRef = useRef(null);
 
@@ -104,6 +108,7 @@ const Navbar = () => {
   // Drawer: lock page scroll, close on Esc, close if screen grows to desktop
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
+    if (!menuOpen) setShowAllCategories(false);
 
     const handleKey = (e) => {
       if (e.key === "Escape") setMenuOpen(false);
@@ -687,7 +692,10 @@ const Navbar = () => {
             <div className="drawer-section">
               <p className="drawer-section-title">Shop by category</p>
               <div className="drawer-category-list">
-                {navCategories.map((item) => (
+                {(showAllCategories
+                  ? navCategories
+                  : navCategories.slice(0, DRAWER_CATEGORY_PREVIEW)
+                ).map((item) => (
                   <button
                     type="button"
                     key={item._id}
@@ -698,6 +706,20 @@ const Navbar = () => {
                     <FaChevronRight />
                   </button>
                 ))}
+
+                {navCategories.length > DRAWER_CATEGORY_PREVIEW && (
+                  <button
+                    type="button"
+                    className="drawer-category-toggle"
+                    onClick={() => setShowAllCategories((prev) => !prev)}
+                    aria-expanded={showAllCategories}
+                  >
+                    {showAllCategories
+                      ? "Show less"
+                      : `View all ${navCategories.length} categories`}
+                    <FaChevronDown className={showAllCategories ? "flip" : ""} />
+                  </button>
+                )}
               </div>
             </div>
           )}

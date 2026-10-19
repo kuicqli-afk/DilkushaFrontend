@@ -988,6 +988,37 @@
   color: #A90409;
 }
 
+.drawer-category-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border: none;
+  border-top: 1px solid #f1f5f9;
+  background: #fff8f8;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #A90409;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.drawer-category-toggle:hover,
+.drawer-category-toggle:active {
+  background: #fee2e2;
+}
+
+.drawer-category-toggle svg {
+  font-size: 11px;
+  transition: transform 0.25s ease;
+}
+
+.drawer-category-toggle svg.flip {
+  transform: rotate(180deg);
+}
+
 /* ---- Store card ---- */
 .drawer-store-card {
   display: flex;
