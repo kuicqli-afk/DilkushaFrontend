@@ -72,6 +72,11 @@
   white-space: nowrap;
 }
 
+/* Hamburger button — hidden on desktop, shown in the mobile block below */
+.nav-hamburger {
+  display: none;
+}
+
 /* ===============================
    SEARCH BOX
 ================================ */
@@ -416,7 +421,6 @@
   white-space: nowrap;
 }
 
-
 .nav-item img {
   height: 30px;
   width: auto;
@@ -426,6 +430,15 @@
 
 .nav-item:hover img {
   animation: bounce 0.8s;
+}
+
+/* Desktop cart count shows as "(2)" — mobile turns it into a badge */
+.cart-count::before {
+  content: "(";
+}
+
+.cart-count::after {
+  content: ")";
 }
 
 .logo-text {
@@ -570,6 +583,24 @@
 }
 
 /* ===============================
+   CHAT ICON
+================================ */
+.chat {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-right: 6px;
+}
+
+.chat img {
+  width: clamp(30px, 7vw, 100px);
+  height: auto;
+  margin-top: 4px;
+  object-fit: contain;
+}
+
+/* ===============================
    BOTTOM CATEGORY STRIP
 ================================ */
 .nav-category-strip {
@@ -630,7 +661,479 @@
 }
 
 /* ======================================================================
-   RESPONSIVE — single, ordered breakpoint chain (desktop → smallest)
+   MOBILE DRAWER  (rendered outside .nav-container so position:fixed works)
+   ====================================================================== */
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+  z-index: 1100;
+}
+
+.mobile-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0s;
+}
+
+.mobile-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(86vw, 340px);
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  visibility: hidden;
+  transition: transform 0.32s cubic-bezier(0.22, 0.8, 0.24, 1), visibility 0s linear 0.32s;
+  z-index: 1101;
+  box-shadow: -20px 0 50px rgba(15, 23, 42, 0.18);
+  border-radius: 20px 0 0 20px;
+  overflow: hidden;
+}
+
+.mobile-drawer.open {
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform 0.32s cubic-bezier(0.22, 0.8, 0.24, 1), visibility 0s;
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  flex-shrink: 0;
+}
+
+.drawer-logo-link {
+  display: flex;
+  align-items: center;
+}
+
+.drawer-logo {
+  width: 120px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.drawer-close {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.drawer-close:hover {
+  background: #fff1f1;
+  color: #A90409;
+}
+
+.drawer-close:active {
+  transform: scale(0.94);
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  scrollbar-width: none;
+}
+
+.drawer-body::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---- Account card ---- */
+.drawer-user-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #A90409 0%, #d81324 100%);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(169, 4, 9, 0.22);
+}
+
+.drawer-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  color: #A90409;
+  font-size: 18px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.drawer-user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.drawer-user-name {
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.drawer-user-sub {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+.drawer-user-arrow {
+  font-size: 12px;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.drawer-guest-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #fff8f8;
+  border: 1px solid #fee2e2;
+}
+
+.drawer-guest-title {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.drawer-guest-sub {
+  display: block;
+  margin-top: 3px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.drawer-login-btn {
+  align-self: stretch;
+  border: none;
+  background: #A90409;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 11px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.drawer-login-btn:hover {
+  background: #8f0308;
+}
+
+.drawer-login-btn:active {
+  transform: scale(0.98);
+}
+
+/* ---- Links ---- */
+.drawer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.drawer-section-title {
+  margin: 0 0 6px;
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 10px;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #334155;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.drawer-link:hover,
+.drawer-link:active {
+  background: #f8fafc;
+}
+
+.drawer-link.active {
+  background: #fff1f1;
+  color: #A90409;
+}
+
+.drawer-link-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.drawer-link.active .drawer-link-icon {
+  background: #A90409;
+  color: #fff;
+}
+
+.drawer-link-text {
+  flex: 1;
+}
+
+.drawer-link-badge {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 11px;
+  background: #A90409;
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- Category list ---- */
+.drawer-category-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #f1f5f9;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.drawer-category-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.drawer-category-item:last-child {
+  border-bottom: none;
+}
+
+.drawer-category-item svg {
+  font-size: 11px;
+  color: #cbd5e1;
+  flex-shrink: 0;
+}
+
+.drawer-category-item:hover,
+.drawer-category-item:active {
+  background: #fff8f8;
+  color: #A90409;
+}
+
+/* ---- Store card ---- */
+.drawer-store-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid #eef1f5;
+}
+
+.drawer-store-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.drawer-store-loc {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.drawer-store-loc svg {
+  color: #A90409;
+}
+
+.drawer-veg {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.drawer-store-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.drawer-store-stats>div {
+  background: #fff;
+  border: 1px solid #eef1f5;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-store-stats strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: #d81324;
+  line-height: 1.2;
+}
+
+.drawer-store-stats span {
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.drawer-follow-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  border: none;
+  background: #d81324;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 11px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.drawer-follow-btn:active {
+  transform: scale(0.98);
+}
+
+.drawer-follow-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.drawer-follow-btn.following {
+  background: #fff;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+/* ---- Footer ---- */
+.drawer-footer {
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid #f1f5f9;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.drawer-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.drawer-logout-btn:hover {
+  background: #fee2e2;
+}
+
+/* Drawer + overlay never show on desktop */
+@media (min-width: 901px) {
+
+  .mobile-overlay,
+  .mobile-drawer {
+    display: none;
+  }
+}
+
+/* ======================================================================
+   RESPONSIVE — ordered breakpoint chain (desktop → smallest)
    ====================================================================== */
 
 /* ---------- ≤1200px : tighten padding, shrink logo slightly ---------- */
@@ -644,8 +1147,7 @@
   }
 }
 
-
-/* ---------- ≤1024px (Tablet) : hide "followers" text, trim location ---------- */
+/* ---------- ≤1024px (Tablet landscape) : hide followers text, trim location ---------- */
 @media (max-width: 1024px) {
   .search-box {
     max-width: 75%;
@@ -660,112 +1162,191 @@
   }
 }
 
-/* ---------- ≤900px : shrink veg badge ---------- */
+/* ======================================================================
+   ≤900px : TABLET PORTRAIT + MOBILE  →  hamburger layout
+   ONE row:  Logo | ---------- search ---------- | cart  [☰]
+   Drawer opens from the RIGHT. Category strip stays as plain text.
+   ====================================================================== */
 @media (max-width: 900px) {
-  .veg-badge {
-    font-size: 11.5px;
-    padding: 5px 10px;
-    margin-right: 6px;
-  }
-}
-
-/* ---------- ≤768px (Mobile) : hide products badge, account name, location item ---------- */
-@media (max-width: 768px) {
   .nav-container {
-    padding-inline: 16px;
+    padding: 10px 14px 8px;
+    margin-bottom: 20px;
   }
 
+  .nav-main-row {
+    position: relative;
+    /* search dropdown anchors to the whole row */
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
 
-  .nav-left>ul {
+  .nav-left {
+    flex: 1 1 auto;
+    gap: 10px;
+  }
+
+  .nav-left .logo-text {
+    width: clamp(88px, 22vw, 130px);
+    margin-left: 0;
+  }
+
+  /* Moved into the drawer */
+  .nav-left>ul,
+  .veg-badge,
+  .store-stats,
+  .nav-user-item,
+  .chat {
     display: none;
-    /* location pill hidden — reclaims space for search */
   }
 
-  .total-products-badge,
-  .stats-divider {
-    display: none;
+  /* Search sits in the middle of the row */
+  .search-box {
+    position: static;
+    flex: 1 1 auto;
+    width: auto;
+    max-width: none;
+    padding: 9px 12px;
+    gap: 8px;
+    border-radius: 12px;
   }
 
-  .store-stats {
-    padding: 4px 8px;
-    gap: 6px;
-  }
-
-  .user-name {
-    display: none;
-    /* keep just the user icon + arrow */
+  .search-icon {
+    font-size: 14px;
   }
 
   .search-dropdown {
-    left: -8px;
-    right: -8px;
-  }
-}
-
-/* ---------- ≤600px : hide veg badge text, hide follow-btn label spacing ---------- */
-@media (max-width: 600px) {
-  .veg-badge-text {
-    display: none;
+    left: 0;
+    right: 0;
+    top: calc(100% + 8px);
+    max-height: 60vh;
   }
 
-  .veg-badge {
-    padding: 6px 9px;
+  /* Right group: cart + hamburger */
+  .nav-right {
+    gap: 6px;
+    flex-shrink: 0;
   }
 
-  .nav-item span {
-    display: none;
-    /* hides "Login" text next to the icon, keeps icon */
+  .nav-list {
+    gap: 0;
   }
 
-  .nav-item.nav-cart span,
   .nav-item.nav-cart {
+    position: relative;
+    padding: 6px 8px;
+  }
+
+  .nav-item.nav-cart img {
+    height: 28px;
+  }
+
+  .cart-count::before,
+  .cart-count::after {
+    content: none;
+  }
+
+  .cart-count {
+    position: absolute;
+    top: -4px;
+    right: -2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: #A90409;
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+    border: 2px solid #fff;
+    box-sizing: content-box;
+  }
+
+  .nav-hamburger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #A90409;
+    border-radius: 12px;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+    transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .nav-hamburger:hover {
+    background: #fff5f5;
+    border-color: #fecaca;
+  }
+
+  .nav-hamburger:active {
+    transform: scale(0.94);
+  }
+
+  /* Category strip — same plain-text look as desktop */
+  .nav-category-strip {
+    padding-top: 10px;
+    padding-bottom: 2px;
+  }
+
+  .nav-category-scroll {
+    gap: 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-category-name-item {
     font-size: 14px;
-    /* cart count must stay visible */
   }
 }
 
-/* ---------- ≤480px (Small phones) : bare minimum — logo, search, veg icon, account icon, cart ---------- */
-@media (max-width: 480px) {
-  :root {
-    --logo-w: clamp(72px, 22vw, 90px);
-  }
-
+/* ---------- ≤600px (Phones) ---------- */
+@media (max-width: 600px) {
   .nav-container {
-    padding-inline: 12px;
-    gap: 8px;
-  }
-
-  .nav-left img {
-    margin-left: -5px;
-    width: 220px;
-  }
-
-  .store-stats {
-    display: none;
-    /* Products count + Follow button + followers — all hidden */
-  }
-
-  .veg-badge span:not(.veg-badge-text) {
-    /* icon only, already handled by veg-badge-text hide above */
-  }
-
-  .veg-badge {
-    padding: 6px 8px;
-    margin-right: 4px;
-    display: none;
+    padding: 10px 12px 8px;
   }
 
   .typing-erase {
-    font-size: 12px;
-  }
-
-  .search-box {
     font-size: 13px;
-    padding: 10px;
   }
 
   .search-box input {
-    width: 150px;
+    font-size: 14px;
+  }
+}
+
+/* ---------- ≤480px (Small phones) ---------- */
+@media (max-width: 480px) {
+  .nav-main-row {
+    gap: 8px;
+  }
+
+  .nav-left {
+    gap: 8px;
+  }
+
+  .nav-left .logo-text {
+    width: clamp(78px, 22vw, 96px);
+  }
+
+  .nav-hamburger {
+    width: 40px;
+    height: 40px;
+    font-size: 17px;
+  }
+
+  .search-box {
+    padding: 8px 10px;
+  }
+
+  .typing-erase {
+    font-size: 12.5px;
   }
 
   .nav-category-name-item {
@@ -777,71 +1358,39 @@
   }
 }
 
-/* ===============================
-   CHAT ICON
-================================ */
-.chat {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  margin-right: 6px;
-
-}
-
-.chat img {
-  width: clamp(30px, 7vw, 100px);
-  height: auto;
-  margin-top: 4px;
-  object-fit: contain;
-}
-
-@media (max-width: 900px) {
-  .chat img {
-    width: clamp(26px, 5vw, 34px);
-  }
-}
-
-@media (max-width: 600px) {
-  .chat img {
-    width: 26px;
-  }
-
-  .chat {
-    margin-right: 3px;
-  }
-}
-
-@media (max-width: 480px) {
-  .chat img {
-    width: 22px;
-  }
-}
-
-/* ---------- ≤360px (Very small phones) : tightest spacing ---------- */
+/* ---------- ≤360px (Very small phones) ---------- */
 @media (max-width: 360px) {
-  :root {
-    --logo-w: 72px;
-  }
-
   .nav-container {
-    padding-inline: 8px;
-    gap: 6px;
+    padding: 8px 10px 6px;
   }
 
-  .nav-left img {
-    width: 76px;
+  .nav-left .logo-text {
+    width: 72px;
   }
 
-  .veg-badge {
-    padding: 5px 6px;
+  .nav-hamburger {
+    width: 38px;
+    height: 38px;
   }
 
-  .nav-item {
-    padding: 6px 8px;
+  .nav-item.nav-cart {
+    padding: 6px 4px;
   }
 
-  .search-box {
-    padding: 7px 10px;
+  .nav-item.nav-cart img {
+    height: 24px;
+  }
+
+  .drawer-logo {
+    width: 104px;
+  }
+}
+
+/* ---------- Respect reduced-motion preference ---------- */
+@media (prefers-reduced-motion: reduce) {
+
+  .mobile-drawer,
+  .mobile-overlay {
+    transition: none;
   }
 }
