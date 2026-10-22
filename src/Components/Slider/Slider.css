@@ -6,6 +6,9 @@
   position: relative;
   overflow: hidden;
   border-radius: 30px;
+  touch-action: pan-y;
+  /* page scrolls vertically, horizontal swipes go to the slider */
+  -webkit-tap-highlight-color: transparent;
 }
 
 .slider1-container {
@@ -17,6 +20,21 @@
   border-radius: 30px;
   margin-bottom: 40px;
   margin-top: 35px;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== LOADING SKELETON (replaces the "Loading Sliders..." text) ===== */
+.slider-skeleton {
+  background: linear-gradient(100deg, #eef1f5 30%, #f8fafc 50%, #eef1f5 70%);
+  background-size: 200% 100%;
+  animation: sliderShimmer 1.4s linear infinite;
+}
+
+@keyframes sliderShimmer {
+  to {
+    background-position: -200% 0;
+  }
 }
 
 /* ===== TRACK ===== */
@@ -25,7 +43,6 @@
   height: 100%;
   transition: transform 0.8s ease-in;
   will-change: transform;
-
 }
 
 /* ===== SLIDE ===== */
@@ -33,7 +50,6 @@
   min-width: 100%;
   height: 100%;
   position: relative;
-
 }
 
 /* ===== BACKGROUND ===== */
@@ -42,11 +58,11 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  /* 🆕 ye add karo — inline gap khatam ho jayega */
+  /* inline gap khatam */
   pointer-events: none;
 }
 
-/* ===== OFFER IMAGE ===== */
+/* ===== OFFER IMAGE (used by .slider1-container) ===== */
 .offer-img {
   position: absolute;
   z-index: 2;
@@ -63,6 +79,39 @@
   object-fit: contain;
 }
 
+/* ===== SLIDE BUTTON (category slider) ===== */
+.slide-cta {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 9px 22px;
+  border-radius: 30px;
+  border: none;
+  background: #f97316;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 2;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.slide-cta:active {
+  transform: translateX(-50%) scale(0.96);
+}
+
+.slide-cta:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 /* ===== DOTS ===== */
 .slider-dots {
   position: absolute;
@@ -72,16 +121,32 @@
   justify-content: center;
   gap: 10px;
   z-index: 5;
+  pointer-events: none;
+  /* the empty strip must not block clicks on the banner */
 }
 
-/* dots same */
 .dot {
+  position: relative;
+  flex-shrink: 0;
   width: 8px;
   height: 8px;
+  padding: 0;
+  border: none;
   background: #fff;
   opacity: 0.5;
   border-radius: 50%;
   cursor: pointer;
+  pointer-events: auto;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: width 0.3s ease, opacity 0.3s ease, background 0.3s ease;
+}
+
+/* bigger invisible tap area around each dot */
+.dot::before {
+  content: "";
+  position: absolute;
+  inset: -9px -4px;
 }
 
 .dot.active {
@@ -91,7 +156,14 @@
   background: #ff6b6b;
 }
 
+.dot:focus-visible {
+  outline: 2px solid #ff6b6b;
+  outline-offset: 3px;
+}
 
+/* ======================================================================
+   OFFER IMAGE breakpoints (unchanged)
+   ====================================================================== */
 @media (max-width: 1599px) {
   .offer-img {
     max-width: 36%;
@@ -152,13 +224,6 @@
   }
 }
 
-/* @media (max-width: 720px) {
-  .offer-img {
-    max-width: 60%;
-    left: 32%;
-    top: 2%;
-  }
-} */
 @media (max-width: 767px) {
   .offer-img {
     max-width: 60%;
@@ -189,4 +254,123 @@
 
 .offer-img {
   pointer-events: none;
+}
+
+/* ======================================================================
+   RESPONSIVE — .slider-container (home) and .slider1-container (category)
+   >1024px stays exactly as before (317px tall).
+   Below that the height follows the width (aspect-ratio), so banners are
+   never stretched or over-cropped, and phones get an app-style inset card.
+   ====================================================================== */
+
+/* ---------- ≤1024px : tablets ---------- */
+@media (max-width: 1024px) {
+
+  .slider-container,
+  .slider1-container {
+    height: auto;
+    aspect-ratio: 3 / 1;
+    border-radius: 22px;
+  }
+
+  .slider1-container {
+    margin: 24px auto 30px;
+  }
+
+  /* track fills the box without relying on a percentage height */
+  .slider-container .slider-track,
+  .slider1-container .slider-track {
+    position: absolute;
+    inset: 0;
+    height: auto;
+  }
+}
+
+/* ---------- ≤767px : phones ---------- */
+@media (max-width: 767px) {
+
+  .slider-container,
+  .slider1-container {
+    width: calc(100% - 24px);
+    aspect-ratio: 2.5 / 1;
+    border-radius: 18px;
+  }
+
+  .slider-container {
+    margin-top: 4px;
+  }
+
+  .slider1-container {
+    margin: 16px auto 22px;
+  }
+
+  .slider-dots {
+    bottom: 8px;
+    gap: 7px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    opacity: 0.65;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.35);
+  }
+
+  .dot.active {
+    width: 18px;
+  }
+
+  .slide-cta {
+    bottom: 20px;
+    padding: 7px 16px;
+    font-size: 12px;
+  }
+}
+
+/* ---------- ≤480px : small phones ---------- */
+@media (max-width: 480px) {
+
+  .slider-container,
+  .slider1-container {
+    aspect-ratio: 2.2 / 1;
+    border-radius: 16px;
+  }
+
+  .slider1-container {
+    margin: 14px auto 20px;
+  }
+
+  .slide-cta {
+    bottom: 18px;
+    padding: 6px 14px;
+    font-size: 11.5px;
+  }
+}
+
+/* ---------- ≤360px : very small phones ---------- */
+@media (max-width: 360px) {
+
+  .slider-container,
+  .slider1-container {
+    width: calc(100% - 16px);
+    aspect-ratio: 2 / 1;
+    border-radius: 14px;
+  }
+
+  .slide-cta {
+    padding: 5px 12px;
+    font-size: 11px;
+  }
+}
+
+/* ---------- Respect reduced-motion preference ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .slider-skeleton {
+    animation: none;
+  }
+
+  .dot,
+  .slide-cta {
+    transition: none;
+  }
 }
