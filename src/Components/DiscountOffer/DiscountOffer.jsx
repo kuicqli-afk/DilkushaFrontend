@@ -18,6 +18,7 @@ import { LiaStopwatchSolid } from "react-icons/lia";
 
 // import cookiesList from "../../data/CookiesData";
 import "../Food/Food.css";
+import { SkeletonCard } from "../Skeleton/Skeleton";
 
 const DiscountOffer = () => {
   const [loading, setLoading] = useState(true);
@@ -112,9 +113,7 @@ const DiscountOffer = () => {
       <div className="food-card-grid">
         {loading ? (
 
-          <h2 style={{ textAlign: "center", width: "100%" }}>
-            Loading offers...
-          </h2>
+          Array.from({ length: 8 }, (_, i) => <SkeletonCard key={i} />)
 
         ) : items.length === 0 ? (
 

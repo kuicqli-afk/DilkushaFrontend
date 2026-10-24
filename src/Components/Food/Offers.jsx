@@ -22,6 +22,10 @@ import "swiper/css/free-mode";
 
 import { useCart } from "../../Context/CartContext";
 import { VscEye } from "react-icons/vsc";
+import AnimatedText from "../Motion/AnimatedText";
+import { optimizeImage } from "../../utils/image";
+import { PressButton, ProductCard, RevealImage, SplitWords } from "../Motion/motionKit";
+import { ProductRowSkeleton } from "../Skeleton/Skeleton";
 
 const BASE_URL = "https://shyambackend.onrender.com";
 
@@ -128,13 +132,13 @@ const Offers = ({ filter, sortBy, price, cuisine }) => {
       state: { item, category: "offers" },
     });
 
-  if (loading) return null;
+  if (loading) return <ProductRowSkeleton />;
   if (!filteredList.length) return null; // Empty section hide
 
   return (
     <div id="offers" className="food-container">
       <div className="food-text">
-        <h1>Offers</h1>
+        <AnimatedText as="h1" text="Offers" />
         <p className="view-all" onClick={() => navigate("/all-offers")}>
           View all
         </p>
@@ -144,7 +148,7 @@ const Offers = ({ filter, sortBy, price, cuisine }) => {
         modules={[Autoplay]}
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         loop={filteredList.length > 3}
-        speed={700}
+        speed={900}
         autoplay={{
           delay: 3000,
           disableOnInteraction: false,
@@ -170,7 +174,7 @@ const Offers = ({ filter, sortBy, price, cuisine }) => {
 
           return (
             <SwiperSlide key={itemId}>
-              <div className="food-card">
+              <ProductCard className="food-card">
                 {item.video && <div className="add-badge">Ads</div>}
 
                 <div className="food-image-wrapper">
@@ -222,8 +226,8 @@ const Offers = ({ filter, sortBy, price, cuisine }) => {
                       preload="metadata"
                     />
                   ) : (
-                    <img
-                      src={item.image}
+                    <RevealImage
+                      src={optimizeImage(item.image, 720)}
                       alt={item.title}
                       className="food-image"
                     />
@@ -274,11 +278,11 @@ const Offers = ({ filter, sortBy, price, cuisine }) => {
                   </div>
 
                   <h2>
-                    {item.title} <span>({item.portion})</span>
+                    <SplitWords text={item.title} /> <span>({item.portion})</span>
                   </h2>
 
                   <p className="food-desc">
-                    {(item.desc || "").slice(0, 60)}...
+                    <SplitWords text={`${(item.desc || "").slice(0, 60)}...`} />
                   </p>
 
                   <div className="food-rating">
@@ -305,21 +309,21 @@ const Offers = ({ filter, sortBy, price, cuisine }) => {
                   </div>
 
                   <div className="food-actions">
-                    <button
+                    <PressButton
                       className="order-btn"
                       onClick={() => placeOrder(item)}
                     >
                       Place order
-                    </button>
+                    </PressButton>
 
                     <div className="add-btn">
-                      <button onClick={() => decrease(item)}>-</button>
+                      <PressButton onClick={() => decrease(item)}>-</PressButton>
                       <span>{getQty(item)}</span>
-                      <button onClick={() => increase(item)}>+</button>
+                      <PressButton onClick={() => increase(item)}>+</PressButton>
                     </div>
                   </div>
                 </div>
-              </div>
+              </ProductCard>
             </SwiperSlide>
           );
         })}

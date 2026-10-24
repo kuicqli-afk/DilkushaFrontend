@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import Slider from "../Slider/Slider";
+import { PageSkeleton } from "../Skeleton/Skeleton";
 
 const OfferDetails = () => {
   const { slug } = useParams();
@@ -14,7 +15,7 @@ const OfferDetails = () => {
       .catch((err) => console.log(err));
   }, [slug]);
 
-  if (!Offers) return <h2>Loading...</h2>;
+  if (!Offers) return <PageSkeleton />;
 
   return (
     <div className="food-container">

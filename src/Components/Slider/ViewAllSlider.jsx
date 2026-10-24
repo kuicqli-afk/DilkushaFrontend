@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./Slider.css";
 import { useNavigate } from "react-router-dom";
+import { optimizeImage } from "../../utils/image";
+import { RevealImage } from "../Motion/motionKit";
 
 const API_URL = "https://backend.shyamnamkeenandbakers.online";
 
@@ -109,8 +111,8 @@ const ViewAllSlider = ({ category }) => {
                         key={item._id ? `${item._id}-${i}` : i}
                         style={{ position: "relative" }}
                     >
-                        <img
-                            src={getImageUrl(item.image)}
+                        <RevealImage
+                            src={optimizeImage(getImageUrl(item.image), 1600)}
                             className="bg-img"
                             alt={item.title || "Category Slider"}
                         />

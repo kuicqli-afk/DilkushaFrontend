@@ -25,7 +25,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-left: -18px;
+  text-decoration: none;
+  color: inherit;
 }
 
 .explore-menu-list-item img {
@@ -138,4 +139,14 @@
   .explore-menu-list-item p {
     font-size: 14px;
   }
+}
+
+/* ================= EDGES ================= */
+/* bubbles that are only partly in view fade out at the edges instead of
+   being sliced off; a little vertical room keeps the rings whole */
+.explore-menu-wrapper .swiper {
+  /* Swiper subtracts its own padding when sizing slides */
+  padding: 6px 20px;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 64px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 64px), transparent 100%);
 }

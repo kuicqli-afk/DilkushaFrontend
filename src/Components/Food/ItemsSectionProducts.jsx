@@ -18,6 +18,10 @@ import Slider from "../Slider/Slider";
 import Category from "../Category/Category";
 import Button from "./Button";
 import { useCart } from "../../Context/CartContext";
+import AnimatedText from "../Motion/AnimatedText";
+import { ProductGridSkeleton } from "../Skeleton/Skeleton";
+import { optimizeImage } from "../../utils/image";
+import { PressButton, ProductCard, RevealImage, SplitWords } from "../Motion/motionKit";
 
 const API_URL = "https://backend.shyamnamkeenandbakers.online";
 
@@ -166,13 +170,11 @@ function ItemsSectionProducts({ tag: propTag }) {
 
             <div className="food-container">
                 <div className="food-text">
-                    <h1>{formatTitle(tag)}</h1>
+                    <AnimatedText as="h1" text={formatTitle(tag)} />
                 </div>
 
                 {loading ? (
-                    <p className="p-6 text-center text-sm" style={{ padding: "40px 0", color: "#666" }}>
-                        Loading products...
-                    </p>
+                    <ProductGridSkeleton />
                 ) : filteredList.length === 0 ? (
                     <div className="no-offers">
                         <p>No products found in "{formatTitle(tag)}" right now.</p>
@@ -184,7 +186,7 @@ function ItemsSectionProducts({ tag: propTag }) {
                             const hasVideo = Boolean(videoSrc);
 
                             return (
-                                <div key={item._id} className="food-card">
+                                <ProductCard key={item._id} className="food-card">
 
                                     {/* Image / Video Media Wrapper */}
                                     <div className="food-image-wrapper">
@@ -213,8 +215,8 @@ function ItemsSectionProducts({ tag: propTag }) {
                                                 />
                                             )
                                         ) : (
-                                            <img
-                                                src={item.image}
+                                            <RevealImage
+                                                src={optimizeImage(item.image, 720)}
                                                 alt={item.title}
                                                 className="food-images"
                                             />
@@ -275,11 +277,11 @@ function ItemsSectionProducts({ tag: propTag }) {
                                         </div>
 
                                         <h2>
-                                            {item.title} <span>({item.portion})</span>
+                                            <SplitWords text={item.title} /> <span>({item.portion})</span>
                                         </h2>
 
                                         <p className="food-desc">
-                                            {(item.desc || "").slice(0, 70)}...
+                                            <SplitWords text={`${(item.desc || "").slice(0, 70)}...`} />
                                         </p>
 
                                         <div className="food-rating">
@@ -306,20 +308,20 @@ function ItemsSectionProducts({ tag: propTag }) {
                                         </div>
 
                                         <div className="food-actions">
-                                            <button
+                                            <PressButton
                                                 className="order-btn"
                                                 onClick={() => placeOrder(item)}
                                             >
                                                 Place order
-                                            </button>
+                                            </PressButton>
                                             <div className="add-btn">
-                                                <button onClick={() => decrease(item)}>-</button>
+                                                <PressButton onClick={() => decrease(item)}>-</PressButton>
                                                 <span>{getQty(item)}</span>
-                                                <button onClick={() => increase(item)}>+</button>
+                                                <PressButton onClick={() => increase(item)}>+</PressButton>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </ProductCard>
                             );
                         })}
                     </div>

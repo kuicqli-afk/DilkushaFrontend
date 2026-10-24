@@ -28,6 +28,8 @@ import {
 
 import { Link } from "react-router-dom";
 import { FiGift } from "react-icons/fi";
+import { StaggerChildren } from "../Motion/motionKit";
+import { TextLinesSkeleton } from "../Skeleton/Skeleton";
 
 // Rider popups live in their own chunk; it loads on first hover/focus/click, not with the page
 const loadRiderConnect = () => import("./RiderConnect");
@@ -222,7 +224,7 @@ const Footer = () => {
         })}
       </div>
 
-      <div className="footer-content">
+      <StaggerChildren className="footer-content">
         <div className="footer-content-left">
           <img src={logo} alt="Shyam Foods" className="footer-logo" />
           <p>Freshly baked, delivered with care. Quality you can taste in every bite.</p>
@@ -240,7 +242,9 @@ const Footer = () => {
 
           <ul className={`footer-collapsible ${openSections.categories ? "open" : ""}`}>
             {categoriesLoading ? (
-              <li>Loading...</li>
+              <li>
+                <TextLinesSkeleton lines={4} label="Loading menus" />
+              </li>
             ) : latestCategories.length === 0 ? (
               <li>No categories yet</li>
             ) : (
@@ -266,10 +270,11 @@ const Footer = () => {
           </button>
 
           <ul className={`footer-collapsible ${openSections.company ? "open" : ""}`}>
-            <li><Link to="">Contact Us</Link></li>
+            <li><Link to="/about-us">About Us</Link></li>
+            <li><Link to="/contact-us">Contact Us</Link></li>
             <li><Link to="/terms-and-conditions">Terms and Conditions</Link></li>
             <li><Link to="/privacy-policy">Privacy Policy</Link></li>
-            <li><Link to="">Shipping and Delivery</Link></li>
+            <li><Link to="/shipping-and-delivery">Shipping and Delivery</Link></li>
             <li>
               <button
                 type="button"
@@ -349,7 +354,7 @@ const Footer = () => {
             </a>
           </div>
         </div>
-      </div>
+      </StaggerChildren>
 
       <div className="footer-bottom-bar">
         <p className="footer-copyright">

@@ -83,6 +83,7 @@
 
 .view-all {
   color: #e11c1c;
+  text-decoration: none;
   font-size: 14px;
   cursor: pointer;
   margin-top: 11px;
@@ -148,17 +149,14 @@
 /* ================= CARD ================= */
 .food-card {
   width: 100%;
-  min-width: 300px;
+  /* never wider than its slot on 320px phones */
+  min-width: min(300px, 100%);
   max-width: 360px;
   height: 100%;
   border-radius: 16px;
   overflow: visible;
   flex-shrink: 0;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.food-card:hover {
-  transform: translateY(-8px);
+  /* hover lift lives in Motion/motion.css (gated to real hover devices) */
 }
 
 /* ================= IMAGE ================= */
@@ -844,4 +842,4 @@ select:focus {
 
 .slide-transition {
   transition: opacity 0.4s ease-in-out;
-}
+}

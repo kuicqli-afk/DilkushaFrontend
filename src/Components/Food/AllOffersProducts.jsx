@@ -20,6 +20,9 @@ import "swiper/css";
 import "../Slider/Slider.css"; // 🆕 same CSS jo main homepage slider use karta hai
 
 import { useCart } from "../../Context/CartContext";
+import { ProductGridSkeleton } from "../Skeleton/Skeleton";
+import { optimizeImage } from "../../utils/image";
+import { PressButton, ProductCard, RevealImage, SplitWords } from "../Motion/motionKit";
 
 
 const API_URL = "https://backend.shyamnamkeenandbakers.online";
@@ -166,7 +169,7 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
                 <div className="slider-track">
                     <div className="slide">
                         <img
-                            src={getImageUrl(offerBanner.image)}
+                            src={optimizeImage(getImageUrl(offerBanner.image), 1600)}
                             className="bg-img"
                             alt={offerBanner.title || "Offer Banner"}
                         />
@@ -181,7 +184,7 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
                 <OfferBanner />
                 <div className="food-container">
                     {/* <div className="food-text"><h1>{offerBanner?.title || formatTitle(slug)}</h1></div> */}
-                    <p className="p-6 text-center text-sm">Loading products...</p>
+                    <ProductGridSkeleton />
                 </div>
             </>
         );
@@ -204,7 +207,7 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
                     <div className="food-card-grid">
 
                         {filteredList.map((item) => (
-                            <div key={item._id} className="food-card">
+                            <ProductCard key={item._id} className="food-card">
 
 
                                 {/* Image */}
@@ -246,8 +249,8 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
                                             title={item.title}
                                         />
                                     ) : (
-                                        <img
-                                            src={item.image}
+                                        <RevealImage
+                                            src={optimizeImage(item.image, 720)}
                                             alt={item.title}
                                             className="food-image"
                                         />
@@ -287,9 +290,9 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
                                     </div>
 
                                     <h2>
-                                        {item.title} <span>({item.portion})</span>
+                                        <SplitWords text={item.title} /> <span>({item.portion})</span>
                                     </h2>
-                                    <p className="food-desc">{(item.desc || "").slice(0, 60)}...</p>
+                                    <p className="food-desc"><SplitWords text={`${(item.desc || "").slice(0, 60)}...`} /></p>
 
                                     <div className="food-rating">
                                         <img src={StarIcon} alt="" />
@@ -315,17 +318,17 @@ function AllOffersProducts({ filter, sortBy, price, cuisine }) {
                                     </div>
 
                                     <div className="food-actions">
-                                        <button className="order-btn" onClick={() => placeOrder(item)}>
+                                        <PressButton className="order-btn" onClick={() => placeOrder(item)}>
                                             Place order
-                                        </button>
+                                        </PressButton>
                                         <div className="add-btn">
-                                            <button onClick={() => decrease(item)}>-</button>
+                                            <PressButton onClick={() => decrease(item)}>-</PressButton>
                                             <span>{getQty(item)}</span>
-                                            <button onClick={() => increase(item)}>+</button>
+                                            <PressButton onClick={() => increase(item)}>+</PressButton>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </ProductCard>
                         ))}
                     </div>
                 )}

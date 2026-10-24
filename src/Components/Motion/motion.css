@@ -1,0 +1,588 @@
+/* =====================================================================
+   SITE MOTION — one system for the whole site.
+
+   Any element with data-reveal animates the first time it scrolls into
+   view (revealObserver.js marks it data-revealed). Everything is a CSS
+   transition of opacity and transform only, which the browser runs on its
+   compositor thread — so it stays smooth even while the page is busy
+   loading products. One curve, one family of durations, short travel.
+
+     data-reveal="up"      rises in            (sections, banners)
+     data-reveal="fade"    static on purpose   (rows of cards)
+     data-reveal="words"   heading, word by word
+     data-reveal="stagger" its children, one after another
+     data-reveal="card"    a product card's text, line by line
+     data-reveal="text"    added automatically to page text
+   ===================================================================== */
+
+:root {
+  /* ease-out-cubic: a soft, even settle */
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --rv-dur: 800ms;
+  --rv-rise: 14px;
+  /* modern "blur-in": text sharpens as it arrives. Only ever on text-sized
+     elements, and dropped to `none` once revealed so nothing keeps a layer */
+  --rv-blur: blur(6px);
+}
+
+/* ================= PAGE TRANSITION ================= */
+/* Runs on every route change. Backwards fill (not `both`) so the transform
+   is dropped once it ends — any leftover transform would trap
+   position:fixed children (modals, drawers) inside the page. */
+.page-transition {
+  animation: pageEnter 520ms var(--ease-out) backwards;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ================= REVEAL: BASICS ================= */
+/* "fade" is accepted but deliberately static: rows of photo cards are
+   too big to fade cheaply (see PRODUCT CARD below) */
+[data-reveal="up"] {
+  opacity: 0;
+  transition:
+    opacity var(--rv-dur) var(--ease-out),
+    transform var(--rv-dur) var(--ease-out);
+}
+
+[data-reveal="up"] {
+  transform: translate3d(0, var(--rv-rise), 0);
+}
+
+[data-reveal="up"][data-revealed] {
+  opacity: 1;
+  transform: none;
+}
+
+/* children of a stagger group, and slides marked .reveal-item (category
+   bubbles), rise in one after another */
+[data-reveal="stagger"] > *,
+[data-reveal] .reveal-item {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  transition:
+    opacity var(--rv-dur) var(--ease-out),
+    transform var(--rv-dur) var(--ease-out),
+    filter var(--rv-dur) var(--ease-out);
+  transition-delay: calc(min(var(--n, 0), 10) * 70ms);
+}
+
+[data-reveal="stagger"] > * {
+  filter: var(--rv-blur);
+}
+
+[data-reveal] .reveal-item {
+  transition-delay: calc(min(var(--i, 0), 10) * 60ms);
+}
+
+[data-reveal="stagger"][data-revealed] > *,
+[data-revealed] .reveal-item {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* plain page text, tagged automatically by revealObserver.js:
+   headings, paragraphs and list items blur-rise in as they arrive */
+[data-reveal="text"] {
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  filter: var(--rv-blur);
+  transition:
+    opacity 700ms var(--ease-out),
+    transform 700ms var(--ease-out),
+    filter 700ms var(--ease-out);
+}
+
+[data-reveal="text"][data-revealed] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* position in a group, for stagger delays */
+:is([data-reveal="stagger"], .food-info, .food-status-left, .food-status-right-icon, .rating-stars, .food-price-row, .food-actions) > :nth-child(2) { --n: 1; }
+:is([data-reveal="stagger"], .food-info, .food-status-left, .food-status-right-icon, .rating-stars, .food-price-row, .food-actions) > :nth-child(3) { --n: 2; }
+:is([data-reveal="stagger"], .food-info, .food-status-left, .food-status-right-icon, .rating-stars, .food-price-row, .food-actions) > :nth-child(4) { --n: 3; }
+:is([data-reveal="stagger"], .food-info, .food-status-left, .food-status-right-icon, .rating-stars, .food-price-row, .food-actions) > :nth-child(5) { --n: 4; }
+:is([data-reveal="stagger"], .food-info, .food-status-left, .food-status-right-icon, .rating-stars, .food-price-row, .food-actions) > :nth-child(6) { --n: 5; }
+:is([data-reveal="stagger"], .food-info, .food-status-left, .food-status-right-icon, .rating-stars, .food-price-row, .food-actions) > :nth-child(n + 7) { --n: 6; }
+
+/* ================= REVEAL: WORDS ================= */
+/* each word sits in its own mask (.sw) and rises out of it */
+.sw {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  /* room for descenders (g, y, p) inside the mask */
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+.sw-i {
+  display: inline-block;
+}
+
+[data-reveal="words"] .sw-i {
+  transform: translate3d(0, 105%, 0);
+  filter: var(--rv-blur);
+  transition:
+    transform 900ms var(--ease-out),
+    filter 900ms var(--ease-out);
+  transition-delay: calc(var(--w, 0) * 55ms);
+}
+
+[data-reveal="words"][data-revealed] .sw-i {
+  transform: none;
+  filter: none;
+}
+
+/* the card title styles `h2 span` as the small weight label; words aren't that */
+.food-info h2 span.sw,
+.food-info h2 span.sw-i {
+  font-size: inherit;
+  color: inherit;
+}
+
+/* ================= REVEAL: PRODUCT CARD ================= */
+/* Measured in a real Chrome: fading whole cards, rows or photos (big
+   image-filled areas) forces the browser to repaint them into new layers
+   the moment they appear, which stalled scrolling. So the card and its
+   photo appear straight away and only the card's text block rises in —
+   one small element per card. */
+/* each line of text rises in, one after another: badges, name,
+   description, rating, price, buttons (about 9 small pieces per card).
+   Only the name also sharpens from a blur: blur on every line measured
+   1–9 dropped frames per scroll in a real Chrome, name-only measured 0. */
+[data-reveal="card"] .food-info > * {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  transition:
+    opacity 750ms var(--ease-out),
+    transform 750ms var(--ease-out),
+    filter 750ms var(--ease-out);
+  transition-delay: calc(150ms + var(--n, 0) * 75ms);
+}
+
+[data-reveal="card"] .food-info > h2 {
+  filter: var(--rv-blur);
+}
+
+[data-reveal="card"][data-revealed] .food-info > * {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* the product name then rises word by word out of its masks */
+[data-reveal="card"] .food-info h2 .sw-i {
+  transform: translate3d(0, 105%, 0);
+  transition: transform 800ms var(--ease-out);
+  transition-delay: calc(230ms + var(--w, 0) * 60ms);
+}
+
+[data-reveal="card"][data-revealed] .food-info h2 .sw-i {
+  transform: none;
+}
+
+/* A soft band of light sweeps once across the photo as the card arrives,
+   like light catching a snack pack. Only the band moves (a transform on a
+   pseudo-element, run by the compositor); the photo itself stays still. */
+.food-image-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.38) 50%, transparent 65%);
+  transform: translate3d(-110%, 0, 0);
+}
+
+[data-reveal="card"][data-revealed] .food-image-wrapper::after {
+  animation: cardSheen 1100ms var(--ease-in-out) 250ms both;
+}
+
+@keyframes cardSheen {
+  to {
+    transform: translate3d(110%, 0, 0);
+  }
+}
+
+/* ================= IMAGES ================= */
+/* Photos stay hidden behind a skeleton shimmer until they are downloaded
+   and decoded (RevealImage adds .is-loaded), then fade in smoothly. */
+.reveal-img {
+  opacity: 0;
+  transition: opacity 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-img.is-loaded {
+  opacity: 1;
+}
+
+/* …except photos in product cards: a row of big photos fading together
+   was the measured cause of scroll lag, so those appear at once and get
+   the light sheen above instead */
+.food-card .reveal-img {
+  transition: none;
+}
+
+.food-image-wrapper:has(> .reveal-img:not(.is-loaded)),
+.order-main-image-wrap:has(> .reveal-img:not(.is-loaded)) {
+  background: linear-gradient(100deg, #f3ece2 30%, #fbf7f1 50%, #f3ece2 70%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s linear infinite;
+}
+
+.food-image-wrapper {
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+/* CardSlideshow: the previous photo fades out on top of the next one
+   (one small layer, only on cards that have several photos) */
+.card-slide-out {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  animation: cardSlideOut 600ms var(--ease-out) forwards;
+}
+
+@keyframes cardSlideOut {
+  to {
+    opacity: 0;
+  }
+}
+
+/* ================= CAROUSELS ================= */
+/* Product rows and category bubbles glide: Swiper's default curve starts
+   abruptly; ease-in-out-cubic eases in and settles gently. */
+.food-card-row.swiper,
+.explore-menu .swiper {
+  --swiper-wrapper-transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ================= HOVER & PRESS ================= */
+/* `translate`/`scale` (not `transform`) so they never fight the reveal */
+.food-card {
+  transition:
+    translate 500ms var(--ease-out),
+    box-shadow 500ms var(--ease-out);
+}
+
+.food-card h2 {
+  transition: color 300ms ease;
+}
+
+.order-btn,
+.add-btn button {
+  transition: scale 160ms var(--ease-out);
+}
+
+.order-btn:not(:disabled):active,
+.add-btn button:not(:disabled):active {
+  scale: 0.97;
+}
+
+.order-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.order-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .food-card:hover {
+    translate: 0 -8px;
+    box-shadow: 0 22px 40px -18px rgba(169, 4, 9, 0.35);
+  }
+
+  .food-card:hover .order-btn:not(:disabled)::after {
+    transform: translateX(120%);
+    transition: transform 800ms var(--ease-out);
+  }
+}
+
+/* ================= SKELETON ================= */
+.skeleton {
+  display: block;
+  background: linear-gradient(100deg, #eef1f5 30%, #f8fafc 50%, #eef1f5 70%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s linear infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeletonShimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-heading {
+  width: min(260px, 60%);
+  height: 32px;
+  margin: 10px 0 15px;
+}
+
+.skeleton-row {
+  display: flex;
+  gap: 20px;
+  overflow: hidden;
+  padding-bottom: 25px;
+}
+
+.skeleton-card {
+  flex: 0 0 auto;
+  width: 300px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.food-card-grid .skeleton-card {
+  width: 100%;
+}
+
+.skeleton-card-image {
+  height: 340px;
+  border-radius: 0;
+}
+
+.skeleton-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px 18px;
+}
+
+.skeleton-line {
+  height: 12px;
+}
+
+.skeleton-line.lg {
+  height: 18px;
+  width: 75%;
+}
+
+.skeleton-line.sm {
+  width: 45%;
+}
+
+.skeleton-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.skeleton-btn {
+  height: 38px;
+  flex: 1;
+  border-radius: 10px;
+}
+
+.skeleton-categories {
+  display: flex;
+  gap: 22px;
+  overflow: hidden;
+  margin-top: 45px;
+  padding-inline: clamp(12px, 4vw, 60px);
+}
+
+.skeleton-category {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.skeleton-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+}
+
+.skeleton-category .skeleton-line {
+  width: 80px;
+}
+
+.skeleton-detail {
+  display: grid;
+  gap: 24px;
+  padding: 30px clamp(12px, 4vw, 60px);
+}
+
+.skeleton-detail-image {
+  height: 420px;
+  border-radius: 16px;
+}
+
+@media (min-width: 900px) {
+  .skeleton-detail {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.skeleton-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.skeleton-inline {
+  display: inline-block;
+  height: 1em;
+  vertical-align: middle;
+  border-radius: 6px;
+}
+
+.skeleton-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 36px clamp(16px, 4vw, 60px) 60px;
+}
+
+.skeleton-blocks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: 18px;
+}
+
+.skeleton-block {
+  height: 220px;
+  border-radius: 16px;
+}
+
+.skeleton-order {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #ede4d8;
+  border-radius: 16px;
+}
+
+.skeleton-order-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+}
+
+.skeleton-thumb {
+  flex: 0 0 auto;
+  width: 84px;
+  height: 84px;
+  border-radius: 12px;
+}
+
+.skeleton-reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.skeleton-review {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.skeleton-avatar {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+/* match the real category bubbles (Category.css) */
+@media (max-width: 768px) {
+  .skeleton-circle {
+    width: 85px;
+    height: 85px;
+  }
+}
+
+@media (max-width: 480px) {
+  .skeleton-card {
+    width: calc(100vw - 48px);
+  }
+
+  .skeleton-card-image {
+    height: 280px;
+  }
+
+  .skeleton-categories {
+    gap: 14px;
+  }
+}
+
+/* ================= REDUCED MOTION ================= */
+/* fewer and gentler: keep short fades, drop all movement */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --rv-dur: 300ms;
+    --rv-blur: none;
+  }
+
+  .page-transition {
+    animation-name: pageFade;
+    animation-duration: 200ms;
+  }
+
+  [data-reveal="up"],
+  [data-reveal="text"],
+  [data-reveal="stagger"] > *,
+  [data-reveal] .reveal-item,
+  [data-reveal="words"] .sw-i,
+  [data-reveal="card"] .food-info > *,
+  [data-reveal="card"] .food-info h2 .sw-i {
+    transform: none !important;
+    transition-delay: 0ms !important;
+  }
+
+
+  .skeleton,
+  .food-image-wrapper,
+  .order-main-image-wrap,
+  .food-image-wrapper::after {
+    animation: none !important;
+  }
+
+  .food-card:hover {
+    translate: none;
+  }
+}
+
+@keyframes pageFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

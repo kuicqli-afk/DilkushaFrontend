@@ -1189,7 +1189,7 @@
 
   .nav-left .logo-text {
     width: clamp(112px, 34vw, 156px);
-    margin-left: 10;
+    margin-left: 0;
   }
 
   /* Row 1 right : cart + menu */

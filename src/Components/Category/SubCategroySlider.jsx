@@ -7,6 +7,8 @@ import { FreeMode, Autoplay } from "swiper/modules";
 
 import "swiper/css";
 import "./Category.css";
+import { optimizeImage } from "../../utils/image";
+import { CategorySkeleton } from "../Skeleton/Skeleton";
 
 const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
@@ -153,7 +155,7 @@ const SubCategorySlider = ({ categoryCode, onSelectSubCategory, onHasSubcategori
     }
   };
 
-  if (loading) return null;
+  if (loading) return <CategorySkeleton count={8} />;
   if (!subs.length) return null;
 
   return (
@@ -182,7 +184,7 @@ const SubCategorySlider = ({ categoryCode, onSelectSubCategory, onHasSubcategori
                 style={{ cursor: "pointer" }}
               >
                 {item.image ? (
-                  <img src={item.image} alt={item.name} />
+                  <img src={optimizeImage(item.image, 240)} alt={item.name} loading="lazy" decoding="async" />
                 ) : (
                   <div className="icon-box">
                     <span style={{ fontSize: "28px", fontWeight: 800, color: "#ff4d4d" }}>

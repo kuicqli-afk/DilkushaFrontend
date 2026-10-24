@@ -16,6 +16,9 @@ import GreenArrow from "../../assets/VEG.png";
 import StarIcon from "../../assets/StarIcon.png";
 
 import MaidaItems from "../Food/MaidaItems.jsx";
+import { optimizeImage } from "../../utils/image";
+import { RevealImage, StaggerChildren } from "../Motion/motionKit";
+import { ProductDetailSkeleton, ReviewsSkeleton, TextLinesSkeleton } from "../Skeleton/Skeleton";
 
 const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
@@ -198,11 +201,7 @@ const OrderPage = () => {
   // NOW it's safe to bail out — every hook above has already run this render,
   // in the same order, on every render, whether item is null or not.
   if (itemLoading) {
-    return (
-      <div style={{ textAlign: "center", padding: "60px 20px" }}>
-        <h2>Loading...</h2>
-      </div>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (!item) {
@@ -385,7 +384,7 @@ const OrderPage = () => {
                   {productImages.map((imgUrl, idx) => (
                     <img
                       key={idx}
-                      src={imgUrl}
+                      src={optimizeImage(imgUrl, 200)}
                       alt={`${item.title} thumbnail ${idx + 1}`}
                       onClick={() => setSelectedImage(imgUrl)}
                       className={`order-thumb-img ${selectedImage === imgUrl ? "active" : ""}`}
@@ -402,7 +401,7 @@ const OrderPage = () => {
 
               <div className="order-main-image-wrap">
                 {selectedImage && (
-                  <img key={selectedImage} src={selectedImage} alt={item.title} className="order-image" />
+                  <RevealImage key={selectedImage} src={optimizeImage(selectedImage, 1100)} alt={item.title} className="order-image" />
                 )}
 
                 <img
@@ -412,7 +411,7 @@ const OrderPage = () => {
                 />
               </div>
             </div>
-            <div className="order-details">
+            <StaggerChildren className="order-details">
               <div className="order-status">
                 <img src={item.isOpen ? OpenIcon : CloseIcon} alt="" />
                 <p className={`stock-status ${isAvailable ? "text-green-600" : "text-red-600"}`}>
@@ -532,7 +531,7 @@ const OrderPage = () => {
                   <button onClick={increase} disabled={!isAvailable}>+</button>
                 </div>
               </div>
-            </div>
+            </StaggerChildren>
 
             <div className="highlights-box">
               <h3 className="highlights-title">Highlights</h3>
@@ -768,7 +767,7 @@ const OrderPage = () => {
           <div className="review">
             {restaurantLoading ? (
               <div className="shop">
-                <p className="text-xs text-gray-400">Loading restaurant info...</p>
+                <TextLinesSkeleton lines={3} label="Loading shop info" />
               </div>
             ) : restaurant ? (
               <div className="shop">
@@ -867,7 +866,7 @@ const OrderPage = () => {
             </form>
 
             {reviewsLoading ? (
-              <p className="reviews-status-text">Loading reviews...</p>
+              <ReviewsSkeleton />
             ) : reviews.length === 0 ? (
               <p className="reviews-status-text">No reviews yet. Be the first to review!</p>
             ) : (

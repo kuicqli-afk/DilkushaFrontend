@@ -15,6 +15,7 @@ import {
   AiOutlineWallet,
 } from "react-icons/ai";
 import { FaMotorcycle } from "react-icons/fa";
+import { OrderListSkeleton } from "../Skeleton/Skeleton";
 const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 const POLL_INTERVAL = 10000;
 
@@ -652,17 +653,7 @@ export default function OrderHistory() {
 
   if (loading) {
     return (
-      <div style={{ padding: "60px", textAlign: "center" }}>
-        <div
-          style={{
-            width: "36px", height: "36px", margin: "0 auto",
-            border: "3px solid #f1e4ec", borderTopColor: "#880559",
-            borderRadius: "50%", animation: "spin 0.8s linear infinite",
-          }}
-        />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        <p style={{ marginTop: "14px", fontSize: "13px", color: "#888" }}>Loading your orders...</p>
-      </div>
+      <OrderListSkeleton />
     );
   }
 

@@ -20,6 +20,10 @@ import {
 } from "react-icons/fa";
 import { FiGlobe, FiLock } from "react-icons/fi";
 import { VscEye } from "react-icons/vsc";
+import { ProductGridSkeleton } from "../Skeleton/Skeleton";
+import { optimizeImage } from "../../utils/image";
+import { PressButton, ProductCard, SplitWords } from "../Motion/motionKit";
+import CardSlideshow from "../Motion/CardSlideshow";
 
 const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
@@ -58,8 +62,6 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // State for continuous automatic image sliding & dot indicators
-    const [activeImageIndices, setActiveImageIndices] = useState({});
 
     const params = useParams();
 
@@ -123,32 +125,6 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
             })
             .finally(() => setLoading(false));
     }, [category, subCategory, isAll]);
-
-    // Continuous automatic background sliding effect for cards with multiple images
-    useEffect(() => {
-        if (!items || items.length === 0) return;
-
-        const interval = setInterval(() => {
-            setActiveImageIndices((prev) => {
-                const next = { ...prev };
-                items.forEach((item) => {
-                    const images = getItemImages(item);
-                    if (images.length > 1) {
-                        const current = prev[item._id] || 0;
-                        next[item._id] = (current + 1) % images.length;
-                    }
-                });
-                return next;
-            });
-        }, 2200);
-
-        return () => clearInterval(interval);
-    }, [items]);
-
-    const handleDotClick = (itemId, index, e) => {
-        e.stopPropagation();
-        setActiveImageIndices((prev) => ({ ...prev, [itemId]: index }));
-    };
 
     const getStock = (item) => {
         if (item.quantity === undefined || item.quantity === null || item.quantity === "") {
@@ -224,7 +200,7 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
             <>
                 {bannerCategory && <ViewAllSlider category={bannerCategory} />}
                 <div className="food-container">
-                    <p>Loading products...</p>
+                    <ProductGridSkeleton />
                 </div>
             </>
         );
@@ -265,12 +241,11 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
                         const ordersCount = item.orders ?? 0;
                         // Extract image array supporting item.images or fallback to single image
                         const images = getItemImages(item);
-                        const currentImgIdx = activeImageIndices[item._id] || 0;
                         const activeVideo = item.video || item.video2;
                         const isYouTube = activeVideo && activeVideo.includes("youtube.com");
                         const isMp4 = activeVideo && activeVideo.endsWith(".mp4");
                         return (
-                            <div key={item._id} className={`food-card${!inStock ? " out-of-stock" : ""}`}>
+                            <ProductCard key={item._id} className={`food-card${!inStock ? " out-of-stock" : ""}`}>
                                 {activeVideo && <div className="add-badge">Ads</div>}
 
                                 <div className="food-image-wrapper">
@@ -294,24 +269,11 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
                                             title={item.title}
                                         />
                                     ) : (
-                                        <>
-                                            <img
-                                                src={images[currentImgIdx] || images[0] || (typeof item.image === "string" ? item.image : "")}
-                                                alt={item.title}
-                                                className={`food-image slide-transition${!inStock ? " blurred" : ""}`}
-                                            />
-                                            {images.length > 1 && (
-                                                <div className="card-dots-container">
-                                                    {images.map((_, idx) => (
-                                                        <span
-                                                            key={idx}
-                                                            className={`card-dot ${idx === currentImgIdx ? 'active' : ''}`}
-                                                            onClick={(e) => handleDotClick(item._id, idx, e)}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </>
+                                        <CardSlideshow
+                                            images={(images.length ? images : [typeof item.image === "string" ? item.image : ""]).map((src) => optimizeImage(src, 720))}
+                                            alt={item.title}
+                                            className={`food-image${!inStock ? " blurred" : ""}`}
+                                        />
                                     )}
 
                                     <div className="view-eye">
@@ -400,11 +362,11 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
                                         </div>
                                     </div>
                                     <h2>
-                                        {item.title} <span>{item.weight ? `${item.weight}${item.unit || ""}` : item.portion ? `(${item.portion})` : ""}</span>
+                                        <SplitWords text={item.title} /> <span>{item.weight ? `${item.weight}${item.unit || ""}` : item.portion ? `(${item.portion})` : ""}</span>
                                     </h2>
 
                                     <p className="food-desc">
-                                        {(item.desc || "").slice(0, 60)}...
+                                        <SplitWords text={`${(item.desc || "").slice(0, 60)}...`} />
                                     </p>
 
                                     <div className="food-rating">
@@ -449,28 +411,28 @@ function MaidaItemsAll({ categoryCode, subCategoryCode, isAll, showBanner = true
                                     </div>
 
                                     <div className="food-actions">
-                                        <button
+                                        <PressButton
                                             className="order-btn"
                                             onClick={() => placeOrder(item)}
                                             disabled={!inStock}
                                         >
                                             {inStock ? "Shop Now" : "Out of Stock"}
-                                        </button>
+                                        </PressButton>
                                         <div className="add-btn">
-                                            <button onClick={() => decrease(item)} disabled={!inStock}>
+                                            <PressButton onClick={() => decrease(item)} disabled={!inStock}>
                                                 -
-                                            </button>
+                                            </PressButton>
                                             <span>{getQty(item)}</span>
-                                            <button
+                                            <PressButton
                                                 onClick={() => increase(item)}
                                                 disabled={!inStock}
                                             >
                                                 +
-                                            </button>
+                                            </PressButton>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </ProductCard>
                         );
                     })}
                 </div>

@@ -1,30 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import "./ScrollToTopButton.css";
+import { scrollToTop as smoothScrollToTop } from "../Motion/lenisStore";
+import { useScrolledPast } from "../Motion/useScrolledPast";
 
 export const ScrollToTopButton = () => {
-  const [isVisible, setIsVisible] = useState(false);
+  // shown once the visitor is 300px down (no layout reads on scroll)
+  const isVisible = useScrolledPast(300);
 
-  // Show button when scrolling down
-  useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.scrollY > 300) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-    };
-
-    window.addEventListener("scroll", toggleVisibility);
-
-    return () => window.removeEventListener("scroll", toggleVisibility);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
+  // glides up (CSS scroll-behavior: smooth)
+  const scrollToTop = () => smoothScrollToTop();
 
   return (
     <div>

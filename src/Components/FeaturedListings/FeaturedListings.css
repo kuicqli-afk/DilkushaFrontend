@@ -20,7 +20,8 @@
 .featured-grid {
   margin-top: 50px;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  /* 5 across on wide screens, fewer as space runs out */
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
   row-gap: 20px;
 }
 

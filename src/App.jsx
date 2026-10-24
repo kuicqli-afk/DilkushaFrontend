@@ -3,31 +3,12 @@ import axios from "axios";
 import { BrowserRouter, Routes, Route, useLocation, Outlet, Router } from "react-router-dom";
 import { AuthProvider, useAuth } from "./Context/AuthContext";
 import ProtectedRoute from "./Components/ProtectedRoute";
-import LoginPage from "./Components/Login/LoginPage.jsx";
 
 import Navbar from "./Components/Navbar/Navbar.jsx";
-import Slider from "./Components/Slider/Slider";
 import Category from "./Components/Category/Category";
-import OrderPage from "./Components/OrderPage/OrderPage.jsx";
 import Footer from "./Components/Footer/Footer";
 
-import RestaurantPage from "./Components/ShopsDetailPage/RestaurantPage.jsx";
-import Items from "./Components/Food/Items.jsx";
-import AppBanner from "./Components/Food/AppBanner.jsx";
-import Khuramnagar from "./Components/Pages/Khuramnagar.jsx";
-import Indiranagar from "./Components/Pages/Indiranagar.jsx";
-import Nishatganj from "./Components/Pages/Nishatganj.jsx";
-import Aliganj from "./Components/Pages/Aliganj.jsx";
-import Kapoorthala from "./Components/Pages/Kapoorthala.jsx";
-import Aminabad from "./Components/Pages/Aminabad.jsx";
-import Gomtinagar from "./Components/Pages/Gomtinagar.jsx";
-import Alambagh from "../src/Components/Pages/Alambagh.jsx";
-import Daliganj from "./Components/Pages/Daliganj.jsx";
-import Kalyanpur from "./Components/Pages/Kalyanpur.jsx";
-import CartPage from "./Components/Cart/Cart.jsx";
-import CheckoutPage from "./Components/CheckoutPage/CheckoutPage.jsx";
 
-import Button from "./Components/Food/Button.jsx";
 import Offers from "./Components/Food/Offers.jsx";
 
 import { ScrollToTopButton } from "./Components/ScrollToTopButton/ScrollToTopButton.jsx";
@@ -35,45 +16,72 @@ import ScrollToTop from "./Components/ScrollToTopButton/ScrollToTop";
 
 
 import AdsSlider from "./Components/Slider/AdsSlider.jsx";
-import OfferDetails from "./Components/Pages/OfferDetails.jsx";
 
-import ShyamBakery from "./Components/ShopsDetailPage/ShyamBakery.jsx";
-import ShaymChips from "./Components/ShopsDetailPage/ShaymChips.jsx";
-import AllShopsSlider from "./Components/ShopAllSlider/AllShopsSlider.jsx";
-import ShyamSev from "./Components/ShopsDetailPage/ShyamSev.jsx";
-import ShaymBhujiya from "./Components/ShopsDetailPage/ShaymBhujiya.jsx";
 
-import KajuNamkeen from "./Components/ViewAll/KajuNamkeen.jsx";
-import SingleItemAll from "./Components/ViewAll/SingleItems.jsx";
-import SingleItems from "./Components/ShopsDetailPage/SingleItems.jsx";
 
 import MaidaItems from "./Components/Food/MaidaItems.jsx";
-import MixAll from "./Components/ViewAll/MixAll.jsx";
-import ChuraAll from "./Components/ViewAll/Chura.jsx";
-import ChipsAll from "./Components/ViewAll/ChipsAll.jsx";
-import BhujiyaAll from "./Components/ViewAll/BhujiyaAll.jsx";
-import SevAll from "./Components/ViewAll/SevAll.jsx";
-import PastryAll from "./Components/ViewAll/PastryAll.jsx";
-import CakeAll from "./Components/ViewAll/CakeAll.jsx";
-import CookiesAll from "./Components/ViewAll/CookiesAll.jsx";
-import ItemsAll from "./Components/ViewAll/Items.jsx";
-import OffersAll from "./Components/ViewAll/OffersAll.jsx";
 
-import WeekendSpecial from "./Components/ViewAll/WeekendSpecial.jsx";
-import DiscountOffer from "./Components/DiscountOffer/DiscountOffer.jsx";
 import DynamicSlider from "./Components/Slider/DynamicSlider.jsx";
 
-import CategoryPage from "./Components/Category/CategoryPage.jsx";
-import AllOffersProducts from "./Components/Food/AllOffersProducts.jsx";
-import OrderHistory from "./Components/CheckoutPage/OrderHistory.jsx";
-import ProfilePage from "./Components/Login/ProfilePage.jsx";
-import ItemsSectionProducts from "./Components/Food/ItemsSectionProducts.jsx";
 import FeedbackWatcher from "./Components/Feedback/FeedbackWatcher.jsx";
-import WishlistPage from "./Components/Wishlist/Wishlist.jsx";
-import TermsAndConditions from "./Components/Legal/TermsAndConditions.jsx";
-import PrivacyPolicy from "./Components/Legal/PrivacyPolicy.jsx";
 import { lazy, Suspense } from 'react'
+import PageTransition from "./Components/Motion/PageTransition.jsx";
+import SiteMotion from "./Components/Motion/SiteMotion.jsx";
+import { ProductGridSkeleton, ProductRowSkeleton } from "./Components/Skeleton/Skeleton.jsx";
+import Seo from "./Components/Seo/Seo.jsx";
 const BASE_URL = import.meta.env?.VITE_API_URL || "https://backend.shyamnamkeenandbakers.online/api";
+
+
+// Pages load on demand so the home page doesn't download checkout, PDF and
+// listing code up front.
+const LoginPage = lazy(() => import("./Components/Login/LoginPage.jsx"));
+const OrderPage = lazy(() => import("./Components/OrderPage/OrderPage.jsx"));
+const RestaurantPage = lazy(() => import("./Components/ShopsDetailPage/RestaurantPage.jsx"));
+const Khuramnagar = lazy(() => import("./Components/Pages/Khuramnagar.jsx"));
+const Indiranagar = lazy(() => import("./Components/Pages/Indiranagar.jsx"));
+const Nishatganj = lazy(() => import("./Components/Pages/Nishatganj.jsx"));
+const Aliganj = lazy(() => import("./Components/Pages/Aliganj.jsx"));
+const Kapoorthala = lazy(() => import("./Components/Pages/Kapoorthala.jsx"));
+const Aminabad = lazy(() => import("./Components/Pages/Aminabad.jsx"));
+const Gomtinagar = lazy(() => import("./Components/Pages/Gomtinagar.jsx"));
+const Alambagh = lazy(() => import("../src/Components/Pages/Alambagh.jsx"));
+const Daliganj = lazy(() => import("./Components/Pages/Daliganj.jsx"));
+const Kalyanpur = lazy(() => import("./Components/Pages/Kalyanpur.jsx"));
+const CartPage = lazy(() => import("./Components/Cart/Cart.jsx"));
+const CheckoutPage = lazy(() => import("./Components/CheckoutPage/CheckoutPage.jsx"));
+const OfferDetails = lazy(() => import("./Components/Pages/OfferDetails.jsx"));
+const ShyamBakery = lazy(() => import("./Components/ShopsDetailPage/ShyamBakery.jsx"));
+const ShaymChips = lazy(() => import("./Components/ShopsDetailPage/ShaymChips.jsx"));
+const AllShopsSlider = lazy(() => import("./Components/ShopAllSlider/AllShopsSlider.jsx"));
+const ShyamSev = lazy(() => import("./Components/ShopsDetailPage/ShyamSev.jsx"));
+const ShaymBhujiya = lazy(() => import("./Components/ShopsDetailPage/ShaymBhujiya.jsx"));
+const KajuNamkeen = lazy(() => import("./Components/ViewAll/KajuNamkeen.jsx"));
+const SingleItemAll = lazy(() => import("./Components/ViewAll/SingleItems.jsx"));
+const SingleItems = lazy(() => import("./Components/ShopsDetailPage/SingleItems.jsx"));
+const MixAll = lazy(() => import("./Components/ViewAll/MixAll.jsx"));
+const ChuraAll = lazy(() => import("./Components/ViewAll/Chura.jsx"));
+const ChipsAll = lazy(() => import("./Components/ViewAll/ChipsAll.jsx"));
+const BhujiyaAll = lazy(() => import("./Components/ViewAll/BhujiyaAll.jsx"));
+const SevAll = lazy(() => import("./Components/ViewAll/SevAll.jsx"));
+const PastryAll = lazy(() => import("./Components/ViewAll/PastryAll.jsx"));
+const CakeAll = lazy(() => import("./Components/ViewAll/CakeAll.jsx"));
+const CookiesAll = lazy(() => import("./Components/ViewAll/CookiesAll.jsx"));
+const ItemsAll = lazy(() => import("./Components/ViewAll/Items.jsx"));
+const OffersAll = lazy(() => import("./Components/ViewAll/OffersAll.jsx"));
+const WeekendSpecial = lazy(() => import("./Components/ViewAll/WeekendSpecial.jsx"));
+const DiscountOffer = lazy(() => import("./Components/DiscountOffer/DiscountOffer.jsx"));
+const Slider = lazy(() => import("./Components/Slider/Slider"));
+const CategoryPage = lazy(() => import("./Components/Category/CategoryPage.jsx"));
+const AllOffersProducts = lazy(() => import("./Components/Food/AllOffersProducts.jsx"));
+const OrderHistory = lazy(() => import("./Components/CheckoutPage/OrderHistory.jsx"));
+const ProfilePage = lazy(() => import("./Components/Login/ProfilePage.jsx"));
+const ItemsSectionProducts = lazy(() => import("./Components/Food/ItemsSectionProducts.jsx"));
+const WishlistPage = lazy(() => import("./Components/Wishlist/Wishlist.jsx"));
+const TermsAndConditions = lazy(() => import("./Components/Legal/TermsAndConditions.jsx"));
+const PrivacyPolicy = lazy(() => import("./Components/Legal/PrivacyPolicy.jsx"));
+const ShippingPolicy = lazy(() => import("./Components/Legal/ShippingPolicy.jsx"));
+const ContactUs = lazy(() => import("./Components/Legal/ContactUs.jsx"));
+const AboutUs = lazy(() => import("./Components/Legal/AboutUs.jsx"));
 
 const BecomeRider = lazy(() =>
   import('./Components/Footer/RiderConnect').then((m) => ({ default: m.BecomeRiderPage }))
@@ -123,11 +131,18 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <SiteMotion />
         <AppContent />
       </BrowserRouter>
     </AuthProvider>
   );
 }
+
+const RouteFallback = () => (
+  <div className="food-container" style={{ paddingTop: "30px" }}>
+    <ProductGridSkeleton count={4} />
+  </div>
+);
 
 const MainLayout = () => (
   <>
@@ -135,7 +150,12 @@ const MainLayout = () => (
     <ScrollToTopButton />
     <FeedbackWatcher />
     <Navbar />
-    <Outlet />
+    <Seo />
+    <PageTransition>
+      <Suspense fallback={<RouteFallback />}>
+        <Outlet />
+      </Suspense>
+    </PageTransition>
     <Footer />
   </>
 );
@@ -148,6 +168,7 @@ function AppContent() {
 
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   const location = useLocation();
 
@@ -166,7 +187,8 @@ function AppContent() {
         const names = orderedCategories.map((cat) => cat.name || cat.title);
         setCategories(names); // 🆕 random category-section order every page load
       })
-      .catch((err) => console.error("Categories fetch error:", err));
+      .catch((err) => console.error("Categories fetch error:", err))
+      .finally(() => setCategoriesLoading(false));
   }, []);
 
   // Smooth scroll handler
@@ -215,6 +237,13 @@ function AppContent() {
                 setCuisine={setCuisine}
               /> */}
               {/* <AllOffer /> */}
+
+              {categoriesLoading && (
+                <>
+                  <ProductRowSkeleton />
+                  <ProductRowSkeleton />
+                </>
+              )}
 
               {categories.map((item) => (
                 <div key={item}>
@@ -282,6 +311,9 @@ function AppContent() {
         <Route path="/offer-details/:slug" element={<OfferDetails />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/shipping-and-delivery" element={<ShippingPolicy />} />
+        <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/about-us" element={<AboutUs />} />
 
         <Route
           path="/become-a-rider"

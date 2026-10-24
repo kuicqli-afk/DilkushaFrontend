@@ -211,6 +211,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./Slider.css";
 import { useNavigate } from "react-router-dom";
+import { optimizeImage } from "../../utils/image";
+import { RevealImage } from "../Motion/motionKit";
 
 const API_URL = "https://backend.shyamnamkeenandbakers.online";
 const AUTOPLAY_MS = 3000;
@@ -469,8 +471,8 @@ const DynamicSlider = () => {
                 }
                 : {})}
             >
-              <img
-                src={getImageUrl(slide.src)}
+              <RevealImage
+                src={optimizeImage(getImageUrl(slide.src), 1600)}
                 className="bg-img"
                 alt={slide.title || "Promotional Banner"}
                 loading={i === 0 ? "eager" : "lazy"}

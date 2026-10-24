@@ -17,6 +17,7 @@ import {
 } from "react-icons/ai";
 import "./CheckoutPage.css";
 import { FiArrowLeft, FiMinus, FiPlus, FiTrash2, FiShoppingBag } from "react-icons/fi";
+import { InlineSkeleton } from "../Skeleton/Skeleton";
 
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
@@ -1132,7 +1133,7 @@ export default function CheckoutPage() {
                 </span>
                 {deliveryFee > 0 ? (
                   <span className="delivery-card__amount">
-                    {deliveryLoading ? "..." : `₹ ${deliveryFee.toFixed(2)}`}
+                    {deliveryLoading ? <InlineSkeleton width="4.5em" /> : `₹ ${deliveryFee.toFixed(2)}`}
                   </span>
                 ) : (
                   <span className="delivery-card__amount free-delivery-badge">FREE</span>

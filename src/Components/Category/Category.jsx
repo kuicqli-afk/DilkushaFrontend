@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Autoplay, Pagination } from "swiper/modules";
 import { BiCategory } from "react-icons/bi";
@@ -8,6 +8,10 @@ import { BiCategory } from "react-icons/bi";
 import "swiper/css";
 import "swiper/css/pagination";
 import "./Category.css";
+import Reveal from "../Motion/Reveal";
+import { CategorySkeleton } from "../Skeleton/Skeleton";
+import { optimizeImage } from "../../utils/image";
+import { RevealImage } from "../Motion/motionKit";
 
 // 🆕 Fisher-Yates shuffle — randomizes category order on every fresh page load/refresh
 const shuffleArray = (arr) => {
@@ -23,7 +27,6 @@ const Category = ({ onSelectCategory }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -54,15 +57,10 @@ const Category = ({ onSelectCategory }) => {
     if (onSelectCategory) {
       onSelectCategory(item);
     }
-    navigate(`/category/${encodeURIComponent(item.name)}`);
   };
 
   if (loading) {
-    return (
-      <div className="explore-menu-loading" style={{ textAlign: "center", padding: "20px", color: "#666" }}>
-        <p>Loading categories...</p>
-      </div>
-    );
+    return <CategorySkeleton />;
   }
 
   if (error) {
@@ -82,7 +80,7 @@ const Category = ({ onSelectCategory }) => {
   const displayList = categories;
 
   return (
-    <section style={{ marginTop: "45px" }} className="explore-menu" aria-label="Product Categories">
+    <Reveal as="section" style={{ marginTop: "45px" }} className="explore-menu" aria-label="Product Categories">
       <div className="explore-menu-wrapper">
         <Swiper
           modules={[FreeMode, Autoplay, Pagination]}
@@ -113,30 +111,24 @@ const Category = ({ onSelectCategory }) => {
             1536: { slidesPerView: 10, spaceBetween: 22 },
           }}
         >
-          {displayList.map((item) => (
-            <SwiperSlide key={item._id}>
+          {displayList.map((item, index) => (
+            <SwiperSlide key={item._id} className="reveal-item" style={{ "--i": index }}>
               {item.isAll ? (
-                <div
-                  className="explore-menu-list-item"
-                  onClick={() => navigate("/category/all")}
-                  role="button"
-                  tabIndex={0}
-                >
+                <Link className="explore-menu-list-item" to="/category/all">
                   <div className="icon-box">
                     <BiCategory aria-hidden="true" />
                   </div>
                   <p>{item.name}</p>
-                </div>
+                </Link>
               ) : (
-                <div
+                <Link
                   className="explore-menu-list-item"
+                  to={`/category/${encodeURIComponent(item.name)}`}
                   onClick={() => handleCategoryClick(item)}
-                  role="button"
-                  tabIndex={0}
                 >
-                  <img src={item.image} alt={item.name} loading="lazy" />
+                  <RevealImage src={optimizeImage(item.image, 240)} alt={item.name} loading="lazy" decoding="async" width="120" height="120" />
                   <p>{item.name}</p>
-                </div>
+                </Link>
               )}
             </SwiperSlide>
           ))}
@@ -144,7 +136,7 @@ const Category = ({ onSelectCategory }) => {
 
         <div className="category-dots" aria-hidden="true"></div>
       </div>
-    </section>
+    </Reveal>
   );
 };
 

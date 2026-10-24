@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import axios from "axios";
 
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaHeart, FaRegHeart, FaCheckCircle, FaTimesCircle, FaSave, FaBookmark, FaRegBookmark, FaStar } from "react-icons/fa";
 import { FiGlobe, FiLock } from "react-icons/fi";
 import "./Food.css";
@@ -19,6 +19,12 @@ import { VscEye } from "react-icons/vsc";
 
 
 import { useWishlist } from "../../Context/WishlistContext";
+import Reveal from "../Motion/Reveal";
+import AnimatedText from "../Motion/AnimatedText";
+import { ProductRowSkeleton } from "../Skeleton/Skeleton";
+import { optimizeImage } from "../../utils/image";
+import { PressButton, ProductCard, SplitWords } from "../Motion/motionKit";
+import CardSlideshow from "../Motion/CardSlideshow";
 
 const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
@@ -70,8 +76,6 @@ const MaidaItems = ({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // State for continuous automatic image sliding & dot indicators
-    const [activeImageIndices, setActiveImageIndices] = useState({});
 
     const effectiveSubCategory = subCategory ?? subCategoryName;
     const treatAsAll = isAll || category === "all";
@@ -138,32 +142,6 @@ const MaidaItems = ({
             })
             .finally(() => setLoading(false));
     }, [category, effectiveSubCategory, treatAsAll]);
-
-    // Continuous automatic background sliding effect for cards with multiple images
-    useEffect(() => {
-        if (!list || list.length === 0) return;
-
-        const interval = setInterval(() => {
-            setActiveImageIndices((prev) => {
-                const next = { ...prev };
-                list.forEach((item) => {
-                    const images = getItemImages(item);   // ✅ use shared helper
-                    if (images.length > 1) {
-                        const current = prev[item._id] || 0;
-                        next[item._id] = (current + 1) % images.length;
-                    }
-                });
-                return next;
-            });
-        }, 2200);
-
-        return () => clearInterval(interval);
-    }, [list]);
-
-    const handleDotClick = (itemId, index, e) => {
-        e.stopPropagation();
-        setActiveImageIndices((prev) => ({ ...prev, [itemId]: index }));
-    };
 
     const getStock = (item) => {
         if (item.quantity === undefined || item.quantity === null || item.quantity === "") {
@@ -281,29 +259,30 @@ const MaidaItems = ({
             },
         });
     };
-    if (loading) return null;
+    if (loading) return <ProductRowSkeleton />;
     if (error) return null;
     if (!finalList.length) return null;
 
     return (
-        <div
+        <Reveal
             id={category ? category.toLowerCase().replace(/\s+/g, "-") : "category"}
+            variant="fade"
             className="food-container"
         >
             <div className="food-text">
-                <h1>{category}</h1>
-                <p
+                <AnimatedText as="h1" text={category} />
+                <Link
                     className="view-all"
-                    onClick={() => navigate(`/category/${encodeURIComponent(category)}`)}
+                    to={`/category/${encodeURIComponent(category)}`}
                 >
                     View all
-                </p>
+                </Link>
             </div>
             <Swiper
                 modules={[Autoplay]}
                 onSwiper={(swiper) => (swiperRef.current = swiper)}
                 loop={finalList.length > 5}
-                speed={700}
+                speed={900}
                 autoplay={{
                     delay: 3000,
                     disableOnInteraction: false,
@@ -334,12 +313,11 @@ const MaidaItems = ({
 
                     // Extract image array supporting item.images or fallback to single image
                     const images = getItemImages(item);
-                    const currentImgIdx = activeImageIndices[item._id] || 0;
                     const isVideo = item.video && item.video.endsWith(".mp4");
 
                     return (
                         <SwiperSlide key={item._id}>
-                            <div className={`food-card${!inStock ? " out-of-stock" : ""}`}>
+                            <ProductCard className={`food-card${!inStock ? " out-of-stock" : ""}`}>
                                 {item.video && <div className="add-badge">Ads</div>}
 
                                 <div className="food-image-wrapper">
@@ -354,24 +332,11 @@ const MaidaItems = ({
                                             preload="metadata"
                                         />
                                     ) : (
-                                        <>
-                                            <img
-                                                src={images[currentImgIdx] || images[0] || ""}
-                                                alt={item.title}
-                                                className={`food-image slide-transition${!inStock ? " blurred" : ""}`}
-                                            />
-                                            {images.length > 1 && (
-                                                <div className="card-dots-container">
-                                                    {images.map((_, idx) => (
-                                                        <span
-                                                            key={idx}
-                                                            className={`card-dot ${idx === currentImgIdx ? 'active' : ''}`}
-                                                            onClick={(e) => handleDotClick(item._id, idx, e)}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </>
+                                        <CardSlideshow
+                                            images={(images.length ? images : [""]).map((src) => optimizeImage(src, 720))}
+                                            alt={item.title}
+                                            className={`food-image${!inStock ? " blurred" : ""}`}
+                                        />
                                     )}
 
                                     <div className="view-eye">
@@ -460,11 +425,11 @@ const MaidaItems = ({
                                     </div>
 
                                     <h2>
-                                        {item.title} <span>{item.weight}{item.unit}</span>
+                                        <SplitWords text={item.title} /> <span>{item.weight}{item.unit}</span>
                                     </h2>
 
                                     <p className="food-desc">
-                                        {(item.desc || "").slice(0, 60)}...
+                                        <SplitWords text={`${(item.desc || "").slice(0, 60)}...`} />
                                     </p>
 
                                     <div className="food-rating">
@@ -509,33 +474,33 @@ const MaidaItems = ({
                                     </div>
 
                                     <div className="food-actions">
-                                        <button
+                                        <PressButton
                                             className="order-btn"
                                             onClick={() => placeOrder(item)}
                                             disabled={!inStock}
                                         >
                                             {inStock ? "Shop Now" : "Out of Stock"}
-                                        </button>
+                                        </PressButton>
                                         <div className="add-btn">
-                                            <button onClick={() => decrease(item)} disabled={!inStock}>
+                                            <PressButton onClick={() => decrease(item)} disabled={!inStock}>
                                                 -
-                                            </button>
+                                            </PressButton>
                                             <span>{getQty(item)}</span>
-                                            <button
+                                            <PressButton
                                                 onClick={() => increase(item)}
                                                 disabled={!inStock}
                                             >
                                                 +
-                                            </button>
+                                            </PressButton>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </ProductCard>
                         </SwiperSlide>
                     );
                 })}
             </Swiper>
-        </div>
+        </Reveal>
     );
 };
 

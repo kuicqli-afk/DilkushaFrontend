@@ -29,6 +29,8 @@ import shyam from "../../assets/syam.png";
 import profile from "../../assets/profile.gif";
 import cart from "../../assets/cart.gif";
 import chatIcon from "../../assets/chat.png";
+import { optimizeImage } from "../../utils/image";
+import { useScrolledPast } from "../Motion/useScrolledPast";
 
 const API_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
@@ -65,7 +67,8 @@ const Navbar = () => {
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const searchDropdownRef = useRef(null);
 
-  const [isScrolled, setIsScrolled] = useState(false);
+  // watched without reading scrollY on every scroll (that caused jerky scrolling)
+  const isScrolled = useScrolledPast(10);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0);
@@ -88,13 +91,7 @@ const Navbar = () => {
   const charIndex = useRef(0);
   const direction = useRef("typing");
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+
 
   // Close menu whenever the route changes
   useEffect(() => {
@@ -408,7 +405,7 @@ const Navbar = () => {
                             >
                               <div className="search-result-img-wrap">
                                 <img
-                                  src={product.image}
+                                  src={optimizeImage(product.image, 160)}
                                   alt={product.title}
                                   className="search-result-img"
                                   onError={(e) => {

@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 
 import './index.css'
 import App from './App.jsx'
+// loaded after the app's own styles so the theme wins
+import './theme.css'
 
 import { CartProvider } from './Context/CartContext.jsx'
 import { WishlistProvider } from "./Context/WishlistContext";

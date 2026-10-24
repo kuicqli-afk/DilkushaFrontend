@@ -4,6 +4,8 @@ import { FaBookmark, FaTrash } from "react-icons/fa";
 import { useWishlist } from "../../Context/WishlistContext";
 import { useCart } from "../../Context/CartContext";
 import "./Wishlist.css";
+import { optimizeImage } from "../../utils/image";
+import { RevealImage } from "../Motion/motionKit";
 
 const WishlistPage = () => {
     const { wishlistItems, toggleWishlist } = useWishlist();
@@ -34,7 +36,7 @@ const WishlistPage = () => {
                             onClick={() => navigate(`/order/${item._id}`, { state: { item } })}
                             style={{ cursor: "pointer" }}
                         >
-                            <img src={item.image} alt={item.title || "Product"} />
+                            <RevealImage src={optimizeImage(item.image, 400)} alt={item.title || "Product"} loading="lazy" decoding="async" />
                         </div>
                         <div className="wishlist-info">
                             <h3

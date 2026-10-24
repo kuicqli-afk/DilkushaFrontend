@@ -5,6 +5,8 @@ import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiArrowRight, FiArrowLeft, Fi
 import { useCart } from "../../Context/CartContext";
 import { useAuth } from "../../Context/AuthContext";
 import "./Cart.css";
+import { optimizeImage } from "../../utils/image";
+import { InlineSkeleton } from "../Skeleton/Skeleton";
 
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
@@ -277,7 +279,7 @@ const Cart = () => {
                     <div className="cart-image-wrapper">
                       {showImage ? (
                         <img
-                          src={imgSrc}
+                          src={optimizeImage(imgSrc, 240)}
                           alt={item.title}
                           onError={() => markImageBroken(item.key)}
                         />
@@ -398,7 +400,7 @@ const Cart = () => {
                 {distanceKm != null && ` (${distanceKm} km)`}
               </span>
               {deliveryLoading ? (
-                <span className="delivery-estimate-note">Calculating…</span>
+                <InlineSkeleton width="4.5em" />
               ) : summary.deliveryEstimate > 0 ? (
                 <span className="delivery-estimate-note">
                   +₹{summary.deliveryEstimate.toFixed(2)}

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./LegalPages.css";
+import { StaggerChildren } from "../Motion/motionKit";
 
 // ====== EDIT THESE WITH YOUR REAL DETAILS ======
 export const BUSINESS = {
@@ -30,14 +31,14 @@ const LegalLayout = ({ title, intro, updated, sections }) => {
 
     return (
         <div className="legal-page">
-            <header className="legal-hero">
+            <StaggerChildren className="legal-hero">
                 <nav className="legal-breadcrumb">
                     <Link to="/">Home</Link> / <span>{title}</span>
                 </nav>
                 <h1>{title}</h1>
                 <p className="legal-updated">Last updated: {updated}</p>
                 <p className="legal-intro">{intro}</p>
-            </header>
+            </StaggerChildren>
 
             <div className="legal-body">
                 <aside className="legal-toc">
@@ -53,7 +54,7 @@ const LegalLayout = ({ title, intro, updated, sections }) => {
 
                 <main className="legal-content">
                     {sections.map((s, i) => (
-                        <section key={s.id} id={s.id} className="legal-section">
+                        <StaggerChildren key={s.id} id={s.id} className="legal-section">
                             <h2>{i + 1}. {s.title}</h2>
                             {s.paras?.map((p, k) => <p key={k}>{p}</p>)}
                             {s.list && (
@@ -61,15 +62,17 @@ const LegalLayout = ({ title, intro, updated, sections }) => {
                             )}
                             {s.after?.map((p, k) => <p key={`a${k}`}>{p}</p>)}
                             {s.note && <div className="legal-note">{s.note}</div>}
-                        </section>
+                        </StaggerChildren>
                     ))}
 
                     <div className="legal-contact">
-                        <h3>Need help? Contact us</h3>
-                        <p><strong>{BUSINESS.legalName}</strong></p>
-                        <p>📞 {BUSINESS.phone}</p>
-                        <p>✉️ {BUSINESS.email}</p>
-                        <p>📍 {BUSINESS.address}</p>
+                        <h3>Need help?</h3>
+                        <p>
+                            Call <a href={`tel:${BUSINESS.phone.replace(/\s+/g, "")}`}>{BUSINESS.phone}</a>, email{" "}
+                            <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>, or see{" "}
+                            <Link to="/contact-us">all the ways to reach us</Link>.
+                        </p>
+                        <p>{BUSINESS.address}</p>
                     </div>
                 </main>
             </div>

@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./Slider.css";
 import { useNavigate } from "react-router-dom";
+import { optimizeImage } from "../../utils/image";
 
 const API_URL = "https://backend.shyamnamkeenandbakers.online";
 
@@ -112,7 +113,7 @@ const Slider = () => {
   };
 
   if (loading) {
-    return <div className="slider-container">Loading banners...</div>;
+    return <div className="slider-container slider-skeleton" aria-hidden="true" />;
   }
 
   if (slides.length === 0) return null; // koi general active slider nahi → hide
@@ -128,7 +129,7 @@ const Slider = () => {
             onClick={() => handleSlideClick(slide)}
           >
             <img
-              src={getImageUrl(slide.image)}
+              src={optimizeImage(getImageUrl(slide.image), 1600)}
               className="bg-img"
               alt={slide.title || "Promotional Slider"}
             />
