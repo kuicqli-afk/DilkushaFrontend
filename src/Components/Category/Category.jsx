@@ -126,7 +126,7 @@ const Category = ({ onSelectCategory }) => {
                   to={`/category/${encodeURIComponent(item.name)}`}
                   onClick={() => handleCategoryClick(item)}
                 >
-                  <RevealImage src={optimizeImage(item.image, 240)} alt={item.name} loading="lazy" decoding="async" width="120" height="120" />
+                  <RevealImage src={optimizeImage(item.image, 240)} alt="" loading="lazy" decoding="async" width="120" height="120" />
                   <p>{item.name}</p>
                 </Link>
               )}

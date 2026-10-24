@@ -1,7 +1,11 @@
 /* ===== CONTAINER ===== */
 .slider-container {
   width: 94%;
-  height: 317px;
+  /* banners are designed at 2580x634 (about 4.07:1). The box follows the
+     width at 3.8:1: a touch taller than the artwork, so very little is
+     cropped, and it scales properly on wide screens instead of being a
+     fixed 317px strip */
+  aspect-ratio: 3.8 / 1;
   margin: 5px auto 0;
   position: relative;
   overflow: hidden;
@@ -38,6 +42,12 @@
 }
 
 /* ===== TRACK ===== */
+/* fills the home banner box without relying on a percentage height */
+.slider-container .slider-track {
+  position: absolute;
+  inset: 0;
+}
+
 .slider-track {
   display: flex;
   height: 100%;
@@ -119,7 +129,8 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  gap: 10px;
+  /* 8px dots 24px apart centre-to-centre: each gets a full 24px touch target */
+  gap: 16px;
   z-index: 5;
   pointer-events: none;
   /* the empty strip must not block clicks on the banner */
@@ -146,7 +157,7 @@
 .dot::before {
   content: "";
   position: absolute;
-  inset: -9px -4px;
+  inset: -8px;
 }
 
 .dot.active {
@@ -258,7 +269,7 @@
 
 /* ======================================================================
    RESPONSIVE — .slider-container (home) and .slider1-container (category)
-   >1024px stays exactly as before (317px tall).
+   >1024px: home banner 3.8:1 (above); category banner stays 317px tall.
    Below that the height follows the width (aspect-ratio), so banners are
    never stretched or over-cropped, and phones get an app-style inset card.
    ====================================================================== */
@@ -269,7 +280,7 @@
   .slider-container,
   .slider1-container {
     height: auto;
-    aspect-ratio: 3 / 1;
+    aspect-ratio: 3.4 / 1;
     border-radius: 22px;
   }
 
@@ -306,7 +317,12 @@
 
   .slider-dots {
     bottom: 8px;
-    gap: 7px;
+    /* 6px dots 24px apart centre-to-centre: full 24px touch targets */
+    gap: 18px;
+  }
+
+  .dot::before {
+    inset: -9px;
   }
 
   .dot {

@@ -12,13 +12,18 @@
   <link rel="canonical" href="https://shyamnamkeenandbakers.online/" />
   <meta name="theme-color" content="#b3121b" />
 
-  <!-- Start connections early: fonts, the API and the image CDN -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Start connections early: the API and the image CDN (the font is
+       served from this site, see src/main.jsx) -->
   <link rel="preconnect" href="https://backend.shyamnamkeenandbakers.online" crossorigin />
   <link rel="preconnect" href="https://res.cloudinary.com" />
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" />
+
+  <!-- The home banner's data: fetched now, in parallel with the app's
+       JavaScript, instead of after it (the banner is the page's main image).
+       Must match the URLs requested in src/Components/Slider/DynamicSlider.jsx. -->
+  <link rel="preload" as="fetch" crossorigin="anonymous"
+    href="https://backend.shyamnamkeenandbakers.online/api/sliders?status=Active" />
+  <link rel="preload" as="fetch" crossorigin="anonymous"
+    href="https://backend.shyamnamkeenandbakers.online/api/offers?status=Active" />
 
   <!-- Favicon: stable, crawlable URLs (Google shows this next to the result) -->
   <link rel="icon" type="image/png" sizes="108x107" href="/favicon.png" />
@@ -114,7 +119,7 @@
 </head>
 
 <body>
-  <div id="boot" aria-hidden="true"><img src="/logo.png" alt="" width="460" height="260"></div>
+  <div id="boot" aria-hidden="true"><img src="/logo.webp" alt="" width="460" height="260" fetchpriority="high"></div>
   <div id="root"></div>
   <noscript>
     <h1>Shyam Namkeen &amp; Bakers</h1>

@@ -25,9 +25,9 @@ import {
   FaChevronRight,
 } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
-import shyam from "../../assets/syam.png";
-import profile from "../../assets/profile.gif";
-import cart from "../../assets/cart.gif";
+import shyam from "../../assets/syam.webp";
+import profile from "../../assets/profile.webp";
+import cart from "../../assets/cart.webp";
 import chatIcon from "../../assets/chat.png";
 import { optimizeImage } from "../../utils/image";
 import { useScrolledPast } from "../Motion/useScrolledPast";
@@ -346,7 +346,7 @@ const Navbar = () => {
           {/* LEFT : Logo + Location + Search */}
           <div className="nav-left">
             <Link to="/" className="nav-logo-link" style={{ textDecoration: "none" }}>
-              <img className="logo-text" src={shyam} alt="Shyam Bakers & Namkeen" />
+              <img className="logo-text" src={shyam} alt="Shyam Bakers & Namkeen" width="460" height="260" fetchPriority="high" />
             </Link>
 
             <ul>
@@ -529,17 +529,17 @@ const Navbar = () => {
                 </li>
               ) : (
                 <li className="nav-item nav-user-item" onClick={() => navigate("/login")}>
-                  <img src={profile} alt="Login" />
+                  <img src={profile} alt="" width="64" height="64" />
                   Login
                 </li>
               )}
 
-              <Link to="/cart" className="nav-link" aria-label={`Cart, ${count} items`}>
-                <li className="nav-item nav-cart">
-                  <img src={cart} alt="Cart" />
+              <li className="nav-item nav-cart">
+                <Link to="/cart" className="nav-link" aria-label={`Cart, ${count} items`}>
+                  <img src={cart} alt="" width="64" height="64" />
                   <span className="cart-count">{count}</span>
-                </li>
-              </Link>
+                </Link>
+              </li>
             </ul>
 
             <button
@@ -580,7 +580,7 @@ const Navbar = () => {
       >
         <div className="drawer-header">
           <Link to="/" onClick={() => setMenuOpen(false)} className="drawer-logo-link">
-            <img className="drawer-logo" src={shyam} alt="Shyam Bakers & Namkeen" />
+            <img className="drawer-logo" src={shyam} alt="Shyam Bakers & Namkeen" width="460" height="260" />
           </Link>
           <button
             type="button"

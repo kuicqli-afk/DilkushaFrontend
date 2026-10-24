@@ -52,7 +52,7 @@ const LegalLayout = ({ title, intro, updated, sections }) => {
                     </ol>
                 </aside>
 
-                <main className="legal-content">
+                <article className="legal-content">
                     {sections.map((s, i) => (
                         <StaggerChildren key={s.id} id={s.id} className="legal-section">
                             <h2>{i + 1}. {s.title}</h2>
@@ -74,7 +74,7 @@ const LegalLayout = ({ title, intro, updated, sections }) => {
                         </p>
                         <p>{BUSINESS.address}</p>
                     </div>
-                </main>
+                </article>
             </div>
         </div>
     );

@@ -473,9 +473,13 @@ const DynamicSlider = () => {
             >
               <RevealImage
                 src={optimizeImage(getImageUrl(slide.src), 1600)}
+                // phones get a 640px or 1024px copy instead of the 1600px one
+                srcSet={[640, 1024, 1600].map((w) => `${optimizeImage(getImageUrl(slide.src), w)} ${w}w`).join(", ")}
+                sizes="(max-width: 1440px) 100vw, 1440px"
                 className="bg-img"
                 alt={slide.title || "Promotional Banner"}
                 loading={i === 0 ? "eager" : "lazy"}
+                priority={i === 0}
                 decoding="async"
                 draggable={false}
               />

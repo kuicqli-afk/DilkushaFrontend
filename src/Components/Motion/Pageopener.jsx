@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef } from "react";
-import logo from "../../assets/syam.png";
+import logo from "../../assets/syam.webp";
 import "./Pageopener.css";
 
 // Same feel as the Designerbirds opener, but on the native Web Animations API
@@ -42,9 +42,11 @@ export const Pageopener = ({ variant = "route", onDone }) => {
     if (fromBoot.current) {
       // logo is already on screen from the HTML splash: carry on from it
       document.getElementById("boot")?.remove();
-      play(line, [{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: 750, easing: EASE_OUT });
-      liftAt = 850;
-      liftFor = 1150;
+      // kept short: on a first visit the splash covers the page, and the
+      // sooner it lifts the sooner the shop is usable (and measured as such)
+      play(line, [{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: 350, easing: EASE_OUT });
+      liftAt = 350;
+      liftFor = 800;
     } else if (variant === "intro") {
       play(
         mark,
@@ -54,9 +56,9 @@ export const Pageopener = ({ variant = "route", onDone }) => {
         ],
         { duration: 800, delay: 150, easing: EASE_OUT }
       );
-      play(line, [{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: 900, delay: 300, easing: EASE_OUT });
-      liftAt = 1300;
-      liftFor = 1150;
+      play(line, [{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: 600, delay: 200, easing: EASE_OUT });
+      liftAt = 800;
+      liftFor = 850;
     } else {
       play(mark, [{ clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)" }], {
         duration: 380,

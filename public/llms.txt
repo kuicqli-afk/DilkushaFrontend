@@ -1,0 +1,30 @@
+# Shyam Namkeen & Bakers
+
+> Pure veg namkeen, gajak, cakes, cookies and bakery items, freshly prepared in Lucknow (Uttar Pradesh, India) and delivered across the city, usually in about 45 minutes for nearby areas. Tagline: "Swaad Bhi, Sehat Bhi".
+
+Customers browse products by category, add them to a cart and pay online at checkout. Prices are in Indian rupees (INR). Custom cakes, gift hampers and bulk orders are available on request.
+
+## Shop
+
+- [All categories](https://shyamnamkeenandbakers.online/category/all): every product category
+- [Offers](https://shyamnamkeenandbakers.online/all-offers): current deals and discounts
+- [Gajak](https://shyamnamkeenandbakers.online/category/Gajak)
+- [Kaju Namkeen](https://shyamnamkeenandbakers.online/category/Kaju%20Namkeen)
+- [Bhujiya](https://shyamnamkeenandbakers.online/category/Bhujiya)
+- [Chips](https://shyamnamkeenandbakers.online/category/Chips)
+- [Sev](https://shyamnamkeenandbakers.online/category/Sev)
+- [Cakes](https://shyamnamkeenandbakers.online/category/Cakes)
+- [Cookies](https://shyamnamkeenandbakers.online/category/Cookies)
+- [Gift Hampers](https://shyamnamkeenandbakers.online/category/Gift%20Hampers)
+
+## About and help
+
+- [About us](https://shyamnamkeenandbakers.online/about-us): who we are and what we promise
+- [Contact us](https://shyamnamkeenandbakers.online/contact-us): phone +91 70805 12292, WhatsApp, email shyamnamkeenandbakers@gmail.com
+- [Shipping and delivery](https://shyamnamkeenandbakers.online/shipping-and-delivery): delivery areas, times, charges, cancellations and refunds
+- [Terms and conditions](https://shyamnamkeenandbakers.online/terms-and-conditions)
+- [Privacy policy](https://shyamnamkeenandbakers.online/privacy-policy)
+
+## Optional
+
+- [Sitemap](https://shyamnamkeenandbakers.online/sitemap.xml)

@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import axios from "axios";
 import "./Footer.css";
-import logo from "../../assets/syam.png";
-import Razorpay from "../../assets/razorpay.png";
+import logo from "../../assets/syam.webp";
+import Razorpay from "../../assets/razorpay.webp";
 
-import PlayStore from "../../assets/PlayStore.png";
-import AppStore from "../../assets/AppStore.png";
+import PlayStore from "../../assets/PlayStore.webp";
+import AppStore from "../../assets/AppStore.webp";
 import {
   FaChevronDown,
   FaTimes,
@@ -226,7 +226,7 @@ const Footer = () => {
 
       <StaggerChildren className="footer-content">
         <div className="footer-content-left">
-          <img src={logo} alt="Shyam Foods" className="footer-logo" />
+          <img src={logo} alt="Shyam Namkeen & Bakers" className="footer-logo" width="460" height="260" loading="lazy" />
           <p>Freshly baked, delivered with care. Quality you can taste in every bite.</p>
         </div>
 
@@ -320,15 +320,15 @@ const Footer = () => {
             <a href="" target="_self" rel="self" aria-label="Pinterest" className="icon-pinterest">
               <FaPinterestP />
             </a>
-            <a onClick={() => openPopup("WhatsApp Inquiry")} aria-label="WhatsApp" style={{ cursor: "pointer" }} className="icon-whatsapp">
+            <button type="button" onClick={() => openPopup("WhatsApp Inquiry")} aria-label="WhatsApp" className="icon-whatsapp">
               <FaWhatsapp />
-            </a>
+            </button>
           </div>
 
           <div className="payment">
             <span className="payment-label">Payment By</span>
             <a href="" target="_self" rel="self" aria-label="Razorpay" className="icon-facebook">
-              <img src={Razorpay} alt="Razorpay" />
+              <img src={Razorpay} alt="Razorpay" width="420" height="89" loading="lazy" />
             </a>
           </div>
 
@@ -341,7 +341,7 @@ const Footer = () => {
               className="icon-facebook"
               onClick={openAppModal}
             >
-              <img src={PlayStore} alt="PlayStore" />
+              <img src={PlayStore} alt="Get it on Google Play" width="240" height="240" loading="lazy" />
             </a>
             <a
               href="#"
@@ -350,7 +350,7 @@ const Footer = () => {
               className="icon-instagram"
               onClick={openAppModal}
             >
-              <img src={AppStore} alt="AppStore" />
+              <img src={AppStore} alt="Download on the App Store" width="360" height="139" loading="lazy" />
             </a>
           </div>
         </div>

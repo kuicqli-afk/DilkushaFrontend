@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { AiOutlineStar, AiFillStar } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
+import "./FeedbackModal.css";
 
 const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
@@ -74,72 +75,50 @@ function FeedbackModal({ order, onClose, onSubmitted }) {
     };
 
     return (
-        <div
-            style={{
-                position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                zIndex: 2000, padding: "20px",
-            }}
-        >
-            <div
-                style={{
-                    background: "#fff", borderRadius: "18px", padding: "24px",
-                    maxWidth: "400px", width: "100%", position: "relative",
-                    maxHeight: "90vh", overflowY: "auto",
-                }}
-            >
-                <button
-                    onClick={handleRemindLater}
-                    style={{
-                        position: "absolute", top: "14px", right: "14px",
-                        border: "none", background: "transparent", cursor: "pointer", color: "#999",
-                    }}
-                >
+        <div className="fb-backdrop">
+            <div className="fb-dialog" role="dialog" aria-modal="true" aria-labelledby="fb-title">
+                <button type="button" className="fb-close" onClick={handleRemindLater} aria-label="Close">
                     <IoClose size={22} />
                 </button>
 
-                <h3 style={{ fontSize: "17px", fontWeight: 700, color: "#1a1a1a", marginBottom: "4px" }}>
+                <h3 id="fb-title" className="fb-title">
                     Your order is delivered! 🎉
                 </h3>
-                <p style={{ fontSize: "12.5px", color: "#888", marginBottom: "18px" }}>
-                    How was order #{order.orderId}?
-                </p>
+                <p className="fb-sub">How was order #{order.orderId}?</p>
 
-                <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginBottom: "18px" }}>
+                <div className="fb-stars" role="radiogroup" aria-label="Rating">
                     {[1, 2, 3, 4, 5].map((star) => {
                         const filled = star <= (hoverRating || rating);
                         const Icon = filled ? AiFillStar : AiOutlineStar;
                         return (
-                            <Icon
+                            <button
                                 key={star}
-                                size={34}
+                                type="button"
+                                role="radio"
+                                aria-checked={rating === star}
+                                aria-label={`${star} star${star > 1 ? "s" : ""}`}
+                                className={`fb-star${filled ? " is-on" : ""}`}
                                 onClick={() => setRating(star)}
                                 onMouseEnter={() => setHoverRating(star)}
                                 onMouseLeave={() => setHoverRating(0)}
-                                style={{ cursor: "pointer", color: filled ? "#f59e0b" : "#e5e7eb" }}
-                            />
+                            >
+                                <Icon size={34} />
+                            </button>
                         );
                     })}
                 </div>
 
-                <p style={{ fontSize: "12px", fontWeight: 600, color: "#555", marginBottom: "8px" }}>
-                    What did you like? (select all that apply)
-                </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: showOtherInput ? "12px" : "18px" }}>
+                <p className="fb-label">What did you like? (select all that apply)</p>
+                <div className={`fb-tags${showOtherInput ? " has-other" : ""}`}>
                     {QUICK_TAGS.map((tag) => {
                         const active = selectedTags.includes(tag);
                         return (
                             <button
                                 key={tag}
                                 type="button"
+                                aria-pressed={active}
+                                className={`fb-tag${active ? " is-on" : ""}`}
                                 onClick={() => toggleTag(tag)}
-                                style={{
-                                    padding: "7px 14px", borderRadius: "20px",
-                                    border: `1.5px solid ${active ? "#880559" : "#e2e2e2"}`,
-                                    background: active ? "#880559" : "#fff",
-                                    color: active ? "#fff" : "#555",
-                                    fontSize: "12px", fontWeight: 600, cursor: "pointer",
-                                }}
                             >
                                 {tag}
                             </button>
@@ -150,41 +129,25 @@ function FeedbackModal({ order, onClose, onSubmitted }) {
                 {showOtherInput && (
                     <textarea
                         autoFocus
+                        className="fb-other"
                         placeholder="Tell us more..."
+                        aria-label="Tell us more"
                         value={otherText}
                         onChange={(e) => setOtherText(e.target.value)}
-                        style={{
-                            width: "100%", padding: "10px", borderRadius: "10px",
-                            border: "1px solid #eee", fontSize: "12.5px", resize: "none",
-                            minHeight: "70px", marginBottom: "18px", boxSizing: "border-box",
-                        }}
                     />
                 )}
 
-                {error && (
-                    <p style={{ color: "#dc2626", fontSize: "12px", marginBottom: "10px" }}>{error}</p>
-                )}
+                {error && <p className="fb-error">{error}</p>}
 
-                <div style={{ display: "flex", gap: "10px" }}>
-                    <button
-                        onClick={handleRemindLater}
-                        style={{
-                            flex: 1, padding: "10px", borderRadius: "20px",
-                            border: "1px solid #ddd", background: "#fff", color: "#666",
-                            fontSize: "12.5px", fontWeight: 600, cursor: "pointer",
-                        }}
-                    >
+                <div className="fb-actions">
+                    <button type="button" className="fb-btn fb-btn-ghost" onClick={handleRemindLater}>
                         Remind me later
                     </button>
                     <button
+                        type="button"
+                        className="fb-btn fb-btn-primary"
                         onClick={handleSubmit}
                         disabled={submitting}
-                        style={{
-                            flex: 1, padding: "10px", borderRadius: "20px",
-                            border: "none", background: "#880559", color: "#fff",
-                            fontSize: "12.5px", fontWeight: 700, cursor: "pointer",
-                            opacity: submitting ? 0.6 : 1,
-                        }}
                     >
                         {submitting ? "Submitting..." : "Submit"}
                     </button>

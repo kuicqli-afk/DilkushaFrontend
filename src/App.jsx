@@ -9,7 +9,6 @@ import Category from "./Components/Category/Category";
 import Footer from "./Components/Footer/Footer";
 
 
-import Offers from "./Components/Food/Offers.jsx";
 
 import { ScrollToTopButton } from "./Components/ScrollToTopButton/ScrollToTopButton.jsx";
 import ScrollToTop from "./Components/ScrollToTopButton/ScrollToTop";
@@ -262,7 +261,9 @@ function AppContent() {
               {/* <Items tag="trending" title="Hot & Trending Food Offers" filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
               <Items tag="combo" title="Combo Deals" filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
               <Items tag="weekend-special" title="Weekend Special" filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} /> */}
-              <Offers filter={filter} sortBy={sortBy} price={price} cuisine={cuisine} />
+              {/* <Offers /> is off: it calls an old backend (shyambackend.onrender.com)
+                  that now refuses requests, so it never showed anything and only
+                  logged console errors. Point it at the current API to bring it back. */}
               {/* <AppBanner /> */}
             </>
           }

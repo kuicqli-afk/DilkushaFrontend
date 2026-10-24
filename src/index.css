@@ -1,5 +1,4 @@
-/* The font (Poppins) is loaded from index.html (preconnect +
-   stylesheet link), not @import, so its request starts with the HTML. */
+/* The font (Poppins) is self-hosted via @fontsource, imported in main.jsx. */
 /* import "bootstrap/dist/css/bootstrap.min.css"; */
 @import "tailwindcss";
 

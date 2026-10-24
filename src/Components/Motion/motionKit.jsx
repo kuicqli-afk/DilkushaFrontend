@@ -9,12 +9,17 @@ import "./motion.css";
 
 // A photo that dissolves in once it has downloaded and decoded, over a
 // skeleton shimmer in its frame. The photo itself never moves.
-export const RevealImage = ({ className = "", onLoad, onError, ...rest }) => {
-  const [loaded, setLoaded] = useState(false);
+// `priority` is for the one image the visitor sees first (the top banner):
+// it loads at high priority and shows the moment it arrives, with no fade,
+// because that image is what the browser measures as the page's main paint.
+export const RevealImage = ({ className = "", priority = false, onLoad, onError, ...rest }) => {
+  const [loaded, setLoaded] = useState(priority);
+  const priorityProps = priority ? { loading: "eager", fetchPriority: "high" } : {};
 
   return (
     <img
       {...rest}
+      {...priorityProps}
       className={`reveal-img${loaded ? " is-loaded" : ""} ${className}`.trim()}
       onLoad={(e) => {
         // decode first, so the fade never stalls on a decode half-way

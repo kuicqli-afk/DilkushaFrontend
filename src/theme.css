@@ -251,3 +251,71 @@ body .skeleton {
 body .food-card:hover h2 {
   color: var(--chilli);
 }
+
+/* ---------- image sizing ---------- */
+/* images carry width/height attributes so the browser knows their shape
+   before they load (no layout shift); CSS still sets their displayed size */
+.footer-logo,
+.payment img,
+.apps img {
+  height: auto;
+}
+
+/* ---------- readable small text (WCAG AA contrast) ---------- */
+body .veg-badge,
+body .veg-badge-text {
+  color: #15803d;
+}
+
+body .rating-reviews,
+body .orders-last-week,
+body .footer-feature-subtitle,
+body .footer-copyright,
+body .footer-credit {
+  color: var(--ink-soft);
+}
+
+/* ---------- out of stock ---------- */
+/* reads as unavailable at a glance: greyscale photo, muted brick-red label,
+   quiet grey buttons that no longer look like the red Shop Now */
+body .stock-text-out,
+body .out-stock-icon {
+  color: #9f2a1e;
+}
+
+body .food-card.out-of-stock .food-image {
+  filter: grayscale(0.9);
+  opacity: 0.85;
+}
+
+body .food-card.out-of-stock h2 {
+  color: var(--ink-soft);
+}
+
+body .food-card.out-of-stock .order-btn,
+body .order-btn:disabled {
+  background: #ece6dd;
+  color: #6b5a4e;
+  cursor: not-allowed;
+}
+
+body .food-card.out-of-stock .order-btn::after {
+  display: none;
+}
+
+body .food-card.out-of-stock .add-btn {
+  box-shadow: inset 0 0 0 1.5px #d6cdc0;
+}
+
+body .food-card.out-of-stock .add-btn button,
+body .food-card.out-of-stock .add-btn span {
+  color: var(--ink-soft);
+  cursor: not-allowed;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body .food-card.out-of-stock:hover h2 {
+    color: var(--ink-soft);
+  }
+}
+

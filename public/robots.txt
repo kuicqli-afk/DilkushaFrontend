@@ -1,3 +1,7 @@
+# AI assistants may use these pages for search and to answer shoppers'
+# questions (contentsignals.org). Training use is not specified here.
+Content-Signal: search=yes, ai-input=yes
+
 User-agent: *
 Allow: /
 Disallow: /cart
@@ -8,3 +12,4 @@ Disallow: /login
 Disallow: /wishlist
 
 Sitemap: https://shyamnamkeenandbakers.online/sitemap.xml
+# Plain-language summary for AI assistants: https://shyamnamkeenandbakers.online/llms.txt
