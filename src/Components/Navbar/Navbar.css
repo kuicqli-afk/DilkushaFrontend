@@ -39,7 +39,7 @@
 }
 
 :root {
-  --logo-w: clamp(110px, 16vw, 180px);
+  --logo-w: clamp(60px, 16vw, 100px);
 }
 
 .nav-logo-link {
@@ -54,7 +54,6 @@
   height: auto;
   object-fit: contain;
   flex-shrink: 0;
-  margin-left: -15px;
   display: block;
 }
 

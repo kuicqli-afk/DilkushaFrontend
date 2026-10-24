@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import axios from "axios";
 import "./Footer.css";
-import logo from "../../assets/syam.png";
+import logo from "../../assets/DilkushaLogo.png";
 import Razorpay from "../../assets/razorpay.png";
 
 import PlayStore from "../../assets/PlayStore.png";

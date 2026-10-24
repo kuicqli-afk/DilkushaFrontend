@@ -25,7 +25,7 @@ import {
   FaChevronRight,
 } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
-import shyam from "../../assets/syam.png";
+import shyam from "../../assets/DilkushaLogo.png";
 import profile from "../../assets/profile.gif";
 import cart from "../../assets/cart.gif";
 import chatIcon from "../../assets/chat.png";
@@ -33,13 +33,13 @@ import chatIcon from "../../assets/chat.png";
 const API_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
 const PLACEHOLDERS = [
-  "Search for Shyam Bakers & Namkeen, a cuisine, or a dish…",
-  "Search for patties",
-  "Search for cookies",
-  "Search for pizza",
-  "Search for cake",
-  "Search for namkeens",
-  "Search for sev",
+  "Search for Dilkusha Biryani, a cuisine, or a dish…",
+  "Search for Chicken Biryani",
+  "Search for Mutton Biryani",
+  "Search for Chicken Tikka Masala",
+  "Search for dal",
+  "Search for Noodles",
+  "Search for pasta",
 ];
 
 const getProductStock = (product) => {

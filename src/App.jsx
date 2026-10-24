@@ -11,7 +11,6 @@ import Category from "./Components/Category/Category";
 import OrderPage from "./Components/OrderPage/OrderPage.jsx";
 import Footer from "./Components/Footer/Footer";
 
-import RestaurantPage from "./Components/ShopsDetailPage/RestaurantPage.jsx";
 import Items from "./Components/Food/Items.jsx";
 import AppBanner from "./Components/Food/AppBanner.jsx";
 import Khuramnagar from "./Components/Pages/Khuramnagar.jsx";
@@ -265,7 +264,7 @@ function AppContent() {
         />
 
         {/* Restaurant & Location Pages */}
-        <Route path="/restaurant" element={<RestaurantPage />} />
+        {/* <Route path="/restaurant" element={<RestaurantPage />} /> */}
         <Route path="/restaurant/khuramnagar" element={<Khuramnagar />} />
         <Route path="/restaurant/indiranagar" element={<Indiranagar />} />
         <Route path="/restaurant/nishatganj" element={<Nishatganj />} />
