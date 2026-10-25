@@ -5,17 +5,22 @@ import "./SiteNotice.css";
 
 const WHATSAPP_NUMBER = "917080512292"; // same number as the footer and Contact page
 const INTRO_KEY = "shyam_intro_seen"; // set by SiteMotion when the splash ends
+const READ_SECONDS = 10; // the notice can't be dismissed before this, so it gets read
 
 // "Site under construction — please don't order or pay yet" pop-up, shown
 // once per visit, after the first-visit splash has lifted.
 const SiteNotice = () => {
   const [open, setOpen] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(READ_SECONDS);
   const okRef = useRef(null);
+  const dialogRef = useRef(null);
+  const canClose = secondsLeft === 0;
 
   const close = useCallback(() => {
+    if (!canClose) return;
     markSiteNoticeSeen();
     setOpen(false);
-  }, []);
+  }, [canClose]);
 
   useEffect(() => {
     if (!isSiteNoticePending()) return undefined;
@@ -35,9 +40,22 @@ const SiteNotice = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // count down the reading time once the notice is up
+  useEffect(() => {
+    if (!open || canClose) return undefined;
+    const timer = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [open, secondsLeft, canClose]);
+
+  // focus the dialog while it's locked, then the button once it can close
+  useEffect(() => {
+    if (!open) return;
+    if (canClose) okRef.current?.focus();
+    else dialogRef.current?.focus();
+  }, [open, canClose]);
+
   useEffect(() => {
     if (!open) return undefined;
-    okRef.current?.focus();
     const onKey = (e) => {
       if (e.key === "Escape") close();
     };
@@ -49,7 +67,15 @@ const SiteNotice = () => {
 
   return (
     <div className="sn-backdrop" onClick={(e) => e.target === e.currentTarget && close()}>
-      <div className="sn-dialog" role="alertdialog" aria-modal="true" aria-labelledby="sn-title" aria-describedby="sn-body">
+      <div
+        ref={dialogRef}
+        tabIndex={-1}
+        className="sn-dialog"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="sn-title"
+        aria-describedby="sn-body"
+      >
         <span className="sn-badge">Under construction</span>
         <h2 id="sn-title" className="sn-title">
           We're getting ready 🚧
@@ -83,8 +109,17 @@ const SiteNotice = () => {
           >
             <FaWhatsapp aria-hidden="true" /> WhatsApp us
           </a>
-          <button ref={okRef} type="button" className="sn-btn sn-btn-primary" onClick={close}>
-            Got it
+          <button
+            ref={okRef}
+            type="button"
+            className={`sn-btn sn-btn-primary ${canClose ? "" : "is-locked"}`}
+            onClick={close}
+            disabled={!canClose}
+            style={{ "--read": `${READ_SECONDS}s` }}
+          >
+            <span className="sn-btn-label">
+              {canClose ? "Got it" : `Please read… ${secondsLeft}s`}
+            </span>
           </button>
         </div>
       </div>

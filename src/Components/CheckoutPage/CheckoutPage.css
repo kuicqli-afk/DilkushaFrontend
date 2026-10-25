@@ -1299,3 +1299,29 @@ select {
 .checkout-left > .cart-list {
   animation: none;
 }
+
+/* ---------- field validation ---------- */
+.checkout-left input.is-invalid,
+.checkout-left input.is-invalid:focus {
+  border-color: var(--chilli);
+  background: #fffafa;
+}
+
+.checkout-left input.is-invalid:focus {
+  box-shadow: 0 0 0 4px rgba(179, 18, 27, 0.12);
+}
+
+.checkout-left .field-error {
+  display: block;
+  margin-top: 6px;
+  color: var(--chilli);
+  font-size: 12px;
+  font-weight: 500;
+  animation: ckRise 260ms var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkout-left .field-error {
+    animation: none;
+  }
+}

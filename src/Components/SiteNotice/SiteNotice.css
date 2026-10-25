@@ -112,13 +112,47 @@
   color: #fff;
 }
 
+/* while locked the button fills left to right over the reading time */
+.sn-btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.sn-btn-primary.is-locked {
+  background: #d9a3a6;
+  cursor: not-allowed;
+}
+
+.sn-btn-primary.is-locked::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--chilli, #b3121b);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: snRead var(--read, 10s) linear forwards;
+}
+
+.sn-btn-label {
+  position: relative;
+  font-variant-numeric: tabular-nums;
+}
+
+.sn-btn-primary.is-locked:active {
+  scale: 1;
+}
+
+.sn-dialog:focus {
+  outline: none;
+}
+
 .sn-btn:focus-visible {
   outline: 3px solid var(--kesar, #f2a007);
   outline-offset: 2px;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .sn-btn-primary:hover {
+  .sn-btn-primary:not(.is-locked):hover {
     background: var(--chilli-deep, #8e0e15);
   }
 
@@ -130,6 +164,12 @@
 @keyframes snFade {
   from {
     opacity: 0;
+  }
+}
+
+@keyframes snRead {
+  to {
+    transform: scaleX(1);
   }
 }
 

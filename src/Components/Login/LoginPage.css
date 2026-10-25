@@ -445,3 +445,43 @@
     transform: none;
   }
 }
+
+/* ---------- field validation ---------- */
+.login-card .phone-prefix {
+  position: absolute;
+  top: 50%;
+  left: 40px;
+  transform: translateY(-50%);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.login-card .input-wrapper input.phone-input {
+  padding-left: 74px;
+}
+
+.login-card .input-wrapper.is-invalid input {
+  border-color: var(--chilli);
+  background: #fffafa;
+}
+
+.login-card .input-wrapper.is-invalid .input-icon {
+  color: var(--chilli);
+}
+
+.login-field-error {
+  display: block;
+  margin-top: 7px;
+  color: var(--chilli);
+  font-size: 12px;
+  font-weight: 500;
+  animation: lgShake 360ms var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-field-error {
+    animation: none;
+  }
+}

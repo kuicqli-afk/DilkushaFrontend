@@ -1,0 +1,930 @@
+/* My Orders page, in the site theme (src/theme.css; motion tokens in
+   Motion/motion.css). Cards are kept mounted across the 10s poll, so
+   their entrance plays once; a status change animates the tracker. */
+
+.oh-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 8px 0 48px;
+  color: var(--ink);
+}
+
+.oh-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--sesame);
+  animation: ohRise 520ms var(--ease-out) both;
+}
+
+.oh-header h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.oh-header p {
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.oh-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  background: #fff;
+  border: 1.5px solid var(--sesame);
+  border-radius: 999px;
+  color: var(--chilli);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    transform 160ms var(--ease-out);
+}
+
+.oh-refresh:active {
+  transform: scale(0.96);
+}
+
+.oh-refresh.is-spinning svg {
+  animation: ohSpin 600ms linear infinite;
+}
+
+/* ---------- card ---------- */
+.oh-card {
+  margin-bottom: 18px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--sesame);
+  border-radius: 22px;
+  box-shadow: 0 20px 40px -32px rgba(36, 22, 15, 0.45);
+  animation: ohRise 560ms var(--ease-out) both;
+  animation-delay: calc(80ms + var(--i, 0) * 80ms);
+}
+
+.oh-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 18px 20px;
+}
+
+.oh-order-id {
+  margin: 0;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.oh-order-date {
+  margin: 3px 0 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.oh-status {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  animation: ohPop 360ms var(--ease-out) both;
+}
+
+.oh-status--pending { background: var(--besan); color: #7a4a00; }
+.oh-status--confirmed,
+.oh-status--preparing { background: var(--pista-tint); color: var(--pista); }
+.oh-status--out-for-delivery { background: #fff0d1; color: #8a5300; }
+.oh-status--delivered { background: var(--pista); color: #fff; }
+.oh-status--cancelled { background: #fdecec; color: var(--chilli); }
+
+.oh-pad {
+  padding: 0 20px;
+}
+
+/* ---------- tracker ---------- */
+.oh-tracker {
+  display: flex;
+  align-items: flex-start;
+  padding: 16px 4px 20px;
+}
+
+.oh-step {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  animation: ohPop 420ms var(--ease-out) both;
+  animation-delay: calc(240ms + var(--i, 0) * 80ms + var(--s, 0) * 90ms);
+}
+
+.oh-step.is-last {
+  flex: 0 0 auto;
+}
+
+.oh-step-icon {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f3ece3;
+  color: #b8a99c;
+  transition:
+    background-color 400ms ease,
+    color 400ms ease;
+}
+
+.oh-step.is-done .oh-step-icon {
+  background: var(--pista);
+  color: #fff;
+}
+
+.oh-step.is-current .oh-step-icon {
+  background: var(--chilli);
+}
+
+/* a delivered order is finished: green, no pulse */
+.oh-step.is-current.is-last .oh-step-icon {
+  background: var(--pista);
+}
+
+.oh-step.is-current.is-last .oh-step-icon::after {
+  display: none;
+}
+
+.oh-step.is-current.is-last .oh-step-label {
+  color: var(--pista);
+}
+
+/* the current step breathes a soft ring */
+.oh-step.is-current .oh-step-icon::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 2px solid var(--chilli);
+  border-radius: 50%;
+  opacity: 0;
+  animation: ohPulse 2s ease-out 1s infinite;
+}
+
+.oh-step-label {
+  max-width: 100px;
+  margin-top: 7px;
+  color: #a8998c;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.oh-step.is-done .oh-step-label {
+  color: var(--ink);
+}
+
+.oh-step.is-current .oh-step-label {
+  color: var(--chilli);
+  font-weight: 700;
+}
+
+/* connectors fill in step by step */
+.oh-connector {
+  position: relative;
+  flex: 2;
+  height: 3px;
+  margin-top: 17px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: #f3ece3;
+}
+
+.oh-connector::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--pista);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 600ms var(--ease-out);
+}
+
+.oh-connector.is-done::after {
+  transform: scaleX(1);
+  animation: ohFill 600ms var(--ease-out) both;
+  animation-delay: calc(320ms + var(--i, 0) * 80ms + var(--s, 0) * 90ms);
+}
+
+.oh-cancelled {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 20px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #fdecec;
+  color: var(--chilli);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ---------- driver ---------- */
+.oh-driver {
+  margin: 0 20px 16px;
+  padding: 14px;
+  border-radius: 18px;
+  background: var(--besan);
+  border: 1px solid #f3dfa9;
+  animation: ohRise 480ms var(--ease-out) both;
+}
+
+.oh-driver-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.oh-driver-profile {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.oh-min0 {
+  min-width: 0;
+}
+
+.oh-driver-photo {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 10px -4px rgba(36, 22, 15, 0.35);
+}
+
+.oh-driver-initials {
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: var(--chilli);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.oh-driver-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.oh-driver-name {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.oh-driver-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #fff;
+  color: #9a6400;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.oh-driver-sub {
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+}
+
+.oh-call {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--pista);
+  color: #fff;
+  text-decoration: none;
+  transition: transform 160ms var(--ease-out);
+}
+
+.oh-call:active {
+  transform: scale(0.92);
+}
+
+.oh-driver-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px dashed #e8c77a;
+}
+
+.oh-mini-label {
+  margin: 0;
+  color: #9a8b7f;
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.oh-mini-value {
+  margin: 3px 0 0;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.oh-plate {
+  letter-spacing: 0.04em;
+}
+
+.oh-delivery-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--pista-tint);
+  color: var(--pista);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.oh-finding {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 20px 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--besan);
+  border: 1px solid #f3dfa9;
+  color: #7a4a00;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* the little bike rides back and forth while we look for a partner */
+.oh-ride {
+  flex-shrink: 0;
+  animation: ohRide 1.6s ease-in-out infinite;
+}
+
+/* ---------- details ---------- */
+.oh-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--sesame);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 200ms ease;
+}
+
+.oh-toggle-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.oh-toggle-count svg {
+  color: var(--chilli);
+}
+
+.oh-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--chilli);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.oh-caret {
+  display: inline-block;
+  transition: transform 300ms var(--ease-out);
+}
+
+.oh-toggle.is-open .oh-caret {
+  transform: rotate(180deg);
+}
+
+.oh-details {
+  padding: 0 20px 16px;
+}
+
+.oh-details > * {
+  animation: ohRise 380ms var(--ease-out) both;
+}
+
+.oh-details > :nth-child(2) { animation-delay: 40ms; }
+.oh-details > :nth-child(3) { animation-delay: 80ms; }
+.oh-details > :nth-child(n + 4) { animation-delay: 120ms; }
+
+.oh-item-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.oh-strong {
+  font-weight: 600;
+}
+
+.oh-bill {
+  margin-top: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fbf7f1;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.oh-bill-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.oh-bill-row .oh-strong {
+  color: var(--ink);
+}
+
+.oh-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.oh-discount,
+.oh-discount .oh-strong {
+  color: var(--pista);
+}
+
+.oh-bill-total {
+  margin: 6px 0 0;
+  padding-top: 8px;
+  border-top: 1px dashed var(--sesame);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.oh-bill-total > span:last-child {
+  color: var(--chilli);
+  font-size: 14px;
+}
+
+.oh-bill-total svg {
+  color: var(--chilli);
+}
+
+.oh-meta {
+  margin-top: 10px;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.oh-meta p {
+  margin: 0 0 4px;
+}
+
+.oh-meta strong {
+  color: var(--ink);
+}
+
+.oh-cancel-reason {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fdecec;
+  color: var(--chilli);
+  font-size: 12px;
+}
+
+.oh-cancel-by {
+  margin-left: 6px;
+  opacity: 0.75;
+}
+
+/* ---------- footer ---------- */
+.oh-card-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--sesame);
+  background: #fbf7f1;
+}
+
+.oh-total {
+  margin: 0;
+  color: var(--chilli);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.oh-cancel-btn {
+  padding: 8px 18px;
+  background: #fff;
+  border: 1.5px solid var(--chilli);
+  border-radius: 999px;
+  color: var(--chilli);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    transform 160ms var(--ease-out);
+}
+
+.oh-cancel-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.oh-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- empty / error ---------- */
+.oh-empty {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.oh-empty-icon {
+  width: 92px;
+  height: 92px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: var(--besan);
+  color: var(--chilli);
+  font-size: 38px;
+  animation: ohPop 640ms var(--ease-out) both;
+}
+
+.oh-empty h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 700;
+  animation: ohRise 520ms var(--ease-out) 160ms both;
+}
+
+.oh-empty p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+  animation: ohRise 520ms var(--ease-out) 240ms both;
+}
+
+.oh-primary-btn {
+  margin-top: 10px;
+  padding: 13px 28px;
+  background: var(--chilli);
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 200ms ease;
+  animation: ohRise 520ms var(--ease-out) 320ms both;
+}
+
+/* ---------- cancel modal ---------- */
+.oh-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(36, 22, 15, 0.55);
+  animation: ohFade 220ms ease-out both;
+}
+
+.oh-modal {
+  width: 100%;
+  max-width: 400px;
+  padding: 24px;
+  background: #fff;
+  border-top: 5px solid var(--chilli);
+  border-radius: 22px;
+  box-shadow: 0 30px 60px -20px rgba(36, 22, 15, 0.45);
+  animation: ohOpen 280ms var(--ease-out) both;
+}
+
+.oh-modal h3 {
+  margin: 0 0 6px;
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.oh-modal > p {
+  margin: 0 0 16px;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.oh-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.oh-reason {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: #fff;
+  border: 1.5px solid var(--sesame);
+  border-radius: 14px;
+  color: var(--ink);
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease;
+}
+
+.oh-reason input {
+  margin: 0;
+  accent-color: var(--chilli);
+}
+
+.oh-reason.is-selected {
+  border-color: var(--chilli);
+  background: var(--besan);
+}
+
+.oh-reason-text {
+  min-height: 70px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--sesame);
+  border-radius: 14px;
+  outline: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  resize: none;
+  animation: ohRise 300ms var(--ease-out) both;
+}
+
+.oh-reason-text:focus {
+  border-color: var(--chilli);
+  box-shadow: 0 0 0 4px rgba(179, 18, 27, 0.1);
+}
+
+.oh-modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.oh-keep-btn,
+.oh-confirm-btn {
+  flex: 1;
+  height: 46px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    transform 160ms var(--ease-out);
+}
+
+.oh-keep-btn {
+  background: #fff;
+  border: 1.5px solid var(--sesame);
+  color: var(--ink);
+}
+
+.oh-confirm-btn {
+  background: var(--chilli);
+  border: 0;
+  color: #fff;
+}
+
+.oh-confirm-btn:disabled {
+  opacity: 0.6;
+}
+
+.oh-keep-btn:active,
+.oh-confirm-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.oh-page :focus-visible,
+.oh-modal :focus-visible,
+.oh-primary-btn:focus-visible {
+  outline: 3px solid var(--kesar);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .oh-refresh:hover,
+  .oh-toggle:hover {
+    background: var(--besan);
+  }
+
+  .oh-cancel-btn:hover:not(:disabled) {
+    background: var(--chilli);
+    color: #fff;
+  }
+
+  .oh-keep-btn:hover {
+    background: var(--besan);
+  }
+
+  .oh-confirm-btn:hover:not(:disabled),
+  .oh-primary-btn:hover {
+    background: var(--chilli-deep);
+  }
+}
+
+/* ---------- keyframes ---------- */
+@keyframes ohRise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+}
+
+@keyframes ohPop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+@keyframes ohFill {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes ohPulse {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes ohRide {
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes ohSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ohFade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ohOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 600px) {
+  .oh-header h2 {
+    font-size: 24px;
+  }
+
+  .oh-card-head,
+  .oh-toggle,
+  .oh-card-foot {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .oh-pad,
+  .oh-details {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .oh-driver,
+  .oh-finding {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .oh-step-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .oh-step-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .oh-connector {
+    margin-top: 14px;
+  }
+
+  .oh-step-label {
+    font-size: 9.5px;
+  }
+
+  .oh-total {
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oh-header,
+  .oh-card,
+  .oh-status,
+  .oh-step,
+  .oh-step.is-current .oh-step-icon::after,
+  .oh-connector.is-done::after,
+  .oh-driver,
+  .oh-ride,
+  .oh-details > *,
+  .oh-empty-icon,
+  .oh-empty h2,
+  .oh-empty p,
+  .oh-primary-btn,
+  .oh-modal-backdrop,
+  .oh-modal,
+  .oh-reason-text {
+    animation: none;
+  }
+
+  .oh-connector::after {
+    transition: none;
+  }
+}

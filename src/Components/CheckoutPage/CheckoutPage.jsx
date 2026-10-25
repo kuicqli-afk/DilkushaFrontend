@@ -17,6 +17,7 @@ import {
 } from "react-icons/ai";
 import "./CheckoutPage.css";
 import { SuccessCheck } from "../Motion/SuccessCheck";
+import { digitsOnly, validateAddress } from "../../utils/validation";
 import { FiArrowLeft, FiMinus, FiPlus, FiTrash2, FiShoppingBag } from "react-icons/fi";
 import { InlineSkeleton } from "../Skeleton/Skeleton";
 
@@ -504,10 +505,46 @@ export default function CheckoutPage() {
     if (clickedStep <= step) setStep(clickedStep);
   };
 
-  const isAddressValid = () => {
-    return Boolean(
-      address.name && address.phone && address.street && address.city && address.pincode
-    );
+  // address checks: errors show once a field is left (or on "Continue")
+  const [addrTouched, setAddrTouched] = useState({});
+  const addressErrors = useMemo(() => validateAddress(address, { withContact: true }), [address]);
+  const isAddressValid = () => Object.keys(addressErrors).length === 0;
+  const addrError = (key) => (addrTouched[key] ? addressErrors[key] : "");
+
+  const ADDRESS_SANITIZE = {
+    phone: (v) => digitsOnly(v, 10),
+    pincode: (v) => digitsOnly(v, 6),
+  };
+
+  const addrField = (key) => ({
+    id: `addr-${key}`,
+    value: address[key] || "",
+    onChange: (e) => {
+      const clean = ADDRESS_SANITIZE[key] ? ADDRESS_SANITIZE[key](e.target.value) : e.target.value;
+      setAddress({ ...address, [key]: clean });
+    },
+    onBlur: () => setAddrTouched((t) => ({ ...t, [key]: true })),
+    className: addrError(key) ? "is-invalid" : undefined,
+    "aria-invalid": addrError(key) ? true : undefined,
+    "aria-describedby": addrError(key) ? `addr-${key}-error` : undefined,
+  });
+
+  const renderAddrError = (field) =>
+    addrError(field) ? (
+      <small id={`addr-${field}-error`} className="field-error" role="alert">
+        {addrError(field)}
+      </small>
+    ) : null;
+
+  const goToPayment = () => {
+    if (!isAddressValid()) {
+      // show every problem and jump to the first one
+      setAddrTouched({ name: true, phone: true, street: true, city: true, state: true, pincode: true });
+      const first = ["name", "phone", "street", "city", "state", "pincode"].find((k) => addressErrors[k]);
+      document.getElementById(`addr-${first}`)?.focus();
+      return;
+    }
+    setStep(3);
   };
 
   const buildOrderPayload = (guestId) => ({
@@ -903,34 +940,28 @@ export default function CheckoutPage() {
           )}
 
           <div className="form-group">
-            <label>Full Name</label>
-            <input
-              type="text"
-              placeholder="Recipient's Full Name"
-              value={address.name}
-              onChange={(e) => setAddress({ ...address, name: e.target.value })}
-            />
+            <label htmlFor="addr-name">Full Name</label>
+            <input type="text" autoComplete="name" placeholder="Recipient's Full Name" {...addrField("name")} />
+            {renderAddrError("name")}
           </div>
 
           <div className="form-group">
-            <label>Phone Number</label>
+            <label htmlFor="addr-phone">Phone Number</label>
             <input
               type="tel"
+              inputMode="numeric"
+              autoComplete="tel-national"
               placeholder="10-digit mobile number"
               maxLength={10}
-              value={address.phone}
-              onChange={(e) => setAddress({ ...address, phone: e.target.value })}
+              {...addrField("phone")}
             />
+            {renderAddrError("phone")}
           </div>
 
           <div className="form-group">
-            <label>Street Address</label>
-            <input
-              type="text"
-              placeholder="House number and street name"
-              value={address.street}
-              onChange={(e) => setAddress({ ...address, street: e.target.value })}
-            />
+            <label htmlFor="addr-street">Street Address</label>
+            <input type="text" autoComplete="address-line1" placeholder="House number and street name" {...addrField("street")} />
+            {renderAddrError("street")}
           </div>
 
           <div className="form-group">
@@ -945,34 +976,29 @@ export default function CheckoutPage() {
 
           <div className="form-row">
             <div className="form-group">
-              <label>City</label>
-              <input
-                type="text"
-                placeholder="City"
-                value={address.city}
-                onChange={(e) => setAddress({ ...address, city: e.target.value })}
-              />
+              <label htmlFor="addr-city">City</label>
+              <input type="text" autoComplete="address-level2" placeholder="City" {...addrField("city")} />
+              {renderAddrError("city")}
             </div>
             <div className="form-group">
-              <label>State</label>
-              <input
-                type="text"
-                placeholder="State"
-                value={address.state || ""}
-                onChange={(e) => setAddress({ ...address, state: e.target.value })}
-              />
+              <label htmlFor="addr-state">State</label>
+              <input type="text" autoComplete="address-level1" placeholder="State" {...addrField("state")} />
+              {renderAddrError("state")}
             </div>
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label>Postal Code</label>
+              <label htmlFor="addr-pincode">Postal Code</label>
               <input
                 type="text"
-                placeholder="Postal Code"
-                value={address.pincode}
-                onChange={(e) => setAddress({ ...address, pincode: e.target.value })}
+                inputMode="numeric"
+                autoComplete="postal-code"
+                placeholder="6-digit pincode"
+                maxLength={6}
+                {...addrField("pincode")}
               />
+              {renderAddrError("pincode")}
             </div>
             <div className="form-group">
               <label>Country</label>
@@ -1256,8 +1282,7 @@ export default function CheckoutPage() {
             {step === 2 && (
               <button
                 className="confirm-order-btn"
-                disabled={!isAddressValid()}
-                onClick={() => setStep(3)}
+                onClick={goToPayment}
               >
                 Continue to Payment
               </button>

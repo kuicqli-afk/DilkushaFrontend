@@ -5,6 +5,7 @@ import axios from "axios";
 import { FiPhone, FiLock, FiArrowRight, FiRotateCw, FiCheck } from "react-icons/fi";
 import "./LoginPage.css";
 import { SuccessCheck } from "../Motion/SuccessCheck";
+import { digitsOnly, validateOtp, validatePhone } from "../../utils/validation";
 
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
@@ -26,6 +27,8 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [error, setError] = useState("");
+  // inline message under the phone / OTP field
+  const [fieldError, setFieldError] = useState("");
 
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
@@ -53,10 +56,13 @@ const LoginPage = () => {
 
     const cleanPhone = phone.trim().replace(/\D/g, "");
 
-    if (!cleanPhone || !/^[0-9]{10}$/.test(cleanPhone)) {
-      setError("Please enter a valid 10-digit mobile number.");
+    const phoneError = validatePhone(cleanPhone);
+    if (phoneError) {
+      setFieldError(phoneError);
+      document.getElementById("phone")?.focus();
       return;
     }
+    setFieldError("");
 
     setLoading(true);
 
@@ -113,10 +119,13 @@ const LoginPage = () => {
     const cleanPhone = phone.trim().replace(/\D/g, "");
     const cleanOtp = otp.trim();
 
-    if (!cleanPhone || !cleanOtp) {
-      setError("Please enter OTP.");
+    const otpError = validateOtp(cleanOtp, 4);
+    if (!cleanPhone || otpError) {
+      setFieldError(otpError || "Please go back and enter your mobile number.");
+      document.getElementById("otp")?.focus();
       return;
     }
+    setFieldError("");
 
     setLoading(true);
 
@@ -186,20 +195,31 @@ const LoginPage = () => {
             <form onSubmit={handleSendOtp}>
               <div className="form-group">
                 <label htmlFor="phone">Mobile Number</label>
-                <div className="input-wrapper">
+                <div className={`input-wrapper ${fieldError ? "is-invalid" : ""}`}>
                   <FiPhone className="input-icon" />
+                  <span className="phone-prefix" aria-hidden="true">+91</span>
                   <input
                     id="phone"
+                    className="phone-input"
                     type="tel"
                     inputMode="numeric"
                     autoComplete="tel-national"
                     maxLength="10"
                     placeholder="10-digit phone number"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
+                    onChange={(e) => {
+                      setPhone(digitsOnly(e.target.value, 10));
+                      if (fieldError) setFieldError("");
+                    }}
+                    aria-invalid={fieldError ? true : undefined}
+                    aria-describedby={fieldError ? "login-field-error" : undefined}
                   />
                 </div>
+                {fieldError && (
+                  <small key={fieldError} id="login-field-error" className="login-field-error" role="alert">
+                    {fieldError}
+                  </small>
+                )}
               </div>
 
               <button type="submit" className="primary-btn" disabled={loading}>
@@ -218,7 +238,7 @@ const LoginPage = () => {
             <form onSubmit={handleVerifyOtp}>
               <div className="form-group">
                 <label htmlFor="otp">One Time Password (OTP)</label>
-                <div className="input-wrapper">
+                <div className={`input-wrapper ${fieldError ? "is-invalid" : ""}`}>
                   <FiLock className="input-icon" />
                   <input
                     id="otp"
@@ -229,11 +249,20 @@ const LoginPage = () => {
                     placeholder="Enter OTP"
                     maxLength={4}
                     value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
+                    onChange={(e) => {
+                      setOtp(digitsOnly(e.target.value, 4));
+                      if (fieldError) setFieldError("");
+                    }}
+                    aria-invalid={fieldError ? true : undefined}
+                    aria-describedby={fieldError ? "login-field-error" : undefined}
                     autoFocus
-                    required
                   />
                 </div>
+                {fieldError && (
+                  <small key={fieldError} id="login-field-error" className="login-field-error" role="alert">
+                    {fieldError}
+                  </small>
+                )}
               </div>
 
               <div className="otp-timer-row">
@@ -274,6 +303,7 @@ const LoginPage = () => {
                 onClick={() => {
                   setStep(1);
                   setOtp("");
+                  setFieldError("");
                 }}
                 disabled={loading}
               >

@@ -319,3 +319,18 @@ body .food-card.out-of-stock .add-btn span {
   }
 }
 
+
+/* account pages (cart, wishlist, orders, profile) keep a side gutter on
+   phones; their desktop spacing comes from the page container */
+@media (max-width: 768px) {
+  /* `body` prefix: wins over each page's own padding shorthand */
+  body .cart-wrapper,
+  body .cart-empty-container,
+  body .wishlist-container,
+  body .oh-page,
+  body .oh-empty,
+  body .profile-page {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}

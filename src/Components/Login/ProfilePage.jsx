@@ -13,6 +13,7 @@ import {
     FiAlertCircle,
 } from "react-icons/fi";
 import "./ProfilePage.css";
+import { digitsOnly, validateAddress, validateName } from "../../utils/validation";
 
 const BASE_URL =
     import.meta.env?.VITE_API_URL ||
@@ -29,6 +30,28 @@ const ProfilePage = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState("");
+    // field errors appear after a field is left, or for everything on save
+    const [touched, setTouched] = useState({});
+    const [triedSave, setTriedSave] = useState(false);
+
+    const nameError = validateName(name);
+    const addressErrors = addresses.map((addr) => validateAddress(addr));
+    const showError = (key, msg) => (triedSave || touched[key] ? msg : "");
+    const touch = (key) => () => setTouched((t) => ({ ...t, [key]: true }));
+
+    const fieldProps = (key, msg) => ({
+        id: key,
+        onBlur: touch(key),
+        "aria-invalid": showError(key, msg) ? true : undefined,
+        "aria-describedby": showError(key, msg) ? `${key}-error` : undefined,
+    });
+
+    const fieldError = (key, msg) =>
+        showError(key, msg) ? (
+            <small id={`${key}-error`} className="field-error" role="alert">
+                {showError(key, msg)}
+            </small>
+        ) : null;
 
     // Sync state when user context is loaded or updated
     useEffect(() => {
@@ -43,6 +66,7 @@ const ProfilePage = () => {
     }, [user]);
 
     const handleAddressChange = (index, field, value) => {
+        if (field === "pincode") value = digitsOnly(value, 6);
         setAddresses((prevAddresses) =>
             prevAddresses.map((addr, i) =>
                 i === index ? { ...addr, [field]: value } : addr
@@ -85,6 +109,20 @@ const ProfilePage = () => {
     const handleUpdate = async (e) => {
         e.preventDefault();
         e.stopPropagation();
+
+        setTriedSave(true);
+        const firstBad = nameError
+            ? "name"
+            : (() => {
+                const i = addressErrors.findIndex((errs) => Object.keys(errs).length);
+                return i === -1 ? null : `addr-${i}-${Object.keys(addressErrors[i])[0]}`;
+            })();
+        if (firstBad) {
+            setMessage("Please fix the highlighted fields before saving.");
+            setMessageType("error");
+            document.getElementById(firstBad)?.focus();
+            return;
+        }
 
         setLoading(true);
         setMessage("");
@@ -155,7 +193,7 @@ const ProfilePage = () => {
     const defaultAddr = addresses.find((a) => a.isDefault) || addresses[0];
 
     return (
-        <div className="profile-page">
+        <div className="profile-page" data-no-reveal>
             <div className="profile-header">
                 <h1>My Profile</h1>
                 <p>Manage your personal information and delivery details</p>
@@ -178,6 +216,8 @@ const ProfilePage = () => {
 
                 {message && (
                     <div
+                        key={message}
+                        role={messageType === "success" ? "status" : "alert"}
                         className={`profile-alert ${messageType === "success" ? "success-alert" : "error-alert"
                             }`}
                     >
@@ -204,17 +244,18 @@ const ProfilePage = () => {
                     <div className="form-grid">
                         <div className="form-group">
                             <label htmlFor="name">Full Name</label>
-                            <div className="input-wrapper">
+                            <div className={`input-wrapper ${showError("name", nameError) ? "is-invalid" : ""}`}>
                                 <FiUser className="input-icon" />
                                 <input
-                                    id="name"
                                     type="text"
+                                    autoComplete="name"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     placeholder="Enter your full name"
-                                    required
+                                    {...fieldProps("name", nameError)}
                                 />
                             </div>
+                            {fieldError("name", nameError)}
                         </div>
 
                         <div className="form-group">
@@ -243,13 +284,7 @@ const ProfilePage = () => {
                         </div>
                         <button
                             type="button"
-                            className="save-button add-address-btn"
-                            style={{
-                                minWidth: "auto",
-                                height: "36px",
-                                padding: "0 14px",
-                                fontSize: "12px",
-                            }}
+                            className="add-address-btn"
                             onClick={handleAddAddress}
                         >
                             <FiPlus size={14} /> Add Address
@@ -257,40 +292,17 @@ const ProfilePage = () => {
                     </div>
 
                     {addresses.length === 0 ? (
-                        <p style={{ color: "#888", fontSize: "13px", margin: "10px 0 20px" }}>
+                        <p className="address-empty">
                             No addresses added yet. Click "Add Address" to create one.
                         </p>
                     ) : (
                         addresses.map((addr, index) => (
                             <div
                                 key={addr._id || index}
-                                style={{
-                                    background: "#fafafa",
-                                    border: "1px solid #eee",
-                                    borderRadius: "10px",
-                                    padding: "16px",
-                                    marginBottom: "16px",
-                                }}
+                                className={`address-card ${addr.isDefault ? "is-default" : ""}`}
                             >
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                        marginBottom: "14px",
-                                    }}
-                                >
-                                    <label
-                                        style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "6px",
-                                            fontSize: "12px",
-                                            fontWeight: 600,
-                                            color: addr.isDefault ? "#249642" : "#666",
-                                            cursor: "pointer",
-                                        }}
-                                    >
+                                <div className="address-card-top">
+                                    <label className="address-default">
                                         <input
                                             type="radio"
                                             name="defaultAddress"
@@ -302,96 +314,56 @@ const ProfilePage = () => {
 
                                     <button
                                         type="button"
+                                        className="address-remove"
                                         onClick={() => handleRemoveAddress(index)}
-                                        style={{
-                                            background: "none",
-                                            border: "none",
-                                            color: "#d42f3d",
-                                            cursor: "pointer",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "4px",
-                                            fontSize: "12px",
-                                            fontWeight: 600,
-                                        }}
                                     >
                                         <FiTrash2 size={14} /> Remove
                                     </button>
                                 </div>
 
                                 <div className="form-grid">
-                                    <div className="form-group" style={{ gridColumn: "span 2" }}>
-                                        <label>Street / Building / Area</label>
-                                        <div className="input-wrapper">
+                                    <div className="form-group form-group-wide">
+                                        <label htmlFor={`addr-${index}-street`}>Street / Building / Area</label>
+                                        <div
+                                            className={`input-wrapper ${showError(`addr-${index}-street`, addressErrors[index]?.street) ? "is-invalid" : ""}`}
+                                        >
                                             <FiMapPin className="input-icon" />
                                             <input
                                                 type="text"
+                                                autoComplete="address-line1"
                                                 value={addr.street || ""}
                                                 onChange={(e) =>
                                                     handleAddressChange(index, "street", e.target.value)
                                                 }
-                                                placeholder="Street Address"
+                                                placeholder="House no., street, area"
+                                                {...fieldProps(`addr-${index}-street`, addressErrors[index]?.street)}
                                             />
                                         </div>
+                                        {fieldError(`addr-${index}-street`, addressErrors[index]?.street)}
                                     </div>
 
-                                    <div className="form-group">
-                                        <label>City</label>
-                                        <input
-                                            type="text"
-                                            className="input-wrapper"
-                                            style={{
-                                                height: "48px",
-                                                border: "1px solid #dedede",
-                                                borderRadius: "9px",
-                                                padding: "0 14px",
-                                                width: "100%",
-                                            }}
-                                            value={addr.city || ""}
-                                            onChange={(e) =>
-                                                handleAddressChange(index, "city", e.target.value)
-                                            }
-                                            placeholder="City"
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label>State</label>
-                                        <input
-                                            type="text"
-                                            style={{
-                                                height: "48px",
-                                                border: "1px solid #dedede",
-                                                borderRadius: "9px",
-                                                padding: "0 14px",
-                                                width: "100%",
-                                            }}
-                                            value={addr.state || ""}
-                                            onChange={(e) =>
-                                                handleAddressChange(index, "state", e.target.value)
-                                            }
-                                            placeholder="State"
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label>Pincode</label>
-                                        <input
-                                            type="text"
-                                            style={{
-                                                height: "48px",
-                                                border: "1px solid #dedede",
-                                                borderRadius: "9px",
-                                                padding: "0 14px",
-                                                width: "100%",
-                                            }}
-                                            value={addr.pincode || ""}
-                                            onChange={(e) =>
-                                                handleAddressChange(index, "pincode", e.target.value)
-                                            }
-                                            placeholder="Pincode"
-                                        />
-                                    </div>
+                                    {[
+                                        { field: "city", label: "City", placeholder: "City", autoComplete: "address-level2" },
+                                        { field: "state", label: "State (optional)", placeholder: "State", autoComplete: "address-level1" },
+                                        { field: "pincode", label: "Pincode", placeholder: "6-digit pincode", autoComplete: "postal-code", inputMode: "numeric", maxLength: 6 },
+                                    ].map(({ field, label, ...inputProps }) => {
+                                        const key = `addr-${index}-${field}`;
+                                        const msg = addressErrors[index]?.[field];
+                                        return (
+                                            <div className="form-group" key={field}>
+                                                <label htmlFor={key}>{label}</label>
+                                                <input
+                                                    type="text"
+                                                    className={`profile-plain-input ${showError(key, msg) ? "is-invalid" : ""}`}
+                                                    value={addr[field] || ""}
+                                                    onChange={(e) => handleAddressChange(index, field, e.target.value)}
+                                                    {...inputProps}
+                                                    {...fieldProps(key, msg)}
+                                                />
+                                                {fieldError(key, msg)}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         ))
