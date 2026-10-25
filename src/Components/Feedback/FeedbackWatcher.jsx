@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import FeedbackModal from "./FeedbackModal";
 import { FEEDBACK_STORAGE_KEYS, isFeedbackSuppressed } from "./feedbackStore";
+import { isSiteNoticePending } from "../SiteNotice/siteNoticeStore";
 
 const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 const POLL_INTERVAL = 10000;
@@ -23,6 +24,8 @@ function FeedbackWatcher() {
         }
 
         if (!userId) return; // login nahi hai to check hi mat karo
+        // never stack on top of the "under construction" notice
+        if (isSiteNoticePending()) return;
 
         try {
             const res = await axios.get(`${BASE_URL}/feedback/pending/user/${userId}`);

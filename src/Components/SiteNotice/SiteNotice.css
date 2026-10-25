@@ -1,0 +1,147 @@
+/* "Under construction" notice, in the site theme (see src/theme.css). */
+
+.sn-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(36, 22, 15, 0.55);
+  animation: snFade 220ms ease-out both;
+}
+
+.sn-dialog {
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 26px 24px 22px;
+  border-radius: 22px;
+  border-top: 5px solid var(--kesar, #f2a007);
+  background: var(--paper, #fff);
+  color: var(--ink, #24160f);
+  box-shadow: 0 30px 60px -20px rgba(36, 22, 15, 0.45);
+  /* opens from the centre: a modal isn't anchored to a trigger */
+  animation: snOpen 280ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.sn-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--besan, #fff4d9);
+  color: #7a4a00;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.sn-title {
+  margin: 12px 0 10px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.sn-text {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.sn-text strong {
+  color: var(--chilli, #b3121b);
+  font-weight: 600;
+}
+
+.sn-hindi {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fbf7f1;
+}
+
+.sn-help {
+  margin: 4px 0 18px;
+  font-size: 0.88rem;
+  color: var(--ink-soft, #6b5a4e);
+}
+
+.sn-help a {
+  color: var(--chilli, #b3121b);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sn-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.sn-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    scale 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.sn-btn:active {
+  scale: 0.97;
+}
+
+.sn-btn-ghost {
+  border: 1.5px solid var(--sesame, #ede4d8);
+  background: var(--paper, #fff);
+  color: #15803d;
+}
+
+.sn-btn-primary {
+  border: 0;
+  background: var(--chilli, #b3121b);
+  color: #fff;
+}
+
+.sn-btn:focus-visible {
+  outline: 3px solid var(--kesar, #f2a007);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sn-btn-primary:hover {
+    background: var(--chilli-deep, #8e0e15);
+  }
+
+  .sn-btn-ghost:hover {
+    background: #f3faf5;
+  }
+}
+
+@keyframes snFade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes snOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sn-dialog {
+    animation-name: snFade;
+  }
+}

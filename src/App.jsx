@@ -26,6 +26,7 @@ import FeedbackWatcher from "./Components/Feedback/FeedbackWatcher.jsx";
 import { lazy, Suspense } from 'react'
 import PageTransition from "./Components/Motion/PageTransition.jsx";
 import SiteMotion from "./Components/Motion/SiteMotion.jsx";
+import SiteNotice from "./Components/SiteNotice/SiteNotice.jsx";
 import { ProductGridSkeleton, ProductRowSkeleton } from "./Components/Skeleton/Skeleton.jsx";
 import Seo from "./Components/Seo/Seo.jsx";
 const BASE_URL = import.meta.env?.VITE_API_URL || "https://backend.shyamnamkeenandbakers.online/api";
@@ -131,6 +132,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <SiteMotion />
+        <SiteNotice />
         <AppContent />
       </BrowserRouter>
     </AuthProvider>

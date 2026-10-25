@@ -462,12 +462,12 @@ function OrderCard({ order, onOpenCancel, cancelling }) {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <AiOutlineShoppingCart size={15} color="#880559" />
+          <AiOutlineShoppingCart size={15} color="var(--chilli)" />
           <span style={{ fontSize: "12.5px", color: "#666", fontWeight: 500 }}>
             {order.items.length} item{order.items.length > 1 ? "s" : ""}
           </span>
         </div>
-        <span style={{ fontSize: "11px", color: "#880559", fontWeight: 600 }}>
+        <span style={{ fontSize: "11px", color: "var(--chilli)", fontWeight: 600 }}>
           {expanded ? "Hide details ▲" : "View details ▼"}
         </span>
       </div>
@@ -507,9 +507,9 @@ function OrderCard({ order, onOpenCancel, cancelling }) {
             )}
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px", paddingTop: "6px", borderTop: "1.5px solid #e5d3de" }}>
               <span style={{ fontWeight: 700, color: '#1a1a1a', fontSize: '13px', display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                <AiOutlineWallet size={15} color="#d81324" /> Grand Total
+                <AiOutlineWallet size={15} color="var(--chilli)" /> Grand Total
               </span>
-              <span style={{ fontWeight: 700, color: '#d81324', fontSize: '14px' }}>₹ {(Number(order.subtotal || 0) + Number(order.delivery || 0) - Number(order.discount || 0)).toFixed(2)}</span>
+              <span style={{ fontWeight: 700, color: 'var(--chilli)', fontSize: '14px' }}>₹ {(Number(order.subtotal || 0) + Number(order.delivery || 0) - Number(order.discount || 0)).toFixed(2)}</span>
             </div>
           </div>
 
@@ -552,7 +552,7 @@ function OrderCard({ order, onOpenCancel, cancelling }) {
           background: "#fbf6f9",
         }}
       >
-        <p style={{ fontWeight: 700, fontSize: "15px", color: "#d81324" }}>
+        <p style={{ fontWeight: 700, fontSize: "15px", color: "var(--chilli)" }}>
           Grand Total: ₹ {(Number(order.subtotal || 0) + Number(order.delivery || 0) - Number(order.discount || 0)).toFixed(2)}
         </p>
 
@@ -677,7 +677,7 @@ export default function OrderHistory() {
           onClick={() => navigate("/")}
           style={{
             marginTop: "18px", padding: "10px 24px", borderRadius: "22px",
-            border: "none", background: "linear-gradient(135deg, #880559, #C2185B)",
+            border: "none", background: "linear-gradient(135deg, var(--chilli), var(--chilli-deep))",
             color: "#fff", fontWeight: 600, fontSize: "13px", cursor: "pointer",
           }}
         >
@@ -706,7 +706,7 @@ export default function OrderHistory() {
             display: "flex", alignItems: "center", gap: "6px",
             padding: "8px 14px", borderRadius: "20px",
             border: "1px solid #e5d3de", background: "#fff",
-            color: "#880559", fontSize: "12px", fontWeight: 600, cursor: "pointer",
+            color: "var(--chilli)", fontSize: "12px", fontWeight: 600, cursor: "pointer",
           }}
         >
           <AiOutlineReload style={{ animation: refreshing ? "spin 0.6s linear infinite" : "none" }} />
@@ -753,7 +753,7 @@ export default function OrderHistory() {
                   style={{
                     display: "flex", alignItems: "center", gap: "8px",
                     padding: "9px 12px", borderRadius: "10px",
-                    border: cancelReasonInput === r ? "1.5px solid #880559" : "1px solid #eee",
+                    border: cancelReasonInput === r ? "1.5px solid var(--chilli)" : "1px solid #eee",
                     background: cancelReasonInput === r ? "#fbeef4" : "#fff",
                     cursor: "pointer", fontSize: "12.5px", color: "#333",
                   }}
@@ -763,7 +763,7 @@ export default function OrderHistory() {
                     name="cancelReason"
                     checked={cancelReasonInput === r}
                     onChange={() => setCancelReasonInput(r)}
-                    style={{ accentColor: "#880559" }}
+                    style={{ accentColor: "var(--chilli)" }}
                   />
                   {r}
                 </label>

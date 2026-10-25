@@ -4,7 +4,7 @@
 
 .profile-page {
     min-height: 100vh;
-    color: #222;
+    color: var(--ink);
 }
 
 .profile-header {
@@ -22,7 +22,7 @@
 
 .profile-header p {
     margin: 7px 0 0;
-    color: #777;
+    color: var(--ink-soft);
     font-size: 14px;
 }
 
@@ -30,7 +30,7 @@
     max-width: 1200px;
     margin: 0 auto;
     background: #ffffff;
-    border: 1px solid #e8e8e8;
+    border: 1px solid var(--sesame);
     border-radius: 16px;
     box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
     padding: 30px;
@@ -47,7 +47,7 @@
     height: 82px;
     min-width: 82px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #e23744, #c91f2d);
+    background: linear-gradient(135deg, var(--chilli), #c91f2d);
     color: white;
     display: flex;
     align-items: center;
@@ -61,13 +61,13 @@
     margin: 0;
     font-size: 23px;
     font-weight: 700;
-    color: #222;
+    color: var(--ink);
 }
 
 .profile-user-info p {
     margin: 5px 0 10px;
     font-size: 14px;
-    color: #777;
+    color: var(--ink-soft);
 }
 
 .account-badge {
@@ -84,7 +84,7 @@
 
 .profile-divider {
     height: 1px;
-    background: #eeeeee;
+    background: var(--sesame);
     margin: 28px 0;
 }
 
@@ -123,7 +123,7 @@
     height: 38px;
     border-radius: 9px;
     background: #fff0f1;
-    color: #e23744;
+    color: var(--chilli);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -133,7 +133,7 @@
     margin: 0;
     font-size: 16px;
     font-weight: 700;
-    color: #222;
+    color: var(--ink);
 }
 
 .section-heading p {
@@ -161,7 +161,7 @@
     margin-bottom: 8px;
     font-size: 13px;
     font-weight: 600;
-    color: #333;
+    color: var(--ink);
 }
 
 .input-wrapper {
@@ -180,11 +180,11 @@
 .input-wrapper input {
     width: 100%;
     height: 48px;
-    border: 1px solid #dedede;
+    border: 1px solid var(--sesame);
     border-radius: 9px;
     padding: 0 14px 0 43px;
     font-size: 14px;
-    color: #333;
+    color: var(--ink);
     outline: none;
     background: #fff;
     transition: all 0.2s ease;
@@ -195,7 +195,7 @@
 }
 
 .input-wrapper input:focus {
-    border-color: #e23744;
+    border-color: var(--chilli);
     box-shadow: 0 0 0 3px rgba(226, 55, 68, 0.08);
 }
 
@@ -232,26 +232,26 @@ textarea::placeholder {
     width: 100%;
     min-height: 115px;
     resize: vertical;
-    border: 1px solid #dedede;
+    border: 1px solid var(--sesame);
     border-radius: 9px;
     padding: 14px 14px 14px 43px;
     font-family: inherit;
     font-size: 14px;
     line-height: 1.5;
-    color: #333;
+    color: var(--ink);
     outline: none;
     transition: all 0.2s ease;
 }
 
 .textarea-wrapper textarea:focus {
-    border-color: #e23744;
+    border-color: var(--chilli);
     box-shadow: 0 0 0 3px rgba(226, 55, 68, 0.08);
 }
 
 .form-actions {
     display: flex;
     justify-content: flex-end;
-    border-top: 1px solid #eeeeee;
+    border-top: 1px solid var(--sesame);
     margin-top: 10px;
     padding-top: 25px;
 }
@@ -261,7 +261,7 @@ textarea::placeholder {
     height: 46px;
     border: none;
     border-radius: 9px;
-    background: #e23744;
+    background: var(--chilli);
     color: white;
     font-size: 14px;
     font-weight: 600;
@@ -309,7 +309,7 @@ textarea::placeholder {
     max-width: 1200px;
     margin: 20px auto 0;
     background: white;
-    border: 1px solid #e8e8e8;
+    border: 1px solid var(--sesame);
     border-radius: 16px;
     padding: 24px 30px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.04);
@@ -330,7 +330,7 @@ textarea::placeholder {
 
 .account-info-header span {
     background: #f1f1f1;
-    color: #666;
+    color: var(--ink-soft);
     font-size: 11px;
     font-weight: 600;
     padding: 5px 10px;
@@ -357,7 +357,7 @@ textarea::placeholder {
 }
 
 .account-info-item strong {
-    color: #333;
+    color: var(--ink);
     font-size: 13px;
     font-weight: 600;
     word-break: break-word;

@@ -16,6 +16,7 @@ import {
   AiOutlineWallet,
 } from "react-icons/ai";
 import "./CheckoutPage.css";
+import { SuccessCheck } from "../Motion/SuccessCheck";
 import { FiArrowLeft, FiMinus, FiPlus, FiTrash2, FiShoppingBag } from "react-icons/fi";
 import { InlineSkeleton } from "../Skeleton/Skeleton";
 
@@ -149,6 +150,10 @@ export default function CheckoutPage() {
   const { user } = useAuth();
 
   const [step, setStep] = useState(1);
+  // each step (and the success screen) starts at the top of the page
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [step]);
   const [placing, setPlacing] = useState(false);
   const [orderError, setOrderError] = useState("");
 
@@ -588,7 +593,7 @@ export default function CheckoutPage() {
           name: address.name,
           contact: address.phone,
         },
-        theme: { color: "#880559" },
+        theme: { color: "#b3121b" }, // site chilli, so the Razorpay sheet matches
 
         handler: async (response) => {
           try {
@@ -719,8 +724,8 @@ export default function CheckoutPage() {
   );
 
   return (
-    <div className="checkout-container">
-      <ProgressBar />
+    <div className="checkout-container" data-no-reveal>
+      {ProgressBar()}
       {step === 1 && (
         <div className="checkout-left">
 
@@ -742,7 +747,7 @@ export default function CheckoutPage() {
 
           {cartItems.length === 0 ? (
             <div className="cart-item" style={{ justifyContent: "center", padding: "24px 0" }}>
-              <p style={{ margin: 0, color: "#6b7280" }}>Your cart is empty.</p>
+              <p style={{ margin: 0, color: "var(--ink-soft)" }}>Your cart is empty.</p>
             </div>
           ) : (
             <div className="cart-list">
@@ -1047,9 +1052,7 @@ export default function CheckoutPage() {
       {step === 4 && (
         <div className="checkout-left success-screen">
           <div className="success-icon-wrapper">
-            <div className="success-checkmark">
-              <AiOutlineCheck className="check-icon" />
-            </div>
+            <SuccessCheck size={108} label="Order placed" />
           </div>
 
           <h2>Order Placed Successfully!</h2>
@@ -1076,7 +1079,7 @@ export default function CheckoutPage() {
               <span>📦 Food Total</span>
               <strong>₹{Number(orderDetails?.subtotal ?? subtotal).toFixed(2)}</strong>
             </div>
-            <div className="order-detail-row" style={{ borderTop: '2px solid #e5e7eb', paddingTop: '10px', marginTop: '4px' }}>
+            <div className="order-detail-row" style={{ borderTop: '1px dashed var(--sesame)', paddingTop: '12px', marginTop: '4px' }}>
               <span style={{ fontWeight: 700 }}>
                 {(orderDetails?.paymentMethod || paymentMethod) === "cod"
                   ? "💰 Grand Total (COD - Pay to Driver)"
@@ -1091,7 +1094,7 @@ export default function CheckoutPage() {
               </strong>
             </div>
             {(orderDetails?.paymentMethod || paymentMethod) !== "cod" && (
-              <div className="order-detail-row" style={{ color: '#6b7280', fontSize: '12px' }}>
+              <div className="order-detail-row" style={{ color: 'var(--ink-soft)', fontSize: '12px' }}>
                 <span>✅ Paid Online (Food + Delivery)</span>
                 <span>₹{Number(orderDetails?.total ?? onlinePayable).toFixed(2)}</span>
               </div>
@@ -1099,10 +1102,10 @@ export default function CheckoutPage() {
           </div>
 
           <div className="success-actions">
-            <button className="primary-btn" onClick={() => navigate("/orders")}>
+            <button type="button" className="primary-btn" onClick={() => navigate("/orders")}>
               View My Orders
             </button>
-            <button className="secondary-btns" onClick={() => navigate("/")}>
+            <button type="button" className="secondary-btns" onClick={() => navigate("/")}>
               Continue Shopping
             </button>
           </div>
@@ -1263,7 +1266,7 @@ export default function CheckoutPage() {
             {step === 3 && (
               <button className="confirm-order-btn" onClick={handlePlaceOrder} disabled={placing}>
                 {placing
-                  ? "Processing..."
+                  ? <span className="btn-busy"><span className="btn-spinner" aria-hidden="true" /> Processing payment…</span>
                   : paymentMethod === "cod"
                     ? `Place Order — Pay ₹${grandTotal.toFixed(2)} on Delivery`
                     : `Pay ₹${onlinePayable.toFixed(2)} Online`}

@@ -1,50 +1,89 @@
-/* Scroll-to-Top Button */
+/* Back-to-top button, in the site theme (see src/theme.css).
+   It rises by --lift (set from the footer's bottom line) so it never sits
+   on top of the copyright / "Designed and developed by" text. */
 .scroll-to-top {
+  --size: 48px;
+  --gap: 24px;
   position: fixed;
-  bottom: 20px;
-  right: 25px;
-  background-color: #0D0F14;
-  color: #fff;
-  border: none;
+  right: var(--gap);
+  bottom: var(--gap);
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  width: var(--size);
+  height: var(--size);
+  padding: 0;
+  border: 0;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  background: var(--chilli, #b3121b);
+  color: #fff;
   font-size: 22px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 12px 24px -10px rgba(169, 4, 9, 0.6);
+  /* `translate` for the footer lift, `scale` for press: neither fights the other */
+  translate: 0 calc(-1 * var(--lift, 0px));
+  transition:
+    translate 300ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 200ms ease,
+    scale 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  animation: scrollTopIn 240ms cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 
-.scroll-to-top:hover {
-  background-color: #0D0F14;
-  transform: scale(1.1);
+.scroll-to-top svg {
+  stroke-width: 2.6;
 }
 
 .scroll-to-top:active {
-  transform: scale(0.95);
+  scale: 0.94;
+}
+
+.scroll-to-top:focus-visible {
+  outline: 3px solid var(--kesar, #f2a007);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .scroll-to-top:hover {
+    background: var(--chilli-deep, #8e0e15);
+  }
+
+  .scroll-to-top:hover svg {
+    transform: translateY(-2px);
+  }
+
+  .scroll-to-top svg {
+    transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+}
+
+@keyframes scrollTopIn {
+  from {
+    opacity: 0;
+    scale: 0.85;
+  }
 }
 
 /* Tablet */
 @media (max-width: 1024px) {
   .scroll-to-top {
-    width: 44px;
-    height: 44px;
+    --size: 44px;
+    --gap: 18px;
     font-size: 20px;
-    bottom: 16px;
-    right: 16px;
   }
 }
 
 /* Mobile */
 @media (max-width: 600px) {
   .scroll-to-top {
-    width: 40px;
-    height: 40px;
-    font-size: 25px;
-    bottom: 12px;
-    right: 12px;
+    --size: 42px;
+    --gap: 14px;
+    font-size: 19px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-to-top {
+    animation: none;
+    transition: background-color 200ms ease;
   }
 }

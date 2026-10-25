@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiArrowRight, FiArrowLeft, FiMapPin } from "react-icons/fi";
@@ -41,6 +41,9 @@ const getUnitPrice = (item) => {
 
 const getMrpPrice = (item) => Number(item.price) || getUnitPrice(item);
 
+// how long a removed row takes to slide out and close its gap (matches Cart.css)
+const LEAVE_MS = 380;
+
 // Factorial helper — 1!=1, 2!=2, 3!=6, 4!=24, 5!=120, 6!=720 ...
 const factorial = (n) => {
   if (n <= 1) return 1;
@@ -63,6 +66,36 @@ const Cart = () => {
   const { cartItems, updateQty, removeFromCart, clearCart } = useCart();
   const { user } = useAuth();
   const [brokenImages, setBrokenImages] = useState({});
+  // rows animating out before they're actually removed from the cart
+  const [leaving, setLeaving] = useState({});
+  const leaveTimers = useRef([]);
+
+  useEffect(() => () => leaveTimers.current.forEach(clearTimeout), []);
+
+  const removeAnimated = (key) => {
+    if (leaving[key]) return;
+    setLeaving((prev) => ({ ...prev, [key]: true }));
+    leaveTimers.current.push(
+      setTimeout(() => {
+        removeFromCart(key);
+        setLeaving((prev) => {
+          const next = { ...prev };
+          delete next[key];
+          return next;
+        });
+      }, LEAVE_MS)
+    );
+  };
+
+  const clearAnimated = () => {
+    setLeaving(Object.fromEntries((cartItems || []).map((item) => [item.key, true])));
+    leaveTimers.current.push(
+      setTimeout(() => {
+        clearCart();
+        setLeaving({});
+      }, LEAVE_MS)
+    );
+  };
 
   // Real distance-based base fare — same API the Checkout page uses.
   // Stays at a clearly-labelled fallback ONLY until a real address/location
@@ -229,7 +262,7 @@ const Cart = () => {
 
   if (!cartItems || cartItems.length === 0) {
     return (
-      <div className="cart-empty-container">
+      <div className="cart-empty-container" data-no-reveal>
         <div className="cart-empty-card">
           <div className="empty-icon-wrapper">
             <FiShoppingBag className="empty-icon" />
@@ -245,7 +278,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="cart-wrapper">
+    <div className="cart-wrapper" data-no-reveal>
       <div className="cart-header">
         {/* Back button */}
         <button
@@ -257,7 +290,7 @@ const Cart = () => {
           <FiArrowLeft />
         </button>
         <h2>Shopping Cart</h2>
-        <span className="item-count">
+        <span key={cartItems.length} className="item-count">
           {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
         </span>
       </div>
@@ -266,7 +299,7 @@ const Cart = () => {
         {/* Left Column: Items List */}
         <div className="cart-items-section">
           <div className="cart-list">
-            {cartItems.map((item) => {
+            {cartItems.map((item, index) => {
               const unitPrice = getUnitPrice(item);
               const mrpPrice = getMrpPrice(item);
               const hasDiscount = mrpPrice > unitPrice;
@@ -274,7 +307,12 @@ const Cart = () => {
               const imgSrc = getItemImage(item);
               const showImage = imgSrc && !brokenImages[item.key];
               return (
-                <div key={item.key} className="cart-item-card">
+                <div
+                  key={item.key}
+                  className={`cart-item-slot ${leaving[item.key] ? "is-leaving" : ""}`}
+                  style={{ "--i": Math.min(index, 8) }}
+                >
+                <div className="cart-item-card">
                   <div className="cart-product-info">
                     <div className="cart-image-wrapper">
                       {showImage ? (
@@ -311,7 +349,7 @@ const Cart = () => {
                       >
                         <FiMinus />
                       </button>
-                      <span>{item.quantity}</span>
+                      <span key={item.quantity} className="cart-tick">{item.quantity}</span>
                       <button
                         onClick={() => updateQty(item.key, item.quantity + 1)}
                         aria-label="Increase quantity"
@@ -320,17 +358,18 @@ const Cart = () => {
                       </button>
                     </div>
 
-                    <div className="item-price-total">₹{itemTotal}</div>
+                    <div key={itemTotal} className="item-price-total cart-tick">₹{itemTotal}</div>
 
                     <button
                       className="remove-btn"
-                      onClick={() => removeFromCart(item.key)}
+                      onClick={() => removeAnimated(item.key)}
                       title="Remove item"
                       aria-label="Remove item"
                     >
                       <FiTrash2 />
                     </button>
                   </div>
+                </div>
                 </div>
               );
             })}
@@ -340,7 +379,7 @@ const Cart = () => {
             <Link to="/" className="back-link">
               ← Continue Shopping
             </Link>
-            <button className="clear-cart-btn" onClick={clearCart}>
+            <button type="button" className="clear-cart-btn" onClick={clearAnimated}>
               Clear Cart
             </button>
           </div>
@@ -388,7 +427,7 @@ const Cart = () => {
 
             <div className="summary-row">
               <span>Subtotal</span>
-              <strong>₹{summary.subtotal.toFixed(2)}</strong>
+              <strong key={summary.subtotal} className="cart-tick">₹{summary.subtotal.toFixed(2)}</strong>
             </div>
 
             {/* Delivery row — driven by the real distance API result, with a
@@ -425,7 +464,7 @@ const Cart = () => {
 
             <div className="summary-row summary-total">
               <span>Grand Total</span>
-              <strong>₹{summary.grandTotal.toFixed(2)}</strong>
+              <strong key={summary.grandTotal} className="cart-tick">₹{summary.grandTotal.toFixed(2)}</strong>
             </div>
             {/* 🆕 One payment, no delivery-on-arrival split: the food total
                 and the dynamic delivery charge are paid together, in one go,
@@ -434,7 +473,7 @@ const Cart = () => {
               Food + delivery are paid together as one amount at checkout — nothing extra to pay on arrival.
             </p>
 
-            <button className="checkout-btn" onClick={handleCheckout}>
+            <button type="button" className="checkout-btn" onClick={handleCheckout}>
               Proceed to Checkout <FiArrowRight />
             </button>
           </div>

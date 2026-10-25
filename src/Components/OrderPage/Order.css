@@ -65,7 +65,7 @@
 
 
 .order-thumb-img.active {
-  border-color: #A90409;
+  border-color: var(--chilli);
 }
 
 .order-thumb-placeholder {
@@ -73,7 +73,7 @@
   height: 150px;
   border-radius: 8px;
   object-fit: contain;
-  background: #f1f5f9;
+  background: var(--besan);
   flex-shrink: 0;
 }
 
@@ -125,7 +125,7 @@
 .order-status p {
   font-size: 15px;
   font-weight: 500;
-  color: #444;
+  color: var(--ink);
 }
 
 .text-green-600 {
@@ -133,7 +133,7 @@
 }
 
 .text-red-600 {
-  color: #dc2626;
+  color: var(--chilli);
 }
 
 .order-status-icons {
@@ -153,7 +153,7 @@
 /* DESCRIPTION */
 .food-desc1 {
   font-size: 15px;
-  color: #555;
+  color: var(--ink);
   line-height: 1.7;
   margin-bottom: 18px;
 }
@@ -164,7 +164,7 @@
 }
 
 .rating-dot {
-  color: #ccc;
+  color: #c9b9aa;
   font-size: 12px;
 }
 
@@ -203,15 +203,15 @@
   word-break: break-word;
 }
 
-.order-food-title span {
+.order-food-title .order-weight {
   font-size: 14px;
-  color: #777;
+  color: var(--ink-soft);
 }
 
 .order-price {
   font-size: 40px;
   font-weight: 600;
-  color: #000;
+  color: var(--ink);
 }
 
 .order-price .rs {
@@ -222,19 +222,19 @@
 
 .offer1 {
   text-decoration: line-through;
-  color: gray;
+  color: var(--ink-soft);
   font-size: 18px;
   margin-top: 8px;
 }
 
 .order-off {
-  color: green;
+  color: var(--pista);
   font-weight: 500;
 }
 
 .order-desc {
   font-size: 16px;
-  color: #555;
+  color: var(--ink);
   line-height: 1.6;
 }
 
@@ -247,7 +247,7 @@
 .order-rating .number {
   font-size: 24px;
   font-weight: 600;
-  color: #000;
+  color: var(--ink);
 }
 
 .shop-meta {
@@ -255,11 +255,11 @@
 }
 
 .label {
-  color: red;
+  color: var(--chilli);
 }
 
 .view-resto {
-  color: red;
+  color: var(--chilli);
   cursor: pointer;
   background: none;
   border: none;
@@ -267,7 +267,7 @@
 
 .order-rating p {
   font-size: 14px;
-  color: red;
+  color: var(--chilli);
   margin-top: 10px;
 }
 
@@ -281,7 +281,7 @@
 }
 
 .order-btnn {
-  background: #e11c1c;
+  background: var(--chilli);
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -295,7 +295,7 @@
 .adds {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--ink);
   display: flex;
   align-items: center;
 }
@@ -304,7 +304,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #e11c1c;
+  background: var(--chilli);
   color: #fff;
   border-radius: 18px 0px 0px 18px;
   padding: 8px 22px;
@@ -322,7 +322,7 @@
   flex: 1;
   padding: 10px 14px;
   border-radius: 25px;
-  border: 1px solid #ff4d4f;
+  border: 1px solid var(--chilli);
   outline: none;
 }
 
@@ -330,7 +330,7 @@
   padding: 10px 18px;
   border-radius: 25px;
   border: none;
-  background: #ff4d4f;
+  background: var(--chilli);
   color: #fff;
   font-size: 14px;
   cursor: pointer;
@@ -377,7 +377,7 @@
 
 .shop-text span {
   font-size: 14px;
-  color: #777;
+  color: var(--ink-soft);
 }
 
 .shop-text p {
@@ -428,7 +428,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--ink-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -454,11 +454,11 @@
 .review-form-label {
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: var(--ink);
 }
 
 .required-star {
-  color: #ef4444;
+  color: var(--chilli);
 }
 
 .star-rating-picker {
@@ -480,7 +480,7 @@
   width: 100%;
   padding: 10px 12px;
   border-radius: 6px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--sesame);
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
@@ -494,8 +494,8 @@
 
 .write-review-toggle-btn {
   background: #fff;
-  color: #880559;
-  border: 1.5px solid #880559;
+  color: var(--chilli);
+  border: 1.5px solid var(--chilli);
   border-radius: 8px;
   padding: 8px 16px;
   font-size: 13px;
@@ -506,13 +506,13 @@
 }
 
 .write-review-toggle-btn:hover {
-  background: #ff4d4f;
+  background: var(--chilli);
   color: #fff;
 }
 
 .post-review-btn {
   padding: 10px 20px;
-  background-color: #ff4d4f;
+  background-color: var(--chilli);
   color: #fff;
   border-radius: 6px;
   border: none;
@@ -530,7 +530,7 @@
 
 .reviews-status-text {
   font-size: 13px;
-  color: #9ca3af;
+  color: #9a8b7f;
   margin-top: 12px;
   text-align: center;
 }
@@ -545,11 +545,11 @@
   display: flex;
   gap: 12px;
   padding: 14px 0;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #f7f2ea;
 }
 
 .review-dp {
-  background: #ff4d4f;
+  background: var(--chilli);
   color: #fff;
   width: 38px;
   height: 38px;
@@ -582,7 +582,7 @@
   margin: 0;
   font-size: 15px;
   font-weight: 600;
-  color: #111827;
+  color: var(--ink);
 }
 
 .review-stars-display {
@@ -593,7 +593,7 @@
 .review-comment-text {
   margin: 4px 0;
   font-size: 14px;
-  color: #374151;
+  color: var(--ink);
   line-height: 1.4;
   word-break: break-word;
 }
@@ -612,7 +612,7 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--ink-soft);
   transition: color 0.2s;
 }
 
@@ -643,8 +643,8 @@
 
 .show-more-btn {
   background: #fff;
-  color: #880559;
-  border: 1.5px solid #880559;
+  color: var(--chilli);
+  border: 1.5px solid var(--chilli);
   border-radius: 999px;
   padding: 8px 22px;
   font-size: 13px;
@@ -655,7 +655,7 @@
 
 .hide-btn {
   border-color: #999;
-  color: #666;
+  color: var(--ink-soft);
 }
 
 /* ===== Branch popup (unchanged) ===== */
@@ -693,7 +693,7 @@
 }
 
 .branch-header {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--sesame);
   padding-bottom: 12px;
   margin-bottom: 16px;
 }
@@ -701,12 +701,12 @@
 .branch-header h2 {
   font-size: 20px;
   font-weight: 600;
-  color: #222;
+  color: var(--ink);
 }
 
 .branch-subtitle {
   font-size: 13px;
-  color: #777;
+  color: var(--ink-soft);
   margin-top: 4px;
 }
 
@@ -746,19 +746,19 @@
 }
 
 .branch-row:hover {
-  border-color: #ff5a00;
+  border-color: var(--chilli);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
 .branch-details p {
   margin: 4px 0;
   font-size: 14px;
-  color: #333;
+  color: var(--ink);
   line-height: 1.4;
 }
 
 .branch-details strong {
-  color: #000;
+  color: var(--ink);
 }
 
 .branch-action {
@@ -767,7 +767,7 @@
 }
 
 .select-branch-btn {
-  background: #ff5a00;
+  background: var(--chilli);
   color: #fff;
   border: none;
   padding: 8px 18px;
@@ -790,11 +790,11 @@
 .selected-branch-info p {
   margin: 2px 0;
   font-size: 14px;
-  color: #333;
+  color: var(--ink);
 }
 
 .selected-branch-info strong {
-  color: #ff5a00;
+  color: var(--chilli);
 }
 
 /* =========================================================
@@ -803,7 +803,7 @@
 .highlights-box {
   flex: 1 1 260px;
   min-width: 240px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--sesame);
   border-radius: 10px;
   padding: 16px;
   /* 🆕 height (not max-height) so this box always has a real fixed size
@@ -820,10 +820,10 @@
   font-size: 15px;
   font-weight: 700;
   margin-bottom: 12px;
-  color: #111827;
+  color: var(--ink);
   flex-shrink: 0;
   padding-bottom: 8px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--sesame);
 }
 
 /* Scrolling works (thanks to the height fix above), but the scrollbar
@@ -851,7 +851,7 @@
   justify-content: space-between;
   gap: 10px;
   font-size: 12px;
-  border-bottom: 1px dashed #eee;
+  border-bottom: 1px dashed var(--sesame);
   padding-bottom: 8px;
   flex-wrap: wrap;
 }
@@ -862,19 +862,19 @@
 }
 
 .highlight-label {
-  color: #6b7280;
+  color: var(--ink-soft);
   font-weight: 600;
   min-width: 110px;
 }
 
 .highlight-value {
-  color: #111827;
+  color: var(--ink);
   text-align: right;
   flex: 1;
 }
 
 .highlight-text {
-  color: #374151;
+  color: var(--ink);
   line-height: 1.5;
   font-size: 12px;
   margin: 0;
@@ -1153,5 +1153,339 @@
   .shop-image {
     width: 48px;
     height: 48px;
+  }
+}
+/* =========================================================
+   THEME POLISH + ENTRANCE (site theme: src/theme.css,
+   motion tokens: Motion/motion.css). Only opacity / transform
+   move; the big product photo just fades (RevealImage).
+   ========================================================= */
+.order-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  animation: pdpRise 520ms var(--ease-out) both;
+}
+
+.order-breadcrumb a {
+  color: var(--chilli);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.order-breadcrumb span:last-child {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* photo stage */
+.order-main-image-wrap {
+  border-radius: 24px;
+  background: linear-gradient(160deg, var(--besan), #fff 70%);
+  box-shadow: 0 24px 48px -28px rgba(36, 22, 15, 0.35);
+}
+
+.order-image {
+  display: block;
+  border-radius: 24px;
+}
+
+.order-type-icon {
+  box-shadow: 0 4px 10px -4px rgba(36, 22, 15, 0.3);
+}
+
+.order-thumb-img,
+.order-thumb-placeholder {
+  border: 2px solid var(--sesame);
+  border-radius: 14px;
+  background: #fff;
+  transition:
+    border-color 200ms ease,
+    opacity 200ms ease,
+    transform 200ms var(--ease-out);
+}
+
+.order-thumb-img:not(.active) {
+  opacity: 0.75;
+}
+
+.order-thumb-img.active {
+  border-color: var(--chilli);
+  opacity: 1;
+}
+
+/* a product with one photo has no thumbnails to show: skip the empty boxes */
+.order-thumbnails-demo {
+  display: none;
+}
+
+/* thumbnails drop in one after another */
+.order-thumbnails > * {
+  animation: pdpRise 480ms var(--ease-out) both;
+  animation-delay: calc(120ms + var(--t, 0) * 60ms);
+}
+.order-thumbnails > :nth-child(2) { --t: 1; }
+.order-thumbnails > :nth-child(3) { --t: 2; }
+.order-thumbnails > :nth-child(4) { --t: 3; }
+.order-thumbnails > :nth-child(n + 5) { --t: 4; }
+
+@media (hover: hover) and (pointer: fine) {
+  .order-thumb-img:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+/* stock pill */
+.order-status .stock-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--pista-tint, #e8f3ec);
+  color: var(--pista);
+}
+
+.order-status .stock-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.order-status .stock-status.text-red-600 {
+  background: #fdecec;
+  color: var(--chilli);
+}
+
+/* title: the words rise out of their masks after the details start */
+.order-food-title {
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.order-details .order-food-title .sw-i {
+  display: inline-block;
+  transform: translate3d(0, 105%, 0);
+  transition: transform 700ms var(--ease-out);
+  transition-delay: calc(160ms + min(var(--w, 0), 12) * 45ms);
+}
+
+.order-details[data-revealed] .order-food-title .sw-i {
+  transform: none;
+}
+
+.order-food-title .order-weight {
+  margin-left: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--besan);
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.food-desc1 {
+  color: var(--ink-soft);
+}
+
+.order-reviews-link {
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--chilli);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 200ms ease;
+}
+
+.order-reviews-link:hover {
+  text-decoration-color: currentColor;
+}
+
+/* price */
+.order-price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.order-price .rs {
+  margin: 0;
+  color: var(--chilli);
+}
+
+.order-price-row .food-off {
+  margin: 0;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+/* a changed number (price or quantity) ticks in from below */
+.tick-in {
+  display: inline-block;
+  animation: pdpTick 320ms var(--ease-out);
+}
+
+/* actions: quantity stepper, then a full "Place order" pill */
+.food-action {
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.food-action .adds {
+  display: none;
+}
+
+.add-btnn {
+  order: -1;
+  height: 50px;
+  padding: 0 6px;
+  gap: 4px;
+  border-radius: 999px;
+  border: 1.5px solid var(--sesame);
+  background: #fff;
+  color: var(--ink);
+}
+
+.add-btnn button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: var(--chilli);
+  font-size: 22px;
+  line-height: 1;
+  transition:
+    background-color 200ms ease,
+    transform 160ms var(--ease-out);
+}
+
+.add-btnn button:active:not(:disabled) {
+  transform: scale(0.9);
+}
+
+.add-btnn span {
+  min-width: 30px;
+  font-weight: 700;
+}
+
+.order-btnn {
+  flex: 1 1 150px;
+  max-width: 320px;
+  height: 50px;
+  padding: 0 28px;
+  border-radius: 999px;
+  font-size: 16px;
+  box-shadow: 0 14px 28px -16px rgba(179, 18, 27, 0.7);
+  transition:
+    background-color 200ms ease,
+    transform 160ms var(--ease-out),
+    box-shadow 200ms ease;
+}
+
+.order-btnn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .add-btnn button:hover:not(:disabled) {
+    background: var(--besan);
+  }
+
+  .order-btnn:hover:not(:disabled) {
+    background: var(--chilli-deep);
+    box-shadow: 0 18px 30px -16px rgba(142, 14, 21, 0.8);
+  }
+}
+
+/* highlights: a themed spec sheet whose rows cascade in */
+.highlights-box {
+  border-radius: 20px;
+  border-color: var(--sesame);
+  background: #fff;
+  box-shadow: 0 18px 40px -32px rgba(36, 22, 15, 0.4);
+  animation: pdpRise 600ms var(--ease-out) 260ms both;
+}
+
+.highlights-title {
+  margin: -16px -16px 12px;
+  padding: 14px 16px;
+  border-radius: 20px 20px 0 0;
+  background: var(--besan);
+  font-size: 16px;
+}
+
+.highlight-label {
+  color: var(--ink-soft);
+}
+
+/* restaurant card */
+.shop {
+  border-radius: 20px;
+}
+
+@keyframes pdpRise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+}
+
+@keyframes pdpTick {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 40%, 0);
+  }
+}
+
+@media (max-width: 600px) {
+  .order-btnn,
+  .add-btnn {
+    flex: 0 0 auto;
+    max-width: none;
+    border-radius: 999px;
+  }
+
+  .add-btnn {
+    justify-content: space-between;
+    padding: 0 8px;
+  }
+
+  .highlights-title {
+    margin: -12px -12px 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .order-breadcrumb,
+  .order-thumbnails > *,
+  .highlights-box,
+  .tick-in {
+    animation: none;
+  }
+
+  .order-details .order-food-title .sw-i {
+    transform: none;
+    transition: none;
   }
 }

@@ -17,7 +17,7 @@ import StarIcon from "../../assets/StarIcon.png";
 
 import MaidaItems from "../Food/MaidaItems.jsx";
 import { optimizeImage } from "../../utils/image";
-import { RevealImage, StaggerChildren } from "../Motion/motionKit";
+import { RevealImage, SplitWords, StaggerChildren } from "../Motion/motionKit";
 import { ProductDetailSkeleton, ReviewsSkeleton, TextLinesSkeleton } from "../Skeleton/Skeleton";
 
 const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
@@ -373,9 +373,17 @@ const OrderPage = () => {
     <>
       <div className="food-container">
         <div className="order-container">
-          <span>
-            Home / {categoryName || "Products"} {subcategoryName ? `/ ${subcategoryName}` : ""}
-          </span>
+          <nav className="order-breadcrumb" aria-label="Breadcrumb">
+            <Link to="/">Home</Link>
+            <span aria-hidden="true">/</span>
+            <span>{categoryName || "Products"}</span>
+            {subcategoryName && (
+              <>
+                <span aria-hidden="true">/</span>
+                <span>{subcategoryName}</span>
+              </>
+            )}
+          </nav>
 
           <div className="order-card">
             <div className="order-image-box">
@@ -427,13 +435,13 @@ const OrderPage = () => {
                       <FaHeart
                         size={24}
                         title="Unlike"
-                        style={{ color: "red" }}
+                        style={{ color: "var(--chilli)" }}
                       />
                     ) : (
                       <FaRegHeart
                         size={24}
                         title="Like"
-                        style={{ color: "#6b7280" }}
+                        style={{ color: "var(--ink-soft)" }}
                       />
                     )}
                     <span style={{ fontSize: "14px", fontWeight: "600" }}>
@@ -443,13 +451,13 @@ const OrderPage = () => {
 
                   {bookmarked ? (
                     <FaBookmark
-                      style={{ fontSize: "20px", cursor: "pointer", color: "red" }}
+                      style={{ fontSize: "20px", cursor: "pointer", color: "var(--chilli)" }}
                       title="Remove from Wishlist"
                       onClick={handleToggleWishlist}
                     />
                   ) : (
                     <FaRegBookmark
-                      style={{ fontSize: "20px", cursor: "pointer", color: "#6b7280" }}
+                      style={{ fontSize: "20px", cursor: "pointer", color: "var(--ink-soft)" }}
                       title="Add to Wishlist"
                       onClick={handleToggleWishlist}
                     />
@@ -458,7 +466,7 @@ const OrderPage = () => {
               </div>
 
               <h2 className="order-food-title">
-                {item.title} {scaledWeightDisplay && <span>{scaledWeightDisplay}</span>}
+                <SplitWords text={item.title} /> {scaledWeightDisplay && <span className="order-weight">{scaledWeightDisplay}</span>}
               </h2>
 
               <p className="food-desc1">{(item.desc || "").slice(0, 300)}</p>
@@ -470,36 +478,24 @@ const OrderPage = () => {
                     <FaStar
                       key={n}
                       size={14}
-                      color={n <= Math.round(currentRating) ? "#ffb300" : "#e0e0e0"}
+                      color={n <= Math.round(currentRating) ? "var(--kesar)" : "var(--sesame)"}
                     />
                   ))}
                 </span>
                 <span>({reviews.length})</span>
                 <span className="rating-dot">•</span>
-                <span className="orders-last-week" style={{ color: "#666", fontSize: "14px" }}>
+                <span className="orders-last-week" style={{ color: "var(--ink-soft)", fontSize: "14px" }}>
                   {item.orders || 0} order{(item.orders || 0) === 1 ? "" : "s"} last week
                 </span>
 
-                <button
-                  onClick={handleOpenReviewModal}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#880559",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                    fontSize: "16px",
-                    marginLeft: "auto",
-
-                  }}
-                >
+                <button type="button" className="order-reviews-link" onClick={handleOpenReviewModal}>
                   Customer Reviews ({reviews.length})
                 </button>
               </div>
 
               <div className="order-price-row">
                 <small className="order-price">
-                  <span className="rs">₹</span> {scaledPrice}
+                  <span className="rs">₹</span> <span key={scaledPrice} className="tick-in">{scaledPrice}</span>
                 </small>
                 {baseOffer > 0 && (
                   <span className="offer1">
@@ -526,9 +522,9 @@ const OrderPage = () => {
                 <div className="adds" onClick={handleAddToCart} style={{ cursor: isAvailable ? "pointer" : "not-allowed", opacity: isAvailable ? 1 : 0.5 }}></div>
 
                 <div className="add-btnn" style={{ opacity: isAvailable ? 1 : 0.5 }}>
-                  <button onClick={decrease} disabled={!isAvailable}>-</button>
-                  <span>{qty}</span>
-                  <button onClick={increase} disabled={!isAvailable}>+</button>
+                  <button type="button" onClick={decrease} disabled={!isAvailable} aria-label="Decrease quantity">−</button>
+                  <span key={qty} className="tick-in" aria-live="polite">{qty}</span>
+                  <button type="button" onClick={increase} disabled={!isAvailable} aria-label="Increase quantity">+</button>
                 </div>
               </div>
             </StaggerChildren>
@@ -537,7 +533,7 @@ const OrderPage = () => {
               <h3 className="highlights-title">Highlights</h3>
 
               <div className="highlights-scroll">
-                <div className="highlights-list">
+                <div className="highlights-list" data-reveal="stagger">
                   {item.brand && (
                     <div className="highlight-row">
                       <span className="highlight-label">Brand</span>
