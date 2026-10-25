@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import FeedbackModal from "./FeedbackModal";
+import { FEEDBACK_STORAGE_KEYS, isFeedbackSuppressed } from "./feedbackStore";
 
 const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 const POLL_INTERVAL = 10000;
@@ -28,10 +29,8 @@ function FeedbackWatcher() {
             const pending = res.data?.pending;
             if (!pending) return;
 
-            const done = JSON.parse(localStorage.getItem("feedbackDone") || "[]");
-            const snoozed = JSON.parse(sessionStorage.getItem("feedbackSnoozed") || "[]");
-
-            if (done.includes(pending.orderId) || snoozed.includes(pending.orderId)) return;
+            // answered or snoozed in this or any other tab: stay quiet
+            if (isFeedbackSuppressed(pending.orderId)) return;
 
             setActiveOrder((prev) => prev || { orderId: pending.orderId });
         } catch (err) {
@@ -43,6 +42,16 @@ function FeedbackWatcher() {
         checkPendingFeedback();
         intervalRef.current = setInterval(checkPendingFeedback, POLL_INTERVAL);
         return () => clearInterval(intervalRef.current);
+    }, []);
+
+    // answered or snoozed in another tab: close this tab's pop-up too
+    useEffect(() => {
+        const onStorage = (e) => {
+            if (!FEEDBACK_STORAGE_KEYS.includes(e.key)) return;
+            setActiveOrder((prev) => (prev && isFeedbackSuppressed(prev.orderId) ? null : prev));
+        };
+        window.addEventListener("storage", onStorage);
+        return () => window.removeEventListener("storage", onStorage);
     }, []);
 
     if (!activeOrder) return null;

@@ -429,6 +429,14 @@
   white-space: nowrap;
 }
 
+/* the cart's link sits inside its list item (valid list markup), so it lays
+   out icon and count side by side itself: 🛒 (1) */
+.nav-item.nav-cart > .nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .nav-item img {
   height: 30px;
   width: auto;

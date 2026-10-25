@@ -3,6 +3,7 @@ import axios from "axios";
 import { AiOutlineStar, AiFillStar } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
 import "./FeedbackModal.css";
+import { markFeedbackDone, snoozeFeedback } from "./feedbackStore";
 
 const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
 
@@ -54,9 +55,7 @@ function FeedbackModal({ order, onClose, onSubmitted }) {
                 comment: otherText.trim(),
             });
 
-            const done = JSON.parse(localStorage.getItem("feedbackDone") || "[]");
-            done.push(order.orderId);
-            localStorage.setItem("feedbackDone", JSON.stringify(done));
+            markFeedbackDone(order.orderId);
 
             onSubmitted?.(order.orderId);
             onClose();
@@ -68,9 +67,8 @@ function FeedbackModal({ order, onClose, onSubmitted }) {
     };
 
     const handleRemindLater = () => {
-        const snoozed = JSON.parse(sessionStorage.getItem("feedbackSnoozed") || "[]");
-        snoozed.push(order.orderId);
-        sessionStorage.setItem("feedbackSnoozed", JSON.stringify(snoozed));
+        // remembered in every tab for a day (was this tab only)
+        snoozeFeedback(order.orderId);
         onClose();
     };
 
