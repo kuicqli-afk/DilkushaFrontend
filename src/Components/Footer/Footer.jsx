@@ -1,13 +1,8 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import axios from "axios";
 import "./Footer.css";
-<<<<<<< HEAD
 import logo from "../../assets/dilkusha.png";
 import Razorpay from "../../assets/razorpay.webp";
-=======
-import logo from "../../assets/DilkushaLogo.png";
-import Razorpay from "../../assets/razorpay.png";
->>>>>>> 4d79668413ed4cfd67255dc58a7908b5a6295351
 
 import PlayStore from "../../assets/PlayStore.webp";
 import AppStore from "../../assets/AppStore.webp";

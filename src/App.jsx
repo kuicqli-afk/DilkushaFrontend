@@ -8,23 +8,6 @@ import Navbar from "./Components/Navbar/Navbar.jsx";
 import Category from "./Components/Category/Category";
 import Footer from "./Components/Footer/Footer";
 
-<<<<<<< HEAD
-=======
-import Items from "./Components/Food/Items.jsx";
-import AppBanner from "./Components/Food/AppBanner.jsx";
-import Khuramnagar from "./Components/Pages/Khuramnagar.jsx";
-import Indiranagar from "./Components/Pages/Indiranagar.jsx";
-import Nishatganj from "./Components/Pages/Nishatganj.jsx";
-import Aliganj from "./Components/Pages/Aliganj.jsx";
-import Kapoorthala from "./Components/Pages/Kapoorthala.jsx";
-import Aminabad from "./Components/Pages/Aminabad.jsx";
-import Gomtinagar from "./Components/Pages/Gomtinagar.jsx";
-import Alambagh from "../src/Components/Pages/Alambagh.jsx";
-import Daliganj from "./Components/Pages/Daliganj.jsx";
-import Kalyanpur from "./Components/Pages/Kalyanpur.jsx";
-import CartPage from "./Components/Cart/Cart.jsx";
-import CheckoutPage from "./Components/CheckoutPage/CheckoutPage.jsx";
->>>>>>> 4d79668413ed4cfd67255dc58a7908b5a6295351
 
 
 import { ScrollToTopButton } from "./Components/ScrollToTopButton/ScrollToTopButton.jsx";
@@ -315,15 +298,9 @@ function AppContent() {
 
         {/* Restaurant & Location Pages */}
         {/* <Route path="/restaurant" element={<RestaurantPage />} /> */}
-<<<<<<< HEAD
         {/* <Route path="/restaurant/khuramnagar" element={<Khuramnagar />} /> */}
         {/* <Route path="/restaurant/indiranagar" element={<Indiranagar />} /> */}
         {/* <Route path="/restaurant/nishatganj" element={<Nishatganj />} />
-=======
-        <Route path="/restaurant/khuramnagar" element={<Khuramnagar />} />
-        <Route path="/restaurant/indiranagar" element={<Indiranagar />} />
-        <Route path="/restaurant/nishatganj" element={<Nishatganj />} />
->>>>>>> 4d79668413ed4cfd67255dc58a7908b5a6295351
         <Route path="/restaurant/aliganj" element={<Aliganj />} />
         <Route path="/restaurant/kapoorthala" element={<Kapoorthala />} />
         <Route path="/restaurant/aminabad" element={<Aminabad />} />
