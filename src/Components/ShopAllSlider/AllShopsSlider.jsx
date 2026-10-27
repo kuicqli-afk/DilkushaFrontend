@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useState, useEffect, useRef } from "react";
 import { FaStar } from "react-icons/fa";
 // import offer from "../../assets/offer.png";
-import fssai from "../../assets/fssai.png";
+// import fssai from "../../assets/fssai.png";
 
 function AllShopsSlider() {
   const [restaurant, setRestaurant] = useState(null);
@@ -150,7 +150,7 @@ function AllShopsSlider() {
             </span>
           </div>
           <p><strong>GST: </strong>{restaurant.gst}</p>
-          <p><strong>Fssai: <img style={{ width: "35px" }} src={fssai} alt="fssai" /> </strong>{restaurant.fssai}</p>
+          {/* <p><strong>Fssai: <img style={{ width: "35px" }} src={fssai} alt="fssai" /> </strong>{restaurant.fssai}</p> */}
         </div>
       </div>
     </div>
