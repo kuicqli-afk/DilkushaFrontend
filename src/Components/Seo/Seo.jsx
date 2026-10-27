@@ -5,11 +5,14 @@ import { useLocation } from "react-router-dom";
 // Google renders the SPA, so these give every page its own search snippet —
 // distinct, descriptive pages are what Google picks sitelinks from.
 
-const SITE_URL = "https://shyamnamkeenandbakers.online";
-const SITE_NAME = "Shyam Namkeen & Bakers";
-const DEFAULT_TITLE = `${SITE_NAME} | Namkeen, Cakes & Bakery Online in Lucknow`;
+// Uses the domain the site is actually served from. Once Dilkusha Biryani has
+// its final domain, hard-code it here, e.g. "https://www.yourdomain.com", so
+// canonical links always point at the live site.
+const SITE_URL = window.location.origin;
+const SITE_NAME = "Dilkusha Biryani";
+const DEFAULT_TITLE = `${SITE_NAME} | Biryani, Kebabs & Non-Veg Food Online in Lucknow`;
 const DEFAULT_DESCRIPTION =
-  "Order fresh namkeen, bhujiya, chips, cakes, pastries, cookies and bakery items online from Shyam Namkeen & Bakers, Lucknow. Fast home delivery and daily offers.";
+  "Order fresh biryani, kebabs, curries, rolls and breads online from Dilkusha Biryani, Lucknow. Fast home delivery and daily offers.";
 
 const titleCase = (value) =>
   decodeURIComponent(value || "")
@@ -21,24 +24,24 @@ const titleCase = (value) =>
 const STATIC_PAGES = {
   "/": { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION },
   "/category/all": {
-    title: `All Categories | ${SITE_NAME}`,
-    description: "Browse every category at Shyam Namkeen & Bakers — namkeen, bhujiya, chips, sev, cakes, pastries, cookies and more.",
+    title: `Full Menu | ${SITE_NAME}`,
+    description: "Browse the full menu at Dilkusha Biryani — biryani, kebabs, curries, rolls, breads and more.",
   },
   "/all-offers": {
     title: `Offers & Deals | ${SITE_NAME}`,
-    description: "Today's offers and discounts on namkeen, cakes and bakery items from Shyam Namkeen & Bakers, Lucknow.",
+    description: "Today's offers and discounts on biryani, kebabs and non-veg combos from Dilkusha Biryani, Lucknow.",
   },
   "/discount": {
     title: `Discount Offers | ${SITE_NAME}`,
-    description: "Discounted namkeen, snacks and bakery items from Shyam Namkeen & Bakers.",
+    description: "Discounted biryani, kebabs and combo meals from Dilkusha Biryani.",
   },
   "/weekend-specials": {
     title: `Weekend Specials | ${SITE_NAME}`,
-    description: "Weekend special namkeen and bakery deals from Shyam Namkeen & Bakers.",
+    description: "Weekend special biryani and non-veg deals from Dilkusha Biryani.",
   },
   "/restaurant": {
     title: `Our Outlets in Lucknow | ${SITE_NAME}`,
-    description: "Shyam Namkeen & Bakers outlets and delivery areas across Lucknow.",
+    description: "Dilkusha Biryani outlets and delivery areas across Lucknow.",
   },
   "/cart": { title: `Your Cart | ${SITE_NAME}`, noindex: true },
   "/checkout": { title: `Checkout | ${SITE_NAME}`, noindex: true },
@@ -48,27 +51,27 @@ const STATIC_PAGES = {
   "/login": { title: `Login | ${SITE_NAME}`, noindex: true },
   "/terms-and-conditions": {
     title: `Terms and Conditions | ${SITE_NAME}`,
-    description: "Terms and conditions for ordering from Shyam Namkeen & Bakers.",
+    description: "Terms and conditions for ordering from Dilkusha Biryani.",
   },
   "/privacy-policy": {
     title: `Privacy Policy | ${SITE_NAME}`,
-    description: "How Shyam Namkeen & Bakers collects, uses and protects your information.",
+    description: "How Dilkusha Biryani collects, uses and protects your information.",
   },
   "/about-us": {
     title: `About Us | ${SITE_NAME}`,
-    description: "Shyam Namkeen & Bakers makes pure veg namkeen, gajak, cakes and cookies in Lucknow, freshly prepared and delivered across the city.",
+    description: "Dilkusha Biryani makes biryani, kebabs, curries and rolls in Lucknow, freshly cooked and delivered hot across the city.",
   },
   "/contact-us": {
     title: `Contact Us | ${SITE_NAME}`,
-    description: "Call, WhatsApp or email Shyam Namkeen & Bakers, Lucknow, about orders, bulk orders and custom cakes.",
+    description: "Call, WhatsApp or email Dilkusha Biryani, Lucknow, about orders, bulk orders and party orders.",
   },
   "/shipping-and-delivery": {
     title: `Shipping and Delivery | ${SITE_NAME}`,
-    description: "Where Shyam Namkeen & Bakers delivers in Lucknow, delivery times and charges, cancellations and help with wrong or damaged items.",
+    description: "Where Dilkusha Biryani delivers in Lucknow, delivery times and charges, cancellations and help with wrong or damaged items.",
   },
   "/become-a-rider": {
     title: `Become a Delivery Rider | ${SITE_NAME}`,
-    description: "Join Shyam Namkeen & Bakers as a delivery rider partner in Lucknow.",
+    description: "Join Dilkusha Biryani as a delivery rider partner in Lucknow.",
   },
 };
 
@@ -80,21 +83,21 @@ const getPageMeta = (pathname) => {
   if (first === "category" && second) {
     const name = titleCase(third || second);
     return {
-      title: `${name} | Buy Online | ${SITE_NAME}`,
-      description: `Order ${name.toLowerCase()} online from Shyam Namkeen & Bakers, Lucknow. Fresh stock, best prices and fast delivery.`,
+      title: `${name} | Order Online | ${SITE_NAME}`,
+      description: `Order ${name.toLowerCase()} online from Dilkusha Biryani, Lucknow. Freshly cooked, great prices and fast delivery.`,
     };
   }
   if (first === "restaurant" && second) {
     const area = titleCase(second);
     return {
-      title: `Shyam Namkeen & Bakers ${area}, Lucknow`,
-      description: `Visit or order from the Shyam Namkeen & Bakers outlet in ${area}, Lucknow.`,
+      title: `Dilkusha Biryani ${area}, Lucknow`,
+      description: `Visit or order from the Dilkusha Biryani outlet in ${area}, Lucknow.`,
     };
   }
   if ((first === "offers" || first === "offer-details") && second) {
     return {
       title: `${titleCase(second)} Offer | ${SITE_NAME}`,
-      description: `${titleCase(second)} — special offer on namkeen and bakery items at Shyam Namkeen & Bakers.`,
+      description: `${titleCase(second)} — special offer on biryani and non-veg dishes at Dilkusha Biryani.`,
     };
   }
   if (first === "section" && second) {
@@ -103,7 +106,7 @@ const getPageMeta = (pathname) => {
   if (first && first.startsWith("all-")) {
     return {
       title: `${titleCase(first.slice(4))} | ${SITE_NAME}`,
-      description: `Shop ${titleCase(first.slice(4)).toLowerCase()} online from Shyam Namkeen & Bakers, Lucknow.`,
+      description: `Order ${titleCase(first.slice(4)).toLowerCase()} online from Dilkusha Biryani, Lucknow.`,
     };
   }
   // product pages set a better title themselves once the product loads
