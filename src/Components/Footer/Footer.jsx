@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import axios from "axios";
 import "./Footer.css";
-import logo from "../../assets/syam.webp";
+import logo from "../../assets/dilkusha.png";
 import Razorpay from "../../assets/razorpay.webp";
 
 import PlayStore from "../../assets/PlayStore.webp";
@@ -36,7 +36,7 @@ const loadRiderConnect = () => import("./RiderConnect");
 const RiderModal = lazy(() => loadRiderConnect().then((m) => ({ default: m.RiderModal })));
 const RiderQrModal = lazy(() => loadRiderConnect().then((m) => ({ default: m.RiderQrModal })));
 
-const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
+const BASE_URL = "http://localhost:5001/api";
 
 // Makes a <button> look like the other footer links
 const linkButtonStyle = {
@@ -52,7 +52,7 @@ const linkButtonStyle = {
 
 const LATEST_CATEGORY_LIMIT = 5;
 
-const FALLBACK_OFFER_MESSAGE = "Freshly baked daily & delivered with care — order now!";
+const FALLBACK_OFFER_MESSAGE = "Freshly prepared daily & delivered with care — order now!";
 
 const getCategoryTimestamp = (cat) => {
   if (cat.createdAt) {
@@ -226,8 +226,8 @@ const Footer = () => {
 
       <StaggerChildren className="footer-content">
         <div className="footer-content-left">
-          <img src={logo} alt="Shyam Namkeen & Bakers" className="footer-logo" width="460" height="260" loading="lazy" />
-          <p>Freshly baked, delivered with care. Quality you can taste in every bite.</p>
+          <img src={logo} alt="Dilkusha Biryani" className="footer-logo" width="460" height="260" loading="lazy" />
+          <p>Freshly prepared, delivered with care. Quality you can taste in every bite.</p>
         </div>
 
         <div className="footer-content-categories">
@@ -301,15 +301,15 @@ const Footer = () => {
           </button>
 
           <ul className={`footer-collapsible ${openSections.contact ? "open" : ""}`}>
-            <li><FaPhoneAlt className="footer-inline-icon" /><span>+91 70805 12292</span></li>
-            <li><FaEnvelope className="footer-inline-icon" /><span>shyamnamkeenandbakers@gmail.com</span></li>
+            <li><FaPhoneAlt className="footer-inline-icon" /><span>+91 98765 43210</span></li>
+            <li><FaEnvelope className="footer-inline-icon" /><span>Dilkushabiryani@gmail.com</span></li>
             <li><FaMapMarkerAlt className="footer-inline-icon" /><span>Lucknow — Office | Store | Workshop</span></li>
           </ul>
         </div>
 
         <div className="footer-content-follow">
           <h2 className="footer-follow-heading">Follow Us</h2>
-          <p className="footer-follow-text">Stay updated with our latest bakes & offers</p>
+          <p className="footer-follow-text">Stay updated with our latest biryani & offers</p>
           <div className="footer-social-icons">
             <a href="" target="_self" rel="self" aria-label="Facebook" className="icon-facebook">
               <FaFacebookF />
@@ -358,7 +358,7 @@ const Footer = () => {
 
       <div className="footer-bottom-bar">
         <p className="footer-copyright">
-          Copyright 2025 © Shyam Namkeen & Bakers. All Rights Reserved.
+          Copyright 2026 © Dilkusha Biryani. All Rights Reserved.
         </p>
 
         <p className="footer-copyright">Powered by DesignerBirds.</p><p className="footer-copyright">For Support Contact 97602 48776</p>
@@ -518,7 +518,7 @@ const PopupForm = ({ type, onClose }) => {
       alert("Please fill all fields!");
       return;
     }
-    const whatsappNumber = "917080512292";
+    const whatsappNumber = "";
     const message = `*New ${type} Request*\n\n👤 Name: ${name}\n📞 Phone: ${phone}\n📝 Your Query: ${yourQuery}`;
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappLink, "_blank");

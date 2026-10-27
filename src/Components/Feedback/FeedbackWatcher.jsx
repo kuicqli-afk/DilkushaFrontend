@@ -4,7 +4,7 @@ import FeedbackModal from "./FeedbackModal";
 import { FEEDBACK_STORAGE_KEYS, isFeedbackSuppressed } from "./feedbackStore";
 import { isSiteNoticePending } from "../SiteNotice/siteNoticeStore";
 
-const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
+const BASE_URL = "http://localhost:5001/api";
 const POLL_INTERVAL = 10000;
 
 function FeedbackWatcher() {

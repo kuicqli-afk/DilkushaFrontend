@@ -5,16 +5,16 @@ import { StaggerChildren } from "../Motion/motionKit";
 
 // ====== EDIT THESE WITH YOUR REAL DETAILS ======
 export const BUSINESS = {
-    brand: "Shyam Namkeen & Bakers",
-    legalName: "Shyam Namkeen & Bakers", // registered name (Proprietor/Pvt Ltd/LLP)
-    website: "https://shyamnamkeenandbakers.online",
-    email: "shyamnamkeenandbakers@gmail.com",
-    phone: "+91 70805 12292",
-    address: "Shyam Namkeen & Bakers, Lucknow, Uttar Pradesh, India – 226021",
+    brand: "Dilkusha Biryani",
+    legalName: "Dilkusha Biryani", // registered name (Proprietor/Pvt Ltd/LLP)
+    website: "http://localhost:5174/",
+    email: "dilkushabiryani@gmail.com",
+    phone: "+91 9876543210",
+    address: "Dilkusha Biryani, Lucknow, Uttar Pradesh, India – 226021",
     fssai: "Your 14-digit FSSAI License No.",
     gstin: "Your GSTIN",
     grievanceOfficer: "Officer Name",
-    grievanceHours: "Monday to Saturday, 10:00 AM – 6:00 PM IST",
+    grievanceHours: "Monday to Sunday, 10:00 AM – 10:00 PM IST",
     jurisdiction: "Lucknow, Uttar Pradesh",
 };
 

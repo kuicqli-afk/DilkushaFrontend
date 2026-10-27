@@ -25,7 +25,7 @@ import { optimizeImage } from "../../utils/image";
 import { PressButton, ProductCard, RevealImage, SplitWords } from "../Motion/motionKit";
 
 
-const API_URL = "https://backend.shyamnamkeenandbakers.online";
+const API_URL = "http://localhost:5001";
 
 function AllOffersProducts({ filter, sortBy, price, cuisine }) {
 

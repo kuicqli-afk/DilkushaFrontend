@@ -11,7 +11,7 @@ import { InlineSkeleton } from "../Skeleton/Skeleton";
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
   (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
-  "https://backend.shyamnamkeenandbakers.online/api";
+  "http://localhost:5001/api";
 
 // Key used to hand the detected location off to the Checkout page so the
 // customer doesn't have to detect it twice.

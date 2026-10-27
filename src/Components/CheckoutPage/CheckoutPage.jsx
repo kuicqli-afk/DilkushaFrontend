@@ -24,7 +24,7 @@ import { InlineSkeleton } from "../Skeleton/Skeleton";
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
   (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
-  "https://backend.shyamnamkeenandbakers.online/api";
+  "http://localhost:5001/api";
 
 const DELIVERY_LOCATION_KEY = "cart_delivery_location";
 
@@ -623,7 +623,7 @@ export default function CheckoutPage() {
         key: keyId,
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
-        name: "Shyam Namkeen & Bakers",
+        name: "Dilkusha Biryani",
         description: "Order Payment",
         order_id: razorpayOrder.id,
         prefill: {

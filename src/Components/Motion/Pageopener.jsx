@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef } from "react";
-import logo from "../../assets/syam.webp";
+import logo from "../../assets/dilkusha.png";
 import "./Pageopener.css";
 
 // Same feel as the Designerbirds opener, but on the native Web Animations API
@@ -82,7 +82,7 @@ export const Pageopener = ({ variant = "route", onDone }) => {
       easing: EASE_EXPO_IN_OUT,
     });
 
-    lift.finished.then(() => doneRef.current?.()).catch(() => {});
+    lift.finished.then(() => doneRef.current?.()).catch(() => { });
     return () => anims.forEach((a) => a.cancel());
   }, [variant]);
 

@@ -5,11 +5,10 @@
 }
 
 .login-container {
-  min-height: 90vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 30px 20px;
+  padding: 90px 20px;
 }
 
 .login-card {
@@ -201,6 +200,7 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
 /* =========================================================
    THEME + MOTION (scoped to the login card; motion tokens
    from Motion/motion.css). Opacity / transform only.
@@ -229,22 +229,33 @@
 }
 
 /* each step (number → OTP) slides in; its parts follow one by one */
-.login-step > * {
+.login-step>* {
   animation: lgStep 520ms var(--ease-out) both;
   animation-delay: calc(140ms + var(--lg, 0) * 70ms);
 }
 
-.login-step form > * {
+.login-step form>* {
   animation: lgRise 480ms var(--ease-out) both;
   animation-delay: calc(300ms + var(--lg, 0) * 70ms);
 }
 
-:is(.login-step, .login-step form) > :nth-child(2) { --lg: 1; }
-:is(.login-step, .login-step form) > :nth-child(3) { --lg: 2; }
-:is(.login-step, .login-step form) > :nth-child(4) { --lg: 3; }
-:is(.login-step, .login-step form) > :nth-child(n + 5) { --lg: 4; }
+:is(.login-step, .login-step form)> :nth-child(2) {
+  --lg: 1;
+}
 
-.login-step > form {
+:is(.login-step, .login-step form)> :nth-child(3) {
+  --lg: 2;
+}
+
+:is(.login-step, .login-step form)> :nth-child(4) {
+  --lg: 3;
+}
+
+:is(.login-step, .login-step form)> :nth-child(n + 5) {
+  --lg: 4;
+}
+
+.login-step>form {
   animation: none;
 }
 
@@ -285,7 +296,7 @@
   box-shadow: 0 0 0 4px rgba(179, 18, 27, 0.1);
 }
 
-.login-card .input-wrapper input:focus ~ .input-icon,
+.login-card .input-wrapper input:focus~.input-icon,
 .login-card .input-wrapper:focus-within .input-icon {
   color: var(--chilli);
 }
@@ -406,16 +417,20 @@
     opacity: 0;
     transform: translateX(0);
   }
+
   25% {
     opacity: 1;
     transform: translateX(-6px);
   }
+
   50% {
     transform: translateX(5px);
   }
+
   75% {
     transform: translateX(-3px);
   }
+
   100% {
     transform: none;
   }
@@ -428,10 +443,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .login-card,
   .login-logo,
-  .login-step > *,
-  .login-step form > *,
+  .login-step>*,
+  .login-step form>*,
   .otp-sent-pill svg,
   .error-banner,
   .login-success h2,

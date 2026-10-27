@@ -6,11 +6,12 @@ import { FiPhone, FiLock, FiArrowRight, FiRotateCw, FiCheck } from "react-icons/
 import "./LoginPage.css";
 import { SuccessCheck } from "../Motion/SuccessCheck";
 import { digitsOnly, validateOtp, validatePhone } from "../../utils/validation";
+import Dilkusha from "../../assets/dilkusha.png";
 
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
   (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
-  "https://backend.shyamnamkeenandbakers.online/api";
+  "http://localhost:5001/api";
 
 // how long the "signed in" tick shows before we move on (SuccessCheck runs ~1.3s)
 const SUCCESS_HOLD_MS = 1500;
@@ -159,7 +160,7 @@ const LoginPage = () => {
         <div className="login-card login-success" role="status" aria-live="polite">
           <SuccessCheck size={104} label="Signed in" />
           <h2>You're signed in!</h2>
-          <p>Welcome to Shyam Namkeen &amp; Bakers. Taking you there…</p>
+          <p>Welcome to Dilkusha Biryani. Taking you there…</p>
           <span className="login-success-bar" aria-hidden="true" />
         </div>
       </div>
@@ -169,7 +170,7 @@ const LoginPage = () => {
   return (
     <div className="login-container" data-no-reveal>
       <div className="login-card">
-        <img className="login-logo" src="/logo.webp" alt="Shyam Namkeen & Bakers" width="460" height="260" />
+        <img className="login-logo" src={Dilkusha} alt="Dilkusha Biryani" width="460" height="260" />
 
         {/* keyed by step so each step plays its entrance */}
         <div key={step} className="login-step">

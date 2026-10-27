@@ -17,7 +17,7 @@ import {
 import { FaMotorcycle } from "react-icons/fa";
 import { OrderListSkeleton } from "../Skeleton/Skeleton";
 import "./OrderHistory.css";
-const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
+const BASE_URL = "http://localhost:5001/api";
 const POLL_INTERVAL = 10000;
 
 const getGuestId = () => {

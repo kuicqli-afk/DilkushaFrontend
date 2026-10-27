@@ -33,7 +33,7 @@ const ContactUs = () => (
                 </a>
                 <a
                     className="contact-way"
-                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi Shyam Namkeen & Bakers, I have a question.")}`}
+                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi Dilkusha Biryani, I have a question.")}`}
                     target="_blank"
                     rel="noreferrer"
                 >

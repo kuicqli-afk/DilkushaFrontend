@@ -35,7 +35,7 @@ const Category = ({ onSelectCategory }) => {
         setError(null);
 
         const res = await axios.get(
-          "https://backend.shyamnamkeenandbakers.online/api/category/categories"
+          "http://localhost:5001/api/category/categories"
         );
 
         const categoryData = res.data.categories || res.data.data || res.data || [];

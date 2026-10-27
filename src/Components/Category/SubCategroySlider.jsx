@@ -10,7 +10,7 @@ import "./Category.css";
 import { optimizeImage } from "../../utils/image";
 import { CategorySkeleton } from "../Skeleton/Skeleton";
 
-const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
+const BASE_URL = "http://localhost:5001/api";
 
 // All possible subcategory API endpoints to try
 const SUB_ENDPOINTS = [

@@ -38,7 +38,7 @@ function Namkeen({ categoryId, filter, sortBy, price, cuisine }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`https://backend.shyamnamkeenandbakers.online/api/products`)
+    axios.get(`http://localhost:5001/api/products`)
       .then((res) => {
         let data = res.data.products;
         console.log("MaidaItems Data:", res.data);

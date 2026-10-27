@@ -35,7 +35,7 @@ const Combo = ({ categoryId, filter, sortBy, price, cuisine }) => {
     if (!categoryId) return;
 
     axios
-      .get(`https://backend.shyamnamkeenandbakers.online/api/products/category-products/${categoryId}`)
+      .get(`http://localhost:5001/api/products/category-products/${categoryId}`)
       .then((res) => {
         setList(res.data.products || []);
       })
@@ -211,7 +211,7 @@ const Combo = ({ categoryId, filter, sortBy, price, cuisine }) => {
                     <img src={item.image} alt={item.title} className="food-image" />
                   </a>
                 ) : (
-                  <img src={`https://backend.shyamnamkeenandbakers.online/uploads/${item.image}`} alt={item.title} className="food-image" />
+                  <img src={`http://localhost:5001/uploads/${item.image}`} alt={item.title} className="food-image" />
                 )}
 
                 <div className="view-eye">

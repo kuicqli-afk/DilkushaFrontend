@@ -27,7 +27,7 @@ import { optimizeImage } from "../../utils/image";
 import { PressButton, ProductCard, RevealImage, SplitWords } from "../Motion/motionKit";
 import { ProductRowSkeleton } from "../Skeleton/Skeleton";
 
-const BASE_URL = "https://shyambackend.onrender.com";
+const BASE_URL = "http://localhost:5001";
 
 
 const Offers = ({ filter, sortBy, price, cuisine }) => {

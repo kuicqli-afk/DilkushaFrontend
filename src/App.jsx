@@ -29,46 +29,46 @@ import SiteMotion from "./Components/Motion/SiteMotion.jsx";
 import SiteNotice from "./Components/SiteNotice/SiteNotice.jsx";
 import { ProductGridSkeleton, ProductRowSkeleton } from "./Components/Skeleton/Skeleton.jsx";
 import Seo from "./Components/Seo/Seo.jsx";
-const BASE_URL = import.meta.env?.VITE_API_URL || "https://backend.shyamnamkeenandbakers.online/api";
+const BASE_URL = import.meta.env?.VITE_API_URL || "http://localhost:5001/api";
 
 
 // Pages load on demand so the home page doesn't download checkout, PDF and
 // listing code up front.
 const LoginPage = lazy(() => import("./Components/Login/LoginPage.jsx"));
 const OrderPage = lazy(() => import("./Components/OrderPage/OrderPage.jsx"));
-const RestaurantPage = lazy(() => import("./Components/ShopsDetailPage/RestaurantPage.jsx"));
-const Khuramnagar = lazy(() => import("./Components/Pages/Khuramnagar.jsx"));
-const Indiranagar = lazy(() => import("./Components/Pages/Indiranagar.jsx"));
-const Nishatganj = lazy(() => import("./Components/Pages/Nishatganj.jsx"));
-const Aliganj = lazy(() => import("./Components/Pages/Aliganj.jsx"));
-const Kapoorthala = lazy(() => import("./Components/Pages/Kapoorthala.jsx"));
-const Aminabad = lazy(() => import("./Components/Pages/Aminabad.jsx"));
-const Gomtinagar = lazy(() => import("./Components/Pages/Gomtinagar.jsx"));
-const Alambagh = lazy(() => import("../src/Components/Pages/Alambagh.jsx"));
-const Daliganj = lazy(() => import("./Components/Pages/Daliganj.jsx"));
-const Kalyanpur = lazy(() => import("./Components/Pages/Kalyanpur.jsx"));
+// const RestaurantPage = lazy(() => import("./Components/ShopsDetailPage/RestaurantPage.jsx"));
+// const Khuramnagar = lazy(() => import("./Components/Pages/Khuramnagar.jsx"));
+// const Indiranagar = lazy(() => import("./Components/Pages/Indiranagar.jsx"));
+// const Nishatganj = lazy(() => import("./Components/Pages/Nishatganj.jsx"));
+// const Aliganj = lazy(() => import("./Components/Pages/Aliganj.jsx"));
+// const Kapoorthala = lazy(() => import("./Components/Pages/Kapoorthala.jsx"));
+// const Aminabad = lazy(() => import("./Components/Pages/Aminabad.jsx"));
+// const Gomtinagar = lazy(() => import("./Components/Pages/Gomtinagar.jsx"));
+// const Alambagh = lazy(() => import("../src/Components/Pages/Alambagh.jsx"));
+// const Daliganj = lazy(() => import("./Components/Pages/Daliganj.jsx"));
+// const Kalyanpur = lazy(() => import("./Components/Pages/Kalyanpur.jsx"));
 const CartPage = lazy(() => import("./Components/Cart/Cart.jsx"));
 const CheckoutPage = lazy(() => import("./Components/CheckoutPage/CheckoutPage.jsx"));
-const OfferDetails = lazy(() => import("./Components/Pages/OfferDetails.jsx"));
-const ShyamBakery = lazy(() => import("./Components/ShopsDetailPage/ShyamBakery.jsx"));
-const ShaymChips = lazy(() => import("./Components/ShopsDetailPage/ShaymChips.jsx"));
+// const OfferDetails = lazy(() => import("./Components/Pages/OfferDetails.jsx"));
+// const ShyamBakery = lazy(() => import("./Components/ShopsDetailPage/ShyamBakery.jsx"));
+// const ShaymChips = lazy(() => import("./Components/ShopsDetailPage/ShaymChips.jsx"));
 const AllShopsSlider = lazy(() => import("./Components/ShopAllSlider/AllShopsSlider.jsx"));
-const ShyamSev = lazy(() => import("./Components/ShopsDetailPage/ShyamSev.jsx"));
-const ShaymBhujiya = lazy(() => import("./Components/ShopsDetailPage/ShaymBhujiya.jsx"));
-const KajuNamkeen = lazy(() => import("./Components/ViewAll/KajuNamkeen.jsx"));
-const SingleItemAll = lazy(() => import("./Components/ViewAll/SingleItems.jsx"));
-const SingleItems = lazy(() => import("./Components/ShopsDetailPage/SingleItems.jsx"));
-const MixAll = lazy(() => import("./Components/ViewAll/MixAll.jsx"));
-const ChuraAll = lazy(() => import("./Components/ViewAll/Chura.jsx"));
-const ChipsAll = lazy(() => import("./Components/ViewAll/ChipsAll.jsx"));
-const BhujiyaAll = lazy(() => import("./Components/ViewAll/BhujiyaAll.jsx"));
-const SevAll = lazy(() => import("./Components/ViewAll/SevAll.jsx"));
-const PastryAll = lazy(() => import("./Components/ViewAll/PastryAll.jsx"));
-const CakeAll = lazy(() => import("./Components/ViewAll/CakeAll.jsx"));
-const CookiesAll = lazy(() => import("./Components/ViewAll/CookiesAll.jsx"));
-const ItemsAll = lazy(() => import("./Components/ViewAll/Items.jsx"));
-const OffersAll = lazy(() => import("./Components/ViewAll/OffersAll.jsx"));
-const WeekendSpecial = lazy(() => import("./Components/ViewAll/WeekendSpecial.jsx"));
+// const ShyamSev = lazy(() => import("./Components/ShopsDetailPage/ShyamSev.jsx"));
+// const ShaymBhujiya = lazy(() => import("./Components/ShopsDetailPage/ShaymBhujiya.jsx"));
+// const KajuNamkeen = lazy(() => import("./Components/ViewAll/KajuNamkeen.jsx"));
+// const SingleItemAll = lazy(() => import("./Components/ViewAll/SingleItems.jsx"));
+// const SingleItems = lazy(() => import("./Components/ShopsDetailPage/SingleItems.jsx"));
+// const MixAll = lazy(() => import("./Components/ViewAll/MixAll.jsx"));
+// const ChuraAll = lazy(() => import("./Components/ViewAll/Chura.jsx"));
+// const ChipsAll = lazy(() => import("./Components/ViewAll/ChipsAll.jsx"));
+// const BhujiyaAll = lazy(() => import("./Components/ViewAll/BhujiyaAll.jsx"));
+// const SevAll = lazy(() => import("./Components/ViewAll/SevAll.jsx"));
+// const PastryAll = lazy(() => import("./Components/ViewAll/PastryAll.jsx"));
+// const CakeAll = lazy(() => import("./Components/ViewAll/CakeAll.jsx"));
+// const CookiesAll = lazy(() => import("./Components/ViewAll/CookiesAll.jsx"));
+// const ItemsAll = lazy(() => import("./Components/ViewAll/Items.jsx"));
+// const OffersAll = lazy(() => import("./Components/ViewAll/OffersAll.jsx"));
+// const WeekendSpecial = lazy(() => import("./Components/ViewAll/WeekendSpecial.jsx"));
 const DiscountOffer = lazy(() => import("./Components/DiscountOffer/DiscountOffer.jsx"));
 const Slider = lazy(() => import("./Components/Slider/Slider"));
 const CategoryPage = lazy(() => import("./Components/Category/CategoryPage.jsx"));
@@ -297,21 +297,21 @@ function AppContent() {
         />
 
         {/* Restaurant & Location Pages */}
-        <Route path="/restaurant" element={<RestaurantPage />} />
-        <Route path="/restaurant/khuramnagar" element={<Khuramnagar />} />
-        <Route path="/restaurant/indiranagar" element={<Indiranagar />} />
-        <Route path="/restaurant/nishatganj" element={<Nishatganj />} />
+        {/* <Route path="/restaurant" element={<RestaurantPage />} /> */}
+        {/* <Route path="/restaurant/khuramnagar" element={<Khuramnagar />} /> */}
+        {/* <Route path="/restaurant/indiranagar" element={<Indiranagar />} /> */}
+        {/* <Route path="/restaurant/nishatganj" element={<Nishatganj />} />
         <Route path="/restaurant/aliganj" element={<Aliganj />} />
         <Route path="/restaurant/kapoorthala" element={<Kapoorthala />} />
         <Route path="/restaurant/aminabad" element={<Aminabad />} />
         <Route path="/restaurant/gomtinagar" element={<Gomtinagar />} />
         <Route path="/restaurant/alambagh" element={<Alambagh />} />
         <Route path="/restaurant/daliganj" element={<Daliganj />} />
-        <Route path="/restaurant/kalyanpur" element={<Kalyanpur />} />
+        <Route path="/restaurant/kalyanpur" element={<Kalyanpur />} /> */}
 
         {/* Offers & Details */}
         <Route path="/offers/:slug" element={<AllOffersProducts />} />
-        <Route path="/offer-details/:slug" element={<OfferDetails />} />
+        {/* <Route path="/offer-details/:slug" element={<OfferDetails />} /> */}
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/shipping-and-delivery" element={<ShippingPolicy />} />
@@ -338,11 +338,11 @@ function AppContent() {
           element={
             <>
               <AllShopsSlider />
-              <ShyamBakery />
-              <ShaymChips />
-              <ShyamSev />
-              <ShaymBhujiya />
-              <SingleItems />
+              {/* <ShyamBakery /> */}
+              {/* <ShaymChips /> */}
+              {/* <ShyamSev /> */}
+              {/* <ShaymBhujiya />
+              <SingleItems /> */}
             </>
           }
         />
@@ -352,7 +352,7 @@ function AppContent() {
         <Route path="/category/:categoryCode/:subCategoryCode" element={<CategoryPage />} />
 
         {/* Product Collection / View All Listings */}
-        <Route path="/all-knamkeenaju-" element={<><Slider /><KajuNamkeen /></>} />
+        {/* <Route path="/all-knamkeenaju-" element={<><Slider /><KajuNamkeen /></>} />
         <Route path="/all-mix-namkeen" element={<><Slider /><MixAll /></>} />
         <Route path="/all-single-items" element={<><Slider /><SingleItemAll /></>} />
         <Route path="/all-chura" element={<><Slider /><ChuraAll /></>} />
@@ -364,7 +364,7 @@ function AppContent() {
         <Route path="/all-cookies" element={<><Slider /><CookiesAll /></>} />
         <Route path="/all-items" element={<><Slider /><ItemsAll /></>} />
         <Route path="/all-offers" element={<><Slider /><OffersAll /></>} />
-        <Route path="/weekend-specials" element={<><Slider /><WeekendSpecial /></>} />
+        <Route path="/weekend-specials" element={<><Slider /><WeekendSpecial /></>} /> */}
       </Route>
     </Routes>
   );

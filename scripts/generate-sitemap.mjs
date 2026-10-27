@@ -5,7 +5,7 @@ import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const SITE_URL = "https://shyamnamkeenandbakers.online";
-const API_URL = "https://backend.shyamnamkeenandbakers.online/api/category/categories";
+const API_URL = "http://localhost:5001/api/category/categories";
 const OUT = fileURLToPath(new URL("../public/sitemap.xml", import.meta.url));
 
 const STATIC_PATHS = [

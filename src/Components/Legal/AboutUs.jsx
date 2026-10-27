@@ -9,7 +9,7 @@ import { optimizeImage } from "../../utils/image";
 import { CategorySkeleton } from "../Skeleton/Skeleton";
 import "./LegalPages.css";
 
-const CATEGORIES_URL = "https://backend.shyamnamkeenandbakers.online/api/category/categories";
+const CATEGORIES_URL = "http://localhost:5001/api/category/categories";
 
 // Everything here restates what the site already says elsewhere (logo
 // tagline, Pure Veg badge, Terms, footer promises); the category grid is

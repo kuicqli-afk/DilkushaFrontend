@@ -3,137 +3,13 @@
 
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="./src/assets/favicon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Shyam Namkeen & Bakers | Namkeen, Cakes & Bakery Online in Lucknow</title>
-  <meta name="description"
-    content="Order fresh namkeen, bhujiya, chips, cakes, pastries, cookies and bakery items online from Shyam Namkeen & Bakers, Lucknow. Fast home delivery and daily offers." />
-  <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://shyamnamkeenandbakers.online/" />
-  <meta name="theme-color" content="#b3121b" />
-
-  <!-- Start connections early: the API and the image CDN (the font is
-       served from this site, see src/main.jsx) -->
-  <link rel="preconnect" href="https://backend.shyamnamkeenandbakers.online" crossorigin />
-  <link rel="preconnect" href="https://res.cloudinary.com" />
-
-  <!-- The home banner's data: fetched now, in parallel with the app's
-       JavaScript, instead of after it (the banner is the page's main image).
-       Must match the URLs requested in src/Components/Slider/DynamicSlider.jsx. -->
-  <link rel="preload" as="fetch" crossorigin="anonymous"
-    href="https://backend.shyamnamkeenandbakers.online/api/sliders?status=Active" />
-  <link rel="preload" as="fetch" crossorigin="anonymous"
-    href="https://backend.shyamnamkeenandbakers.online/api/offers?status=Active" />
-
-  <!-- Favicon: stable, crawlable URLs (Google shows this next to the result) -->
-  <link rel="icon" type="image/png" sizes="108x107" href="/favicon.png" />
-  <link rel="apple-touch-icon" href="/favicon.png" />
-
-  <!-- Open Graph / social previews -->
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Shyam Namkeen & Bakers" />
-  <meta property="og:title" content="Shyam Namkeen & Bakers | Namkeen, Cakes & Bakery Online in Lucknow" />
-  <meta property="og:description"
-    content="Order fresh namkeen, bhujiya, chips, cakes, pastries, cookies and bakery items online from Shyam Namkeen & Bakers, Lucknow." />
-  <meta property="og:url" content="https://shyamnamkeenandbakers.online/" />
-  <meta property="og:image" content="https://shyamnamkeenandbakers.online/logo.png" />
-  <meta property="og:locale" content="en_IN" />
-  <meta name="twitter:card" content="summary_large_image" />
-
-  <!-- Structured data: WebSite gives Google the site name shown above the URL;
-       Organization ties the name, logo and contact details together. -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebSite",
-        "@id": "https://shyamnamkeenandbakers.online/#website",
-        "name": "Shyam Namkeen & Bakers",
-        "alternateName": ["Shyam Namkeen and Bakers", "shyamnamkeenandbakers", "Shyam Bakers"],
-        "url": "https://shyamnamkeenandbakers.online/",
-        "inLanguage": "en-IN",
-        "publisher": { "@id": "https://shyamnamkeenandbakers.online/#organization" }
-      },
-      {
-        "@type": "Organization",
-        "@id": "https://shyamnamkeenandbakers.online/#organization",
-        "name": "Shyam Namkeen & Bakers",
-        "alternateName": "Shyam Namkeen and Bakers",
-        "url": "https://shyamnamkeenandbakers.online/",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://shyamnamkeenandbakers.online/logo.png",
-          "width": 460,
-          "height": 260
-        },
-        "email": "shyamnamkeenandbakers@gmail.com",
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "telephone": "+91-70805-12292",
-          "contactType": "customer service",
-          "areaServed": "IN",
-          "availableLanguage": ["en", "hi"]
-        },
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Lucknow",
-          "addressRegion": "Uttar Pradesh",
-          "addressCountry": "IN"
-        }
-      }
-    ]
-  }
-  </script>
-
-  <!-- First-visit splash: painted before any JS loads, then the React opener
-       (src/Components/Motion/Pageopener.jsx) carries on from it and lifts it away.
-       Hidden for reduced motion and on later visits in the same session. -->
-  <style>
-    #boot { display: none; }
-    .intro #boot {
-      position: fixed; inset: 0; z-index: 100000; display: grid; place-items: center; background: #fff4d9;
-      animation: boot-hide 0s 5s forwards; /* safety net if the app never starts */
-    }
-    /* same size as .po-logo in Pageopener.css so the hand-over doesn't jump */
-    #boot img { width: min(380px, 78vw); height: auto; display: block; }
-    @media (max-width: 600px) { #boot img { width: min(280px, 78vw); } }
-    @keyframes boot-hide { to { visibility: hidden; } }
-  </style>
-  <script>
-    try {
-      if (!sessionStorage.getItem('shyam_intro_seen') && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        document.documentElement.classList.add('intro');
-      }
-    } catch (e) { }
-  </script>
-
-  <script>
-    // Start every page load at the top. (A scrollTo on the window "load"
-    // event used to do this, but "load" waits for every image, so it fired
-    // seconds later and threw visitors who had started scrolling back up.)
-    if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
-    }
-  </script>
+  <title>Dilkusha Biryani</title>
 </head>
 
 <body>
-  <div id="boot" aria-hidden="true"><img src="/logo.webp" alt="" width="460" height="260" fetchpriority="high"></div>
   <div id="root"></div>
-  <noscript>
-    <h1>Shyam Namkeen &amp; Bakers</h1>
-    <p>Fresh namkeen, cakes and bakery items delivered in Lucknow.</p>
-    <nav>
-      <a href="/category/all">All Categories</a>
-      <a href="/all-offers">Offers</a>
-      <a href="/about-us">About Us</a>
-      <a href="/contact-us">Contact Us</a>
-      <a href="/shipping-and-delivery">Shipping and Delivery</a>
-      <a href="/terms-and-conditions">Terms and Conditions</a>
-      <a href="/privacy-policy">Privacy Policy</a>
-    </nav>
-  </noscript>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

@@ -4,7 +4,6 @@ import axios from "axios";
 import { useCart } from "../../Context/CartContext";
 import { useAuth } from "../../Context/AuthContext";
 import "./Navbar.css";
-
 import {
   FaSearch,
   FaUser,
@@ -16,7 +15,6 @@ import {
   FaPlus,
   FaBookmark,
   FaExclamationCircle,
-  FaLeaf,
   FaBars,
   FaTimes,
   FaHome,
@@ -25,25 +23,27 @@ import {
   FaChevronRight,
 } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
-import shyam from "../../assets/syam.webp";
+import Dilkusha from "../../assets/dilkusha.png";
 import profile from "../../assets/profile.webp";
 import cart from "../../assets/cart.webp";
 import chatIcon from "../../assets/chat.png";
 import { optimizeImage } from "../../utils/image";
 import { useScrolledPast } from "../Motion/useScrolledPast";
 
-const API_URL = "https://backend.shyamnamkeenandbakers.online/api";
+const API_URL = "http://localhost:5001/api";
 
 const PLACEHOLDERS = [
-  "Search for Shyam Bakers & Namkeen, a cuisine, or a dish…",
-  "Search for patties",
-  "Search for cookies",
-  "Search for pizza",
-  "Search for cake",
-  "Search for namkeens",
-  "Search for sev",
+  "Search for chicken biryani or mutton biryani…",
+  "Search for chicken tikka",
+  "Search for butter chicken",
+  "Search for chicken kebab",
+  "Search for mutton curry",
+  "Search for chicken rolls",
+  "Search for fish fry",
+  "Search for egg curry",
+  "Search for tandoori chicken",
+  "Search for chicken burgers",
 ];
-
 const getProductStock = (product) => {
   if (product.quantity === undefined || product.quantity === null || product.quantity === "") {
     return Infinity;
@@ -346,7 +346,7 @@ const Navbar = () => {
           {/* LEFT : Logo + Location + Search */}
           <div className="nav-left">
             <Link to="/" className="nav-logo-link" style={{ textDecoration: "none" }}>
-              <img className="logo-text" src={shyam} alt="Shyam Bakers & Namkeen" width="460" height="260" fetchPriority="high" />
+              <img className="logo-text" src={Dilkusha} alt="Dilkusha Biryani" width="460" height="260" fetchPriority="high" />
             </Link>
 
             <ul>
@@ -452,18 +452,17 @@ const Navbar = () => {
 
           {/* RIGHT : Chat | Vegetarian | Products/Follow | Account | Cart | Hamburger (mobile) */}
           <div className="nav-right">
-            <span
+            {/* <span
               className="chat"
               onClick={handleChatClick}
               style={{ cursor: "pointer" }}
               title={isAuthenticated ? "Open Chat" : "Login to Chat"}
             >
               <img src={chatIcon} alt="Chat" />
-            </span>
-
-            <span className="veg-badge">
-              <FaLeaf size={12} />
-              <span className="veg-badge-text">Pure Veg</span>
+            </span> */}
+            <span className="veg-badge" title="Non Vegetarian">
+              <span className="nonveg-mark" aria-hidden="true" />
+              <span className="veg-badge-text">Non Veg</span>
             </span>
 
             <div className="store-stats">
@@ -580,7 +579,7 @@ const Navbar = () => {
       >
         <div className="drawer-header">
           <Link to="/" onClick={() => setMenuOpen(false)} className="drawer-logo-link">
-            <img className="drawer-logo" src={shyam} alt="Shyam Bakers & Namkeen" width="460" height="260" />
+            <img className="drawer-logo" src={Dilkusha} alt="Dilkusha Biryani" width="460" height="260" />
           </Link>
           <button
             type="button"
@@ -705,7 +704,8 @@ const Navbar = () => {
                 <FaLocationDot /> Lucknow City
               </span>
               <span className="drawer-veg">
-                <FaLeaf size={11} /> Pure Veg
+                <span className="nonveg-mark" aria-hidden="true" />
+                Non Veg
               </span>
             </div>
 

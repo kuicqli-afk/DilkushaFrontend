@@ -20,7 +20,7 @@ import { optimizeImage } from "../../utils/image";
 import { RevealImage, SplitWords, StaggerChildren } from "../Motion/motionKit";
 import { ProductDetailSkeleton, ReviewsSkeleton, TextLinesSkeleton } from "../Skeleton/Skeleton";
 
-const BASE_URL = "https://backend.shyamnamkeenandbakers.online/api";
+const BASE_URL = "http://localhost:5001/api";
 
 const getGuestId = () => {
   let guestId = localStorage.getItem("shop_guest_id");
@@ -33,7 +33,7 @@ const getGuestId = () => {
 
 const getScaledWeight = (weight, unit, quantity) => {
   if (!weight || isNaN(weight)) return "";
-  
+
   const baseWeight = Number(weight) * quantity;
   const unitLower = (unit || "").toLowerCase().trim();
 

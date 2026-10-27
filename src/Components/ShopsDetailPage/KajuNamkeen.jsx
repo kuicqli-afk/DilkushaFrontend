@@ -14,7 +14,7 @@ import { VscEye } from "react-icons/vsc";
 import { FaRegHeart } from "react-icons/fa";
 import { LiaStopwatchSolid } from "react-icons/lia";
 
-import KajuNamkeen from "../ShopsData/KajuNamkeenData"; 
+import KajuNamkeen from "../ShopsData/KajuNamkeenData";
 
 function KajuBhujiya() {
     const navigate = useNavigate();

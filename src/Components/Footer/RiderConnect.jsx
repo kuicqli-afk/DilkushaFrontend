@@ -26,14 +26,14 @@ const QRCodeCanvas = lazy(() =>
 
 // QR must always point to the live domain (never localhost).
 // To test on your phone before deploying, set VITE_SITE_URL in .env (e.g. http://192.168.1.5:5173)
-const SITE_URL = import.meta.env?.VITE_SITE_URL || "https://shyamnamkeenandbakers.online";
+const SITE_URL = import.meta.env?.VITE_SITE_URL || "http://localhost:5001";
 
 // Existing Kuicqli backend. Riders are saved with role "driver", so they appear in
 // Kuicqli admin -> Application Requests -> Drivers.
 const JOIN_API_URL = "https://backend.kuicqli.com/join-applications";
 
 // Fixed name of this website. It is sent with every application and cannot be changed by the user.
-const SOURCE_WEBSITE = "Shyam Namkeen & Bakers";
+const SOURCE_WEBSITE = "Dilkusha Biryani";
 const REQUEST_TIMEOUT_MS = 15000;
 
 const FIELDS = [
