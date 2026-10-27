@@ -16,7 +16,7 @@ const ContactUs = () => (
             </nav>
             <h1>Contact us</h1>
             <p className="legal-intro">
-                Questions about an order, a bulk or custom cake, or our products? Call, message or email us and
+                Questions about an order, a bulk or party order, or our menu? Call, message or email us and
                 we'll help.
             </p>
         </StaggerChildren>
@@ -41,7 +41,7 @@ const ContactUs = () => (
                         <FaWhatsapp />
                     </span>
                     <h2>WhatsApp</h2>
-                    <p>Send photos, bulk orders or custom cake details.</p>
+                    <p>Send photos, bulk orders or party order details.</p>
                     <strong>Message us</strong>
                 </a>
                 <a className="contact-way" href={`mailto:${B.email}`}>
@@ -65,8 +65,8 @@ const ContactUs = () => (
                 <section className="contact-panel">
                     <h2>Problem with an order?</h2>
                     <p>
-                        Contact us within 2 hours of delivery (24 hours for packaged namkeen) with your order ID and
-                        photos of the product and packaging, and we'll refund or replace it.
+                        Contact us within 2 hours of delivery with your order ID and photos of the food and
+                        packaging, and we'll refund or replace it.
                     </p>
                     <p>
                         <Link to="/orders">See your orders</Link>

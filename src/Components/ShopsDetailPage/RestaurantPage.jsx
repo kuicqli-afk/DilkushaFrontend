@@ -85,7 +85,11 @@ const CombinedComponent = () => {
       {/* <MarketSlider /> */}
       {/* <FeaturedListings />
       <FeaturedListingsAll/> */}
+<<<<<<< HEAD
       <FeaturedListigsFinal />
+=======
+      {/* <FeaturedListigsFinal/> */}
+>>>>>>> 4d79668413ed4cfd67255dc58a7908b5a6295351
       <AdsSlider />
       <LatestListing />
       {/* <SellerStories /> */}

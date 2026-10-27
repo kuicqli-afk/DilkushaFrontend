@@ -13,7 +13,7 @@ const sections = [
         id: "about",
         title: "About Us & Regulatory Information",
         paras: [
-            `${B.legalName} is a food business operator engaged in manufacturing and selling namkeen, snacks, sweets, bakery products and cakes from Lucknow, Uttar Pradesh.`,
+            `${B.legalName} is a food business operator engaged in preparing and selling biryani, kebabs, curries, rolls, breads and other non-vegetarian and vegetarian food from Lucknow, Uttar Pradesh.`,
         ],
         list: [
             `FSSAI License No.: ${B.fssai}`,
@@ -21,6 +21,7 @@ const sections = [
             `Registered address: ${B.address}`,
         ],
     },
+
     {
         id: "eligibility",
         title: "Eligibility & Your Account",
@@ -33,14 +34,14 @@ const sections = [
     },
     {
         id: "products",
-        title: "Products, Food Safety & Allergens",
+        title: "Food, Food Safety & Allergens",
         list: [
-            "All products are freshly prepared in hygienic conditions in line with FSSAI food safety standards.",
-            "Product images are for illustration only. Actual colour, shape, decoration and packaging may vary slightly.",
-            "Weights are approximate; a variation of up to ±5% may occur in handmade items such as cakes, sweets and namkeen.",
-            "Our kitchen handles wheat (gluten), milk, nuts, peanuts, sesame, soy and eggs. Products may contain traces of these allergens. Customers with allergies must check ingredient details or contact us before ordering.",
-            "Shelf life and storage instructions are printed on the pack or product page. Cakes and fresh bakery items should be refrigerated and consumed within the stated time.",
-            "Products are vegetarian unless clearly marked otherwise (e.g. egg-containing items).",
+            "All food is freshly prepared in hygienic conditions in line with FSSAI food safety standards.",
+            "Food images are for illustration only. Actual colour, presentation and packaging may vary slightly.",
+            "Portion sizes and weights are approximate, and a small variation may occur in freshly cooked dishes. Spice levels may also vary slightly from batch to batch.",
+            "Our kitchen handles meat (such as chicken and mutton), eggs, milk and dairy, wheat (gluten), nuts, sesame and soy. Dishes may contain traces of these allergens. Customers with allergies must check ingredient details or contact us before ordering.",
+            "Hot food is best eaten as soon as it is delivered. Please consume it within 2 hours of delivery, refrigerate any leftovers promptly, and reheat them thoroughly before eating.",
+            "Vegetarian and non-vegetarian items are marked on the menu. Because our kitchen prepares non-vegetarian food, cross-contact between vegetarian and non-vegetarian items may occur. If you follow a strict vegetarian diet, please contact us before ordering.",
         ],
     },
     {
@@ -75,7 +76,7 @@ const sections = [
         id: "coupons",
         title: "Coupons, Offers & Promotions",
         list: [
-            "Coupon codes are valid only for the stated period, minimum order value and eligible products.",
+            "Coupon codes are valid only for the stated period, minimum order value and eligible dishes.",
             "Only one coupon can be applied per order unless stated otherwise. Coupons cannot be exchanged for cash.",
             "We may withdraw or modify any offer at any time and may cancel orders where a coupon is misused or abused.",
         ],
@@ -86,8 +87,8 @@ const sections = [
         list: [
             "We deliver within our serviceable areas in and around Lucknow. Availability is checked using your delivery address or pincode.",
             "Our standard delivery estimate is around 45 minutes for nearby locations. This is an estimate, not a guarantee, and may vary due to traffic, weather, order volume or festivals.",
-            "Pre-ordered, bulk and custom orders are delivered at the scheduled slot agreed with you.",
-            "Someone must be available at the address to receive the order. If we cannot reach you after reasonable attempts, the order may be cancelled without refund, as food is perishable.",
+            "Pre-ordered, bulk and party orders are delivered at the scheduled slot agreed with you.",
+            "Someone must be available at the address to receive the order. If we cannot reach you after reasonable attempts, the order may be cancelled without refund, as hot food is perishable.",
             "Risk of loss passes to you upon delivery. Please check the order at the time of receiving it.",
         ],
     },
@@ -96,7 +97,7 @@ const sections = [
         title: "Cancellation Policy",
         list: [
             "Regular orders can be cancelled before the kitchen starts preparing them. Once preparation or dispatch begins, cancellation is not possible.",
-            "Custom/designer cakes and bulk orders require at least 24 hours' notice for cancellation; otherwise, a cancellation charge of up to 100% may apply.",
+            "Bulk and party orders (such as biryani by the handi or party platters) require at least 24 hours' notice for cancellation; otherwise, a cancellation charge of up to 100% may apply.",
             "If we cancel an order, you will receive a full refund to the original payment method.",
         ],
     },
@@ -104,16 +105,16 @@ const sections = [
         id: "refunds",
         title: "Returns & Refunds",
         paras: [
-            "Because our products are perishable food items, we do not accept returns after delivery. However, we will refund or replace an order if:",
+            "Because our food is freshly cooked and perishable, we do not accept returns after delivery. However, we will refund or replace an order if:",
         ],
         list: [
             "the wrong item was delivered;",
             "the item was damaged, spilled or tampered with in transit;",
-            "the product was stale, spoiled or of poor quality; or",
+            "the food was stale, spoiled or of poor quality; or",
             "items are missing from your order.",
         ],
         after: [
-            `To raise a claim, contact us within 2 hours of delivery (24 hours for packaged, long-shelf-life namkeen) at ${B.phone} or ${B.email} with your order ID and clear photos/videos of the product and packaging.`,
+            `To raise a claim, contact us within 2 hours of delivery at ${B.phone} or ${B.email} with your order ID and clear photos/videos of the food and packaging.`,
             "Approved refunds are credited to the original payment method within 5–7 working days (UPI/wallet usually faster). For cash orders, refunds are made via bank transfer or UPI.",
         ],
     },
@@ -126,14 +127,14 @@ const sections = [
             "harass, threaten or abuse our staff or delivery partners;",
             "attempt to hack, scrape, overload or interfere with the Platform's security or operation;",
             "post false reviews or misleading information; or",
-            "resell our products commercially without written permission.",
+            "resell our food commercially without written permission.",
         ],
     },
     {
         id: "ip",
         title: "Intellectual Property",
         paras: [
-            `All content on the Platform — including the ${B.brand} name, logo, product photos, recipes' presentation, text, graphics and software — is owned by or licensed to us and protected by Indian copyright and trademark law. You may not copy, reproduce, modify or distribute any content without our prior written consent.`,
+            `All content on the Platform — including the ${B.brand} name, logo, food photos, menu, recipes' presentation, text, graphics and software — is owned by or licensed to us and protected by Indian copyright and trademark law. You may not copy, reproduce, modify or distribute any content without our prior written consent.`,
         ],
     },
     {
@@ -194,8 +195,8 @@ const sections = [
 const TermsAndConditions = () => (
     <LegalLayout
         title="Terms and Conditions"
-        updated="1 October 2026"
-        intro="Please read these terms carefully before ordering. They explain your rights and responsibilities when buying namkeen, sweets, bakery items and cakes from us."
+        updated="27 October 2026"
+        intro="Please read these terms carefully before ordering. They explain your rights and responsibilities when buying biryani, kebabs and other food from us."
         sections={sections}
     />
 );

@@ -23,9 +23,15 @@ import {
   FaChevronRight,
 } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
+<<<<<<< HEAD
 import Dilkusha from "../../assets/dilkusha.png";
 import profile from "../../assets/profile.webp";
 import cart from "../../assets/cart.webp";
+=======
+import shyam from "../../assets/DilkushaLogo.png";
+import profile from "../../assets/profile.gif";
+import cart from "../../assets/cart.gif";
+>>>>>>> 4d79668413ed4cfd67255dc58a7908b5a6295351
 import chatIcon from "../../assets/chat.png";
 import { optimizeImage } from "../../utils/image";
 import { useScrolledPast } from "../Motion/useScrolledPast";
@@ -33,6 +39,7 @@ import { useScrolledPast } from "../Motion/useScrolledPast";
 const API_URL = "http://localhost:5001/api";
 
 const PLACEHOLDERS = [
+<<<<<<< HEAD
   "Search for chicken biryani or mutton biryani…",
   "Search for chicken tikka",
   "Search for butter chicken",
@@ -43,6 +50,15 @@ const PLACEHOLDERS = [
   "Search for egg curry",
   "Search for tandoori chicken",
   "Search for chicken burgers",
+=======
+  "Search for Dilkusha Biryani, a cuisine, or a dish…",
+  "Search for Chicken Biryani",
+  "Search for Mutton Biryani",
+  "Search for Chicken Tikka Masala",
+  "Search for dal",
+  "Search for Noodles",
+  "Search for pasta",
+>>>>>>> 4d79668413ed4cfd67255dc58a7908b5a6295351
 ];
 const getProductStock = (product) => {
   if (product.quantity === undefined || product.quantity === null || product.quantity === "") {

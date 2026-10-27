@@ -15,7 +15,7 @@ const sections = [
         list: [
             "Identity & contact: name, phone number, email address.",
             "Delivery details: saved addresses, landmarks, pincode and, with your permission, device location to help find your address.",
-            "Order information: items ordered, order history, preferences, special instructions, gift/cake messages.",
+            "Order information: items ordered, order history, preferences (such as spice level or portion size), special instructions, and details of party or bulk orders.",
             "Payment information: payment status, transaction ID and method. Card, UPI PIN and bank credentials are handled directly by Razorpay and are never stored by us.",
             "Communication data: queries sent through our forms, WhatsApp, email or calls, and feedback/reviews.",
             "Technical data: IP address, device type, browser, operating system, app version, pages viewed and cookies.",
@@ -38,9 +38,9 @@ const sections = [
             "To confirm payments, handle refunds and prevent fraud.",
             "To send order updates by SMS, email, WhatsApp or app notifications.",
             "To provide customer support and resolve complaints.",
-            "To personalise menus, suggest products and apply relevant offers.",
+            "To personalise menus, suggest dishes and apply relevant offers.",
             "To send promotional messages and festival offers, only where you have consented (you can opt out anytime).",
-            "To improve our products, website performance and security.",
+            "To improve our food, menu, website performance and security.",
             "To comply with legal, tax and food-safety obligations.",
         ],
     },
@@ -160,7 +160,7 @@ const sections = [
 const PrivacyPolicy = () => (
     <LegalLayout
         title="Privacy Policy"
-        updated="1 October 2026"
+        updated="27 October 2026"
         intro="Your trust matters to us. This policy explains in simple terms what information we collect when you order from us, how we use it, and how we keep it safe."
         sections={sections}
     />

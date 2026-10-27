@@ -39,7 +39,11 @@
 }
 
 :root {
+<<<<<<< HEAD
   --logo-w: clamp(110px, 16vw, 130px);
+=======
+  --logo-w: clamp(60px, 16vw, 100px);
+>>>>>>> 4d79668413ed4cfd67255dc58a7908b5a6295351
 }
 
 .nav-logo-link {
