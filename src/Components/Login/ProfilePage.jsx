@@ -18,7 +18,7 @@ import { digitsOnly, validateAddress, validateName } from "../../utils/validatio
 const BASE_URL =
     import.meta.env?.VITE_API_URL ||
     (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
-    "http://localhost:5001/api";
+    "https://dilkushabackend.onrender.com/api";
 
 const ProfilePage = () => {
     const { user, setUser } = useAuth();

@@ -11,7 +11,7 @@ import Dilkusha from "../../assets/dilkusha.png";
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
   (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
-  "http://localhost:5001/api";
+  "https://dilkushabackend.onrender.com/api";
 
 // how long the "signed in" tick shows before we move on (SuccessCheck runs ~1.3s)
 const SUCCESS_HOLD_MS = 1500;

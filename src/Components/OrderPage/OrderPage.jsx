@@ -20,7 +20,7 @@ import { optimizeImage } from "../../utils/image";
 import { RevealImage, SplitWords, StaggerChildren } from "../Motion/motionKit";
 import { ProductDetailSkeleton, ReviewsSkeleton, TextLinesSkeleton } from "../Skeleton/Skeleton";
 
-const BASE_URL = "http://localhost:5001/api";
+const BASE_URL = "https://dilkushabackend.onrender.com/api";
 
 const getGuestId = () => {
   let guestId = localStorage.getItem("shop_guest_id");

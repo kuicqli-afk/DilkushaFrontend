@@ -5,7 +5,7 @@ import { IoClose } from "react-icons/io5";
 import "./FeedbackModal.css";
 import { markFeedbackDone, snoozeFeedback } from "./feedbackStore";
 
-const BASE_URL = "http://localhost:5001/api";
+const BASE_URL = "https://dilkushabackend.onrender.com/api";
 
 const QUICK_TAGS = [
     "Great taste",

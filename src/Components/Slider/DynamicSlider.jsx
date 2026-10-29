@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { optimizeImage } from "../../utils/image";
 import { RevealImage } from "../Motion/motionKit";
 
-const API_URL = "http://localhost:5001";
+const API_URL = "https://dilkushabackend.onrender.com";
 const AUTOPLAY_MS = 3000;
 const REFRESH_MS = 30000;
 const SWIPE_MIN_PX = 40;

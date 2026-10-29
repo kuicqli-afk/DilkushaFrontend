@@ -35,7 +35,7 @@ const Category = ({ onSelectCategory }) => {
         setError(null);
 
         const res = await axios.get(
-          "http://localhost:5001/api/category/categories"
+          "https://dilkushabackend.onrender.com/api/category/categories"
         );
 
         const categoryData = res.data.categories || res.data.data || res.data || [];

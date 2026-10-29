@@ -57,7 +57,7 @@ function ComboOffers() {
         const fetchProducts = async () => {
             try {
                 const res = await axios.get(
-                    `http://localhost:5000/api/products?type=${type}`
+                    `https://dilkushabackend.onrender.com/api/products?type=${type}`
                 );
 
                 setItems(res.data.products || []);
@@ -187,7 +187,7 @@ function ComboOffers() {
                                     //   className="food-image"
                                     // />
                                     <img
-                                        src={`http://localhost:5000/uploads/${item.image}`}
+                                        src={`https://dilkushabackend.onrender.com/uploads/${item.image}`}
                                         alt={item.title}
                                         className="food-image"
                                     />

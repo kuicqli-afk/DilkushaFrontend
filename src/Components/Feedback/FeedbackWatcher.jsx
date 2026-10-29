@@ -4,7 +4,7 @@ import FeedbackModal from "./FeedbackModal";
 import { FEEDBACK_STORAGE_KEYS, isFeedbackSuppressed } from "./feedbackStore";
 import { isSiteNoticePending } from "../SiteNotice/siteNoticeStore";
 
-const BASE_URL = "http://localhost:5001/api";
+const BASE_URL = "https://dilkushabackend.onrender.com/api";
 const POLL_INTERVAL = 10000;
 
 function FeedbackWatcher() {

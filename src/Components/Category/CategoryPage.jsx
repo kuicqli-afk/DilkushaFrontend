@@ -28,9 +28,7 @@ function CategoryPage() {
 
       {/*
         ✅ SMART NAVIGATION ROW:
-        - Agar category ki subcategories hain → sirf SubCategorySlider dikhao
-        - Agar subcategories nahi hain       → sirf Category full list dikhao
-        - isAll page par → sirf Category full list dikhao
+      
       */}
 
       {isAll ? (
@@ -38,13 +36,12 @@ function CategoryPage() {
         <Category onSelectCategory={setSelectedCategory} />
       ) : (
         <>
-          {/* SubCategorySlider: hamesha render karo taaki check ho sake (returns null if empty) */}
+
           <SubCategorySlider
             categoryCode={categoryCode}
             onHasSubcategoriesChange={handleHasSubcategoriesChange}
           />
 
-          {/* Category list: sirf tab dikhao jab subcategories NAHI hain */}
           {hasSubcategories === false && (
             <Category onSelectCategory={setSelectedCategory} />
           )}

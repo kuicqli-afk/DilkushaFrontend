@@ -1,13 +1,3 @@
-// Remembers what the customer did with the "Your order is delivered!" pop-up,
-// in localStorage so every tab of the site agrees.
-//
-// - Submitted orders never ask again ("feedbackDone", kept from before).
-// - "Remind me later" / close snoozes that order for a day, in every tab.
-//   (It used to use sessionStorage, which each new tab starts without, so the
-//   pop-up came straight back whenever the site was opened in a new tab.)
-// - After any answer or dismissal, no other order asks for a day either, so a
-//   customer with several delivered orders isn't asked again and again.
-
 const DONE_KEY = "feedbackDone";
 const SNOOZE_KEY = "feedbackSnoozedUntil";
 const QUIET_KEY = "feedbackQuietUntil";

@@ -25,7 +25,7 @@ import { optimizeImage } from "../../utils/image";
 import { PressButton, ProductCard, RevealImage, SplitWords } from "../Motion/motionKit";
 
 
-const API_URL = "http://localhost:5001";
+const API_URL = "https://dilkushabackend.onrender.com";
 
 function AllOffersProducts({ filter, sortBy, price, cuisine }) {
 

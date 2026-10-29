@@ -11,14 +11,11 @@
 }
 
 /* =========================================================
-   OFFER STRIP — permanent (no dismiss button), taller, with
-   an icon badge. Plain smooth gradient now — the diagonal
-   stripe texture was removed since it read as unwanted
-   slanted/"italic" lines across the bar.
+   OFFER STRIP 
    ========================================================= */
 .footer-offer-patti {
     position: relative;
-    background: linear-gradient(135deg, #A90409 0%, #d81324 60%, #b30810 100%);
+    background: #313826;
     color: #ffffff;
     margin: 0 -60px;
     min-height: 90px;
@@ -41,7 +38,6 @@
     letter-spacing: 0.2px;
 }
 
-/* icon sits inside its own small badge circle instead of floating bare */
 .offer-patti-icon {
     flex-shrink: 0;
     width: 30px;
@@ -67,7 +63,6 @@
     font-weight: 500;
 }
 
-/* the coupon code itself, styled as a tappable chip */
 .offer-patti-code-chip {
     display: inline-flex;
     align-items: center;
@@ -120,8 +115,10 @@
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: #fdeceb;
-    color: #A90409;
+    background: #edf2ec;
+    /* Updated to match olive theme */
+    color: #313826;
+    /* Updated icon color */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -209,7 +206,8 @@
     bottom: 0;
     width: 26px;
     height: 2px;
-    background: #A90409;
+    background: #313826;
+    /* Updated underline accent */
 }
 
 .footer-arrow {
@@ -255,16 +253,19 @@
 }
 
 .footer-collapsible li a:hover {
-    color: #A90409;
+    color: #313826;
+    /* Updated hover color */
     padding-left: 3px;
 }
 
 .footer-inline-icon {
-    color: #A90409;
+    color: #313826;
+    /* Updated icon color */
     font-size: 13px;
     flex-shrink: 0;
     margin-top: 3px;
-    background: #fdeceb;
+    background: #edf2ec;
+    /* Updated badge background */
     padding: 6px;
     border-radius: 50%;
     box-sizing: content-box;
@@ -286,11 +287,7 @@
     max-width: 200px;
 }
 
-/* =========================================================
-   SOCIAL MEDIA ICONS — styled with the exact same badge
-   look, brand color (#A90409), and consistent sizing to
-   match the rest of the inline icons.
-   ========================================================= */
+/* ===== SOCIAL MEDIA ICONS ===== */
 .footer-social-icons {
     display: flex;
     gap: 10px;
@@ -305,8 +302,10 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: #fdeceb;
-    color: #A90409;
+    background: #edf2ec;
+    /* Updated matching background */
+    color: #313826;
+    /* Updated icon color */
     font-size: 14px;
     display: flex;
     align-items: center;
@@ -317,7 +316,8 @@
 
 .footer-social-icons a:hover,
 .footer-social-icons button:hover {
-    background: #f8d9d5;
+    background: #e2e8df;
+    /* Slightly deeper olive tint on hover */
     transform: translateY(-2px);
 }
 
@@ -388,7 +388,8 @@
 }
 
 .footer-credit a:hover {
-    color: #A90409;
+    color: #313826;
+    /* Updated credit hover color */
 }
 
 /* ===== POPUP FORM ===== */
@@ -493,7 +494,8 @@
 
 .popup input:focus,
 .popup textarea:focus {
-    border-color: #ff5a00;
+    border-color: #313826;
+    /* Updated focus border color */
 }
 
 .popup textarea {
@@ -503,7 +505,8 @@
 
 .popup button[type="submit"] {
     margin-top: 16px;
-    background: #25d366;
+    background: #313826;
+    /* Updated button color to match theme */
     color: #fff;
     border: none;
     padding: 12px;
@@ -515,7 +518,8 @@
 }
 
 .popup button[type="submit"]:hover {
-    background: #1ebd5a;
+    background: #23281b;
+    /* Darker shade on hover */
 }
 
 /* ===== RESPONSIVE ===== */
@@ -569,7 +573,6 @@
     }
 }
 
-/* ===== 480px — offer strip stacks to two lines cleanly on very small phones ===== */
 @media (max-width: 480px) {
     .footer-offer-patti-content {
         flex-direction: column;

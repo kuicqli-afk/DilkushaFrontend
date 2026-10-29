@@ -5,7 +5,7 @@ import "./Slider.css";
 import { useNavigate } from "react-router-dom";
 import { optimizeImage } from "../../utils/image";
 
-const API_URL = "http://localhost:5001";
+const API_URL = "https://dilkushabackend.onrender.com";
 
 const Slider = () => {
   const navigate = useNavigate();

@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./Slider.css";
 
-const API_URL = "http://localhost:5001";
+const API_URL = "https://dilkushabackend.onrender.com";
 
 const Slider2 = () => {
   const [slides, setSlides] = useState([]);

@@ -29,7 +29,7 @@ import SiteMotion from "./Components/Motion/SiteMotion.jsx";
 import SiteNotice from "./Components/SiteNotice/SiteNotice.jsx";
 import { ProductGridSkeleton, ProductRowSkeleton } from "./Components/Skeleton/Skeleton.jsx";
 import Seo from "./Components/Seo/Seo.jsx";
-const BASE_URL = import.meta.env?.VITE_API_URL || "http://localhost:5001/api";
+const BASE_URL = import.meta.env?.VITE_API_URL || "https://dilkushabackend.onrender.com/api";
 
 
 // Pages load on demand so the home page doesn't download checkout, PDF and
@@ -88,6 +88,7 @@ const BecomeRider = lazy(() =>
 )
 
 // 🆕 Fisher-Yates shuffle — randomizes category-section order on every fresh page load/refresh
+
 const shuffleArray = (arr) => {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {

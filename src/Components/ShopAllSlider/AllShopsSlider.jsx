@@ -18,7 +18,7 @@ function AllShopsSlider() {
     const fetchRestaurant = async () => {
       try {
         // Use location.state first if exists, otherwise fetch first restaurant
-        const res = await axios.get("http://localhost:5001/api/restaurant/get-restaurants");
+        const res = await axios.get("https://dilkushabackend.onrender.com/api/restaurant/get-restaurants");
         const clickedRestaurant = location.state?.restaurant || res.data.data[0];
         setRestaurant(clickedRestaurant);
       } catch (err) {

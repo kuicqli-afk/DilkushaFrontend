@@ -23,7 +23,7 @@ import { ProductGridSkeleton } from "../Skeleton/Skeleton";
 import { optimizeImage } from "../../utils/image";
 import { PressButton, ProductCard, RevealImage, SplitWords } from "../Motion/motionKit";
 
-const API_URL = "http://localhost:5001";
+const API_URL = "https://dilkushabackend.onrender.com";
 
 // ✅ Tag → display title mapping.
 const TAG_TITLES = {

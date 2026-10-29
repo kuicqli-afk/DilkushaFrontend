@@ -26,7 +26,7 @@ import { optimizeImage } from "../../utils/image";
 import { PressButton, ProductCard, SplitWords } from "../Motion/motionKit";
 import CardSlideshow from "../Motion/CardSlideshow";
 
-const BASE_URL = "http://localhost:5001/api";
+const BASE_URL = "https://dilkushabackend.onrender.com/api";
 
 // Fisher-Yates shuffle — randomizes product order on every fresh page load/refresh
 const shuffleArray = (arr) => {

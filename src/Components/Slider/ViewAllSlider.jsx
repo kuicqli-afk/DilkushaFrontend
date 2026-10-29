@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { optimizeImage } from "../../utils/image";
 import { RevealImage } from "../Motion/motionKit";
 
-const API_URL = "http://localhost:5001";
+const API_URL = "https://dilkushabackend.onrender.com";
 
 const ViewAllSlider = ({ category }) => {
     const navigate = useNavigate();

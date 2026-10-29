@@ -36,7 +36,7 @@ const loadRiderConnect = () => import("./RiderConnect");
 const RiderModal = lazy(() => loadRiderConnect().then((m) => ({ default: m.RiderModal })));
 const RiderQrModal = lazy(() => loadRiderConnect().then((m) => ({ default: m.RiderQrModal })));
 
-const BASE_URL = "http://localhost:5001/api";
+const BASE_URL = "https://dilkushabackend.onrender.com/api";
 
 // Makes a <button> look like the other footer links
 const linkButtonStyle = {

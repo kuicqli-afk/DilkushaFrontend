@@ -65,9 +65,8 @@ const DiscountOffer = () => {
 
       try {
 
-        let url = "http://localhost:5000/api/products";
+        let url = "https://dilkushabackend.onrender.com/api/products";
 
-        // ✅ OFFER
         // ✅ OFFER
         if (tag === "offer" && discount) {
           url += `?tag=offer&discount=${discount}`;
@@ -215,7 +214,7 @@ const DiscountOffer = () => {
                   //   className="food-image"
                   // />
                   <img
-                    src={`http://localhost:5000/uploads/${item.image}`}
+                    src={`https://dilkushabackend.onrender.com/uploads/${item.image}`}
                     alt={item.title}
                     className="food-image"
                   />

@@ -29,7 +29,7 @@ function CombosAll() {
         const fetchCombos = async () => {
             try {
                 const res = await axios.get(
-                    "http://localhost:5001/api/products?tag=combo"
+                    "https://dilkushabackend.onrender.com/api/products?tag=combo"
                 );
 
                 setItems(res.data.products || []);
@@ -158,7 +158,7 @@ function CombosAll() {
                                 />
                             ) : (
                                 <img
-                                    src={`http://localhost:5000/uploads/${item.image}`}
+                                    src={`https://dilkushabackend.onrender.com/uploads/${item.image}`}
                                     alt={item.title}
                                     className="food-image"
                                 />

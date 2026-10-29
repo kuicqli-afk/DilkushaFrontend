@@ -15,11 +15,11 @@
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--chilli, #b3121b);
+  background: #313826;
   color: #fff;
   font-size: 22px;
   cursor: pointer;
-  box-shadow: 0 12px 24px -10px rgba(169, 4, 9, 0.6);
+  box-shadow: 0 12px 24px -10px rgba(49, 56, 38, 0.6);
   /* `translate` for the footer lift, `scale` for press: neither fights the other */
   translate: 0 calc(-1 * var(--lift, 0px));
   transition:
@@ -44,7 +44,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .scroll-to-top:hover {
-    background: var(--chilli-deep, #8e0e15);
+    background: var(--chilli-deep, #313826);
   }
 
   .scroll-to-top:hover svg {

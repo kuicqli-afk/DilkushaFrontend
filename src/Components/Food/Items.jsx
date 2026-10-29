@@ -22,7 +22,7 @@ import { useCart } from "../../Context/CartContext";
 import { VscEye } from "react-icons/vsc";
 import { LiaStopwatchSolid } from "react-icons/lia";
 
-const API_URL = "http://localhost:5001";
+const API_URL = "https://dilkushabackend.onrender.com";
 
 /* ✅ helper: decide source (local mp4 OR online url) */
 const getVideoSource = (item) => item.video2 || item.video || "";

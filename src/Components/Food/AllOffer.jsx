@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 
-const API_URL = "https://shyambackend.onrender.com"; // match your offers backend
+const API_URL = "https://dilkushabackend.onrender.com"; // match your offers backend
 
 const OfferDetail = () => {
   const { slug } = useParams();

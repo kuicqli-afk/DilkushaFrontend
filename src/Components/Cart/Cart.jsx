@@ -11,7 +11,7 @@ import { InlineSkeleton } from "../Skeleton/Skeleton";
 const BASE_URL =
   import.meta.env?.VITE_API_URL ||
   (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
-  "http://localhost:5001/api";
+  "https://dilkushabackend.onrender.com/api";
 
 // Key used to hand the detected location off to the Checkout page so the
 // customer doesn't have to detect it twice.
@@ -312,64 +312,64 @@ const Cart = () => {
                   className={`cart-item-slot ${leaving[item.key] ? "is-leaving" : ""}`}
                   style={{ "--i": Math.min(index, 8) }}
                 >
-                <div className="cart-item-card">
-                  <div className="cart-product-info">
-                    <div className="cart-image-wrapper">
-                      {showImage ? (
-                        <img
-                          src={optimizeImage(imgSrc, 240)}
-                          alt={item.title}
-                          onError={() => markImageBroken(item.key)}
-                        />
-                      ) : (
-                        <div className="cart-image-placeholder">
-                          <FiShoppingBag />
-                        </div>
-                      )}
-                    </div>
-                    <div className="cart-details">
-                      <h4 className="product-title">{item.title}</h4>
-
-                      {/* unit price matches the same price used for the line total */}
-                      <div className="unit-price">
-                        ₹{unitPrice.toFixed(2)} each
-                        {hasDiscount && (
-                          <span className="unit-price-mrp">₹{mrpPrice.toFixed(2)}</span>
+                  <div className="cart-item-card">
+                    <div className="cart-product-info">
+                      <div className="cart-image-wrapper">
+                        {showImage ? (
+                          <img
+                            src={optimizeImage(imgSrc, 240)}
+                            alt={item.title}
+                            onError={() => markImageBroken(item.key)}
+                          />
+                        ) : (
+                          <div className="cart-image-placeholder">
+                            <FiShoppingBag />
+                          </div>
                         )}
                       </div>
-                    </div>
-                  </div>
+                      <div className="cart-details">
+                        <h4 className="product-title">{item.title}</h4>
 
-                  <div className="cart-controls">
-                    <div className="quantity-control">
-                      <button
-                        onClick={() => updateQty(item.key, item.quantity - 1)}
-                        disabled={item.quantity <= 1}
-                        aria-label="Decrease quantity"
-                      >
-                        <FiMinus />
-                      </button>
-                      <span key={item.quantity} className="cart-tick">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQty(item.key, item.quantity + 1)}
-                        aria-label="Increase quantity"
-                      >
-                        <FiPlus />
-                      </button>
+                        {/* unit price matches the same price used for the line total */}
+                        <div className="unit-price">
+                          ₹{unitPrice.toFixed(2)} each
+                          {hasDiscount && (
+                            <span className="unit-price-mrp">₹{mrpPrice.toFixed(2)}</span>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
-                    <div key={itemTotal} className="item-price-total cart-tick">₹{itemTotal}</div>
+                    <div className="cart-controls">
+                      <div className="quantity-control">
+                        <button
+                          onClick={() => updateQty(item.key, item.quantity - 1)}
+                          disabled={item.quantity <= 1}
+                          aria-label="Decrease quantity"
+                        >
+                          <FiMinus />
+                        </button>
+                        <span key={item.quantity} className="cart-tick">{item.quantity}</span>
+                        <button
+                          onClick={() => updateQty(item.key, item.quantity + 1)}
+                          aria-label="Increase quantity"
+                        >
+                          <FiPlus />
+                        </button>
+                      </div>
 
-                    <button
-                      className="remove-btn"
-                      onClick={() => removeAnimated(item.key)}
-                      title="Remove item"
-                      aria-label="Remove item"
-                    >
-                      <FiTrash2 />
-                    </button>
+                      <div key={itemTotal} className="item-price-total cart-tick">₹{itemTotal}</div>
+
+                      <button
+                        className="remove-btn"
+                        onClick={() => removeAnimated(item.key)}
+                        title="Remove item"
+                        aria-label="Remove item"
+                      >
+                        <FiTrash2 />
+                      </button>
+                    </div>
                   </div>
-                </div>
                 </div>
               );
             })}

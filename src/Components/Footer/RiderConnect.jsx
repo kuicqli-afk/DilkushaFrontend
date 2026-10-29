@@ -26,7 +26,7 @@ const QRCodeCanvas = lazy(() =>
 
 // QR must always point to the live domain (never localhost).
 // To test on your phone before deploying, set VITE_SITE_URL in .env (e.g. http://192.168.1.5:5173)
-const SITE_URL = import.meta.env?.VITE_SITE_URL || "http://localhost:5001";
+const SITE_URL = import.meta.env?.VITE_SITE_URL || "https://dilkushabackend.onrender.com";
 
 // Existing Kuicqli backend. Riders are saved with role "driver", so they appear in
 // Kuicqli admin -> Application Requests -> Drivers.

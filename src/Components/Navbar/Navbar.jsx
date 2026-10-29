@@ -30,7 +30,7 @@ import chatIcon from "../../assets/chat.png";
 import { optimizeImage } from "../../utils/image";
 import { useScrolledPast } from "../Motion/useScrolledPast";
 
-const API_URL = "http://localhost:5001/api";
+const API_URL = "https://dilkushabackend.onrender.com/api";
 
 const PLACEHOLDERS = [
   "Search for chicken biryani or mutton biryani…",

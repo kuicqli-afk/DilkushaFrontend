@@ -9,7 +9,7 @@ import { optimizeImage } from "../../utils/image";
 import { CategorySkeleton } from "../Skeleton/Skeleton";
 import "./LegalPages.css";
 
-const CATEGORIES_URL = "http://localhost:5001/api/category/categories";
+const CATEGORIES_URL = "https://dilkushabackend.onrender.com/api/category/categories";
 
 // The category grid is loaded live, so it always matches the menu in the shop.
 const PROMISES = [

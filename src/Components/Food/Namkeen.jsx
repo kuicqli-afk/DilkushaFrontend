@@ -38,7 +38,7 @@ function Namkeen({ categoryId, filter, sortBy, price, cuisine }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`http://localhost:5001/api/products`)
+    axios.get(`https://dilkushabackend.onrender.com/api/products`)
       .then((res) => {
         let data = res.data.products;
         console.log("MaidaItems Data:", res.data);
@@ -131,14 +131,13 @@ function Namkeen({ categoryId, filter, sortBy, price, cuisine }) {
     <div id="bhujiya" className="food-container">
       <div className="food-text">
         <h1>Bhujiya</h1>
-        {/* <h1>{items[0]?.category?.id}</h1> */}
         <p className="view-all" onClick={() => navigate("/all-bhujiya")}>View all</p>
       </div>
 
       <Swiper
         modules={[Autoplay]}
         onSwiper={(swiper) => (swiperRef.current = swiper)}
-        loop={filteredList.length > 3} // <--- Only loop if enough slides
+        loop={filteredList.length > 3} 
         speed={700}
         autoplay={{
           delay: 3000,
@@ -168,10 +167,6 @@ function Namkeen({ categoryId, filter, sortBy, price, cuisine }) {
             slidesPerView: 2.5,
             spaceBetween: 18,
           },
-          //    900: {
-          //   slidesPerView: 3,
-          //   spaceBetween: 20,
-          // },
           1000: {
             slidesPerView: 3,
             spaceBetween: 18,
@@ -269,7 +264,7 @@ function Namkeen({ categoryId, filter, sortBy, price, cuisine }) {
 
                   </a>
                 ) : (
-                  <img src={`http://localhost:5000/uploads/${item.image}`}
+                  <img src={`/uploads/${item.image}`}
                     alt={item.title}
                     className="food-image"
                   />
